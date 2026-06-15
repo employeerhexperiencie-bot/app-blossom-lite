@@ -26,7 +26,8 @@ const homeByPerfil: Record<ProfileKey, string> = {
 };
 
 function AuthPage() {
-  const { perfil = "motorista" } = Route.useSearch();
+  const search = Route.useSearch();
+  const perfil: ProfileKey = (search.perfil ?? "motorista") as ProfileKey;
   const setPerfil = useConect((s) => s.setPerfil);
   const setNome = useConect((s) => s.setNome);
   const navigate = useNavigate();
