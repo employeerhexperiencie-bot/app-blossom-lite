@@ -9,38 +9,451 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ProprietarioRouteImport } from './routes/proprietario'
+import { Route as PassageiroRouteImport } from './routes/passageiro'
+import { Route as OficinaRouteImport } from './routes/oficina'
+import { Route as MotoristaRouteImport } from './routes/motorista'
+import { Route as LojaRouteImport } from './routes/loja'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProprietarioIndexRouteImport } from './routes/proprietario.index'
+import { Route as PassageiroIndexRouteImport } from './routes/passageiro.index'
+import { Route as OficinaIndexRouteImport } from './routes/oficina.index'
+import { Route as MotoristaIndexRouteImport } from './routes/motorista.index'
+import { Route as LojaIndexRouteImport } from './routes/loja.index'
+import { Route as ProprietarioPerfilRouteImport } from './routes/proprietario.perfil'
+import { Route as ProprietarioMotoristasRouteImport } from './routes/proprietario.motoristas'
+import { Route as ProprietarioFinanceiroRouteImport } from './routes/proprietario.financeiro'
+import { Route as PassageiroPerfilRouteImport } from './routes/passageiro.perfil'
+import { Route as PassageiroParceirosRouteImport } from './routes/passageiro.parceiros'
+import { Route as PassageiroCashbackRouteImport } from './routes/passageiro.cashback'
+import { Route as OficinaPromocoesRouteImport } from './routes/oficina.promocoes'
+import { Route as OficinaPerfilRouteImport } from './routes/oficina.perfil'
+import { Route as OficinaAgendaRouteImport } from './routes/oficina.agenda'
+import { Route as MotoristaPerfilRouteImport } from './routes/motorista.perfil'
+import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.beneficios'
+import { Route as MotoristaAlugueisRouteImport } from './routes/motorista.alugueis'
+import { Route as LojaPerfilRouteImport } from './routes/loja.perfil'
+import { Route as LojaCampanhasRouteImport } from './routes/loja.campanhas'
+import { Route as ProprietarioFrotaNovoRouteImport } from './routes/proprietario.frota.novo'
+import { Route as ProprietarioFrotaCarroIdRouteImport } from './routes/proprietario.frota.$carroId'
+import { Route as MotoristaBeneficiosParceiroIdRouteImport } from './routes/motorista.beneficios.$parceiroId'
+import { Route as MotoristaAlugueisCarroIdRouteImport } from './routes/motorista.alugueis.$carroId'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProprietarioRoute = ProprietarioRouteImport.update({
+  id: '/proprietario',
+  path: '/proprietario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PassageiroRoute = PassageiroRouteImport.update({
+  id: '/passageiro',
+  path: '/passageiro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OficinaRoute = OficinaRouteImport.update({
+  id: '/oficina',
+  path: '/oficina',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MotoristaRoute = MotoristaRouteImport.update({
+  id: '/motorista',
+  path: '/motorista',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LojaRoute = LojaRouteImport.update({
+  id: '/loja',
+  path: '/loja',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProprietarioIndexRoute = ProprietarioIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProprietarioRoute,
+} as any)
+const PassageiroIndexRoute = PassageiroIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PassageiroRoute,
+} as any)
+const OficinaIndexRoute = OficinaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OficinaRoute,
+} as any)
+const MotoristaIndexRoute = MotoristaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MotoristaRoute,
+} as any)
+const LojaIndexRoute = LojaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LojaRoute,
+} as any)
+const ProprietarioPerfilRoute = ProprietarioPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => ProprietarioRoute,
+} as any)
+const ProprietarioMotoristasRoute = ProprietarioMotoristasRouteImport.update({
+  id: '/motoristas',
+  path: '/motoristas',
+  getParentRoute: () => ProprietarioRoute,
+} as any)
+const ProprietarioFinanceiroRoute = ProprietarioFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => ProprietarioRoute,
+} as any)
+const PassageiroPerfilRoute = PassageiroPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => PassageiroRoute,
+} as any)
+const PassageiroParceirosRoute = PassageiroParceirosRouteImport.update({
+  id: '/parceiros',
+  path: '/parceiros',
+  getParentRoute: () => PassageiroRoute,
+} as any)
+const PassageiroCashbackRoute = PassageiroCashbackRouteImport.update({
+  id: '/cashback',
+  path: '/cashback',
+  getParentRoute: () => PassageiroRoute,
+} as any)
+const OficinaPromocoesRoute = OficinaPromocoesRouteImport.update({
+  id: '/promocoes',
+  path: '/promocoes',
+  getParentRoute: () => OficinaRoute,
+} as any)
+const OficinaPerfilRoute = OficinaPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => OficinaRoute,
+} as any)
+const OficinaAgendaRoute = OficinaAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => OficinaRoute,
+} as any)
+const MotoristaPerfilRoute = MotoristaPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => MotoristaRoute,
+} as any)
+const MotoristaBeneficiosRoute = MotoristaBeneficiosRouteImport.update({
+  id: '/beneficios',
+  path: '/beneficios',
+  getParentRoute: () => MotoristaRoute,
+} as any)
+const MotoristaAlugueisRoute = MotoristaAlugueisRouteImport.update({
+  id: '/alugueis',
+  path: '/alugueis',
+  getParentRoute: () => MotoristaRoute,
+} as any)
+const LojaPerfilRoute = LojaPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => LojaRoute,
+} as any)
+const LojaCampanhasRoute = LojaCampanhasRouteImport.update({
+  id: '/campanhas',
+  path: '/campanhas',
+  getParentRoute: () => LojaRoute,
+} as any)
+const ProprietarioFrotaNovoRoute = ProprietarioFrotaNovoRouteImport.update({
+  id: '/frota/novo',
+  path: '/frota/novo',
+  getParentRoute: () => ProprietarioRoute,
+} as any)
+const ProprietarioFrotaCarroIdRoute =
+  ProprietarioFrotaCarroIdRouteImport.update({
+    id: '/frota/$carroId',
+    path: '/frota/$carroId',
+    getParentRoute: () => ProprietarioRoute,
+  } as any)
+const MotoristaBeneficiosParceiroIdRoute =
+  MotoristaBeneficiosParceiroIdRouteImport.update({
+    id: '/$parceiroId',
+    path: '/$parceiroId',
+    getParentRoute: () => MotoristaBeneficiosRoute,
+  } as any)
+const MotoristaAlugueisCarroIdRoute =
+  MotoristaAlugueisCarroIdRouteImport.update({
+    id: '/$carroId',
+    path: '/$carroId',
+    getParentRoute: () => MotoristaAlugueisRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/loja': typeof LojaRouteWithChildren
+  '/motorista': typeof MotoristaRouteWithChildren
+  '/oficina': typeof OficinaRouteWithChildren
+  '/passageiro': typeof PassageiroRouteWithChildren
+  '/proprietario': typeof ProprietarioRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/loja/campanhas': typeof LojaCampanhasRoute
+  '/loja/perfil': typeof LojaPerfilRoute
+  '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
+  '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
+  '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/oficina/agenda': typeof OficinaAgendaRoute
+  '/oficina/perfil': typeof OficinaPerfilRoute
+  '/oficina/promocoes': typeof OficinaPromocoesRoute
+  '/passageiro/cashback': typeof PassageiroCashbackRoute
+  '/passageiro/parceiros': typeof PassageiroParceirosRoute
+  '/passageiro/perfil': typeof PassageiroPerfilRoute
+  '/proprietario/financeiro': typeof ProprietarioFinanceiroRoute
+  '/proprietario/motoristas': typeof ProprietarioMotoristasRoute
+  '/proprietario/perfil': typeof ProprietarioPerfilRoute
+  '/loja/': typeof LojaIndexRoute
+  '/motorista/': typeof MotoristaIndexRoute
+  '/oficina/': typeof OficinaIndexRoute
+  '/passageiro/': typeof PassageiroIndexRoute
+  '/proprietario/': typeof ProprietarioIndexRoute
+  '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
+  '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
+  '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
+  '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/loja/campanhas': typeof LojaCampanhasRoute
+  '/loja/perfil': typeof LojaPerfilRoute
+  '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
+  '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
+  '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/oficina/agenda': typeof OficinaAgendaRoute
+  '/oficina/perfil': typeof OficinaPerfilRoute
+  '/oficina/promocoes': typeof OficinaPromocoesRoute
+  '/passageiro/cashback': typeof PassageiroCashbackRoute
+  '/passageiro/parceiros': typeof PassageiroParceirosRoute
+  '/passageiro/perfil': typeof PassageiroPerfilRoute
+  '/proprietario/financeiro': typeof ProprietarioFinanceiroRoute
+  '/proprietario/motoristas': typeof ProprietarioMotoristasRoute
+  '/proprietario/perfil': typeof ProprietarioPerfilRoute
+  '/loja': typeof LojaIndexRoute
+  '/motorista': typeof MotoristaIndexRoute
+  '/oficina': typeof OficinaIndexRoute
+  '/passageiro': typeof PassageiroIndexRoute
+  '/proprietario': typeof ProprietarioIndexRoute
+  '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
+  '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
+  '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
+  '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/loja': typeof LojaRouteWithChildren
+  '/motorista': typeof MotoristaRouteWithChildren
+  '/oficina': typeof OficinaRouteWithChildren
+  '/passageiro': typeof PassageiroRouteWithChildren
+  '/proprietario': typeof ProprietarioRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/loja/campanhas': typeof LojaCampanhasRoute
+  '/loja/perfil': typeof LojaPerfilRoute
+  '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
+  '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
+  '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/oficina/agenda': typeof OficinaAgendaRoute
+  '/oficina/perfil': typeof OficinaPerfilRoute
+  '/oficina/promocoes': typeof OficinaPromocoesRoute
+  '/passageiro/cashback': typeof PassageiroCashbackRoute
+  '/passageiro/parceiros': typeof PassageiroParceirosRoute
+  '/passageiro/perfil': typeof PassageiroPerfilRoute
+  '/proprietario/financeiro': typeof ProprietarioFinanceiroRoute
+  '/proprietario/motoristas': typeof ProprietarioMotoristasRoute
+  '/proprietario/perfil': typeof ProprietarioPerfilRoute
+  '/loja/': typeof LojaIndexRoute
+  '/motorista/': typeof MotoristaIndexRoute
+  '/oficina/': typeof OficinaIndexRoute
+  '/passageiro/': typeof PassageiroIndexRoute
+  '/proprietario/': typeof ProprietarioIndexRoute
+  '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
+  '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
+  '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
+  '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/loja'
+    | '/motorista'
+    | '/oficina'
+    | '/passageiro'
+    | '/proprietario'
+    | '/sitemap.xml'
+    | '/loja/campanhas'
+    | '/loja/perfil'
+    | '/motorista/alugueis'
+    | '/motorista/beneficios'
+    | '/motorista/perfil'
+    | '/oficina/agenda'
+    | '/oficina/perfil'
+    | '/oficina/promocoes'
+    | '/passageiro/cashback'
+    | '/passageiro/parceiros'
+    | '/passageiro/perfil'
+    | '/proprietario/financeiro'
+    | '/proprietario/motoristas'
+    | '/proprietario/perfil'
+    | '/loja/'
+    | '/motorista/'
+    | '/oficina/'
+    | '/passageiro/'
+    | '/proprietario/'
+    | '/motorista/alugueis/$carroId'
+    | '/motorista/beneficios/$parceiroId'
+    | '/proprietario/frota/$carroId'
+    | '/proprietario/frota/novo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/loja/campanhas'
+    | '/loja/perfil'
+    | '/motorista/alugueis'
+    | '/motorista/beneficios'
+    | '/motorista/perfil'
+    | '/oficina/agenda'
+    | '/oficina/perfil'
+    | '/oficina/promocoes'
+    | '/passageiro/cashback'
+    | '/passageiro/parceiros'
+    | '/passageiro/perfil'
+    | '/proprietario/financeiro'
+    | '/proprietario/motoristas'
+    | '/proprietario/perfil'
+    | '/loja'
+    | '/motorista'
+    | '/oficina'
+    | '/passageiro'
+    | '/proprietario'
+    | '/motorista/alugueis/$carroId'
+    | '/motorista/beneficios/$parceiroId'
+    | '/proprietario/frota/$carroId'
+    | '/proprietario/frota/novo'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/loja'
+    | '/motorista'
+    | '/oficina'
+    | '/passageiro'
+    | '/proprietario'
+    | '/sitemap.xml'
+    | '/loja/campanhas'
+    | '/loja/perfil'
+    | '/motorista/alugueis'
+    | '/motorista/beneficios'
+    | '/motorista/perfil'
+    | '/oficina/agenda'
+    | '/oficina/perfil'
+    | '/oficina/promocoes'
+    | '/passageiro/cashback'
+    | '/passageiro/parceiros'
+    | '/passageiro/perfil'
+    | '/proprietario/financeiro'
+    | '/proprietario/motoristas'
+    | '/proprietario/perfil'
+    | '/loja/'
+    | '/motorista/'
+    | '/oficina/'
+    | '/passageiro/'
+    | '/proprietario/'
+    | '/motorista/alugueis/$carroId'
+    | '/motorista/beneficios/$parceiroId'
+    | '/proprietario/frota/$carroId'
+    | '/proprietario/frota/novo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  LojaRoute: typeof LojaRouteWithChildren
+  MotoristaRoute: typeof MotoristaRouteWithChildren
+  OficinaRoute: typeof OficinaRouteWithChildren
+  PassageiroRoute: typeof PassageiroRouteWithChildren
+  ProprietarioRoute: typeof ProprietarioRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/proprietario': {
+      id: '/proprietario'
+      path: '/proprietario'
+      fullPath: '/proprietario'
+      preLoaderRoute: typeof ProprietarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/passageiro': {
+      id: '/passageiro'
+      path: '/passageiro'
+      fullPath: '/passageiro'
+      preLoaderRoute: typeof PassageiroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oficina': {
+      id: '/oficina'
+      path: '/oficina'
+      fullPath: '/oficina'
+      preLoaderRoute: typeof OficinaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/motorista': {
+      id: '/motorista'
+      path: '/motorista'
+      fullPath: '/motorista'
+      preLoaderRoute: typeof MotoristaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loja': {
+      id: '/loja'
+      path: '/loja'
+      fullPath: '/loja'
+      preLoaderRoute: typeof LojaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +461,291 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/proprietario/': {
+      id: '/proprietario/'
+      path: '/'
+      fullPath: '/proprietario/'
+      preLoaderRoute: typeof ProprietarioIndexRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/passageiro/': {
+      id: '/passageiro/'
+      path: '/'
+      fullPath: '/passageiro/'
+      preLoaderRoute: typeof PassageiroIndexRouteImport
+      parentRoute: typeof PassageiroRoute
+    }
+    '/oficina/': {
+      id: '/oficina/'
+      path: '/'
+      fullPath: '/oficina/'
+      preLoaderRoute: typeof OficinaIndexRouteImport
+      parentRoute: typeof OficinaRoute
+    }
+    '/motorista/': {
+      id: '/motorista/'
+      path: '/'
+      fullPath: '/motorista/'
+      preLoaderRoute: typeof MotoristaIndexRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/loja/': {
+      id: '/loja/'
+      path: '/'
+      fullPath: '/loja/'
+      preLoaderRoute: typeof LojaIndexRouteImport
+      parentRoute: typeof LojaRoute
+    }
+    '/proprietario/perfil': {
+      id: '/proprietario/perfil'
+      path: '/perfil'
+      fullPath: '/proprietario/perfil'
+      preLoaderRoute: typeof ProprietarioPerfilRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/proprietario/motoristas': {
+      id: '/proprietario/motoristas'
+      path: '/motoristas'
+      fullPath: '/proprietario/motoristas'
+      preLoaderRoute: typeof ProprietarioMotoristasRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/proprietario/financeiro': {
+      id: '/proprietario/financeiro'
+      path: '/financeiro'
+      fullPath: '/proprietario/financeiro'
+      preLoaderRoute: typeof ProprietarioFinanceiroRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/passageiro/perfil': {
+      id: '/passageiro/perfil'
+      path: '/perfil'
+      fullPath: '/passageiro/perfil'
+      preLoaderRoute: typeof PassageiroPerfilRouteImport
+      parentRoute: typeof PassageiroRoute
+    }
+    '/passageiro/parceiros': {
+      id: '/passageiro/parceiros'
+      path: '/parceiros'
+      fullPath: '/passageiro/parceiros'
+      preLoaderRoute: typeof PassageiroParceirosRouteImport
+      parentRoute: typeof PassageiroRoute
+    }
+    '/passageiro/cashback': {
+      id: '/passageiro/cashback'
+      path: '/cashback'
+      fullPath: '/passageiro/cashback'
+      preLoaderRoute: typeof PassageiroCashbackRouteImport
+      parentRoute: typeof PassageiroRoute
+    }
+    '/oficina/promocoes': {
+      id: '/oficina/promocoes'
+      path: '/promocoes'
+      fullPath: '/oficina/promocoes'
+      preLoaderRoute: typeof OficinaPromocoesRouteImport
+      parentRoute: typeof OficinaRoute
+    }
+    '/oficina/perfil': {
+      id: '/oficina/perfil'
+      path: '/perfil'
+      fullPath: '/oficina/perfil'
+      preLoaderRoute: typeof OficinaPerfilRouteImport
+      parentRoute: typeof OficinaRoute
+    }
+    '/oficina/agenda': {
+      id: '/oficina/agenda'
+      path: '/agenda'
+      fullPath: '/oficina/agenda'
+      preLoaderRoute: typeof OficinaAgendaRouteImport
+      parentRoute: typeof OficinaRoute
+    }
+    '/motorista/perfil': {
+      id: '/motorista/perfil'
+      path: '/perfil'
+      fullPath: '/motorista/perfil'
+      preLoaderRoute: typeof MotoristaPerfilRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/motorista/beneficios': {
+      id: '/motorista/beneficios'
+      path: '/beneficios'
+      fullPath: '/motorista/beneficios'
+      preLoaderRoute: typeof MotoristaBeneficiosRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/motorista/alugueis': {
+      id: '/motorista/alugueis'
+      path: '/alugueis'
+      fullPath: '/motorista/alugueis'
+      preLoaderRoute: typeof MotoristaAlugueisRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/loja/perfil': {
+      id: '/loja/perfil'
+      path: '/perfil'
+      fullPath: '/loja/perfil'
+      preLoaderRoute: typeof LojaPerfilRouteImport
+      parentRoute: typeof LojaRoute
+    }
+    '/loja/campanhas': {
+      id: '/loja/campanhas'
+      path: '/campanhas'
+      fullPath: '/loja/campanhas'
+      preLoaderRoute: typeof LojaCampanhasRouteImport
+      parentRoute: typeof LojaRoute
+    }
+    '/proprietario/frota/novo': {
+      id: '/proprietario/frota/novo'
+      path: '/frota/novo'
+      fullPath: '/proprietario/frota/novo'
+      preLoaderRoute: typeof ProprietarioFrotaNovoRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/proprietario/frota/$carroId': {
+      id: '/proprietario/frota/$carroId'
+      path: '/frota/$carroId'
+      fullPath: '/proprietario/frota/$carroId'
+      preLoaderRoute: typeof ProprietarioFrotaCarroIdRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/motorista/beneficios/$parceiroId': {
+      id: '/motorista/beneficios/$parceiroId'
+      path: '/$parceiroId'
+      fullPath: '/motorista/beneficios/$parceiroId'
+      preLoaderRoute: typeof MotoristaBeneficiosParceiroIdRouteImport
+      parentRoute: typeof MotoristaBeneficiosRoute
+    }
+    '/motorista/alugueis/$carroId': {
+      id: '/motorista/alugueis/$carroId'
+      path: '/$carroId'
+      fullPath: '/motorista/alugueis/$carroId'
+      preLoaderRoute: typeof MotoristaAlugueisCarroIdRouteImport
+      parentRoute: typeof MotoristaAlugueisRoute
+    }
   }
 }
 
+interface LojaRouteChildren {
+  LojaCampanhasRoute: typeof LojaCampanhasRoute
+  LojaPerfilRoute: typeof LojaPerfilRoute
+  LojaIndexRoute: typeof LojaIndexRoute
+}
+
+const LojaRouteChildren: LojaRouteChildren = {
+  LojaCampanhasRoute: LojaCampanhasRoute,
+  LojaPerfilRoute: LojaPerfilRoute,
+  LojaIndexRoute: LojaIndexRoute,
+}
+
+const LojaRouteWithChildren = LojaRoute._addFileChildren(LojaRouteChildren)
+
+interface MotoristaAlugueisRouteChildren {
+  MotoristaAlugueisCarroIdRoute: typeof MotoristaAlugueisCarroIdRoute
+}
+
+const MotoristaAlugueisRouteChildren: MotoristaAlugueisRouteChildren = {
+  MotoristaAlugueisCarroIdRoute: MotoristaAlugueisCarroIdRoute,
+}
+
+const MotoristaAlugueisRouteWithChildren =
+  MotoristaAlugueisRoute._addFileChildren(MotoristaAlugueisRouteChildren)
+
+interface MotoristaBeneficiosRouteChildren {
+  MotoristaBeneficiosParceiroIdRoute: typeof MotoristaBeneficiosParceiroIdRoute
+}
+
+const MotoristaBeneficiosRouteChildren: MotoristaBeneficiosRouteChildren = {
+  MotoristaBeneficiosParceiroIdRoute: MotoristaBeneficiosParceiroIdRoute,
+}
+
+const MotoristaBeneficiosRouteWithChildren =
+  MotoristaBeneficiosRoute._addFileChildren(MotoristaBeneficiosRouteChildren)
+
+interface MotoristaRouteChildren {
+  MotoristaAlugueisRoute: typeof MotoristaAlugueisRouteWithChildren
+  MotoristaBeneficiosRoute: typeof MotoristaBeneficiosRouteWithChildren
+  MotoristaPerfilRoute: typeof MotoristaPerfilRoute
+  MotoristaIndexRoute: typeof MotoristaIndexRoute
+}
+
+const MotoristaRouteChildren: MotoristaRouteChildren = {
+  MotoristaAlugueisRoute: MotoristaAlugueisRouteWithChildren,
+  MotoristaBeneficiosRoute: MotoristaBeneficiosRouteWithChildren,
+  MotoristaPerfilRoute: MotoristaPerfilRoute,
+  MotoristaIndexRoute: MotoristaIndexRoute,
+}
+
+const MotoristaRouteWithChildren = MotoristaRoute._addFileChildren(
+  MotoristaRouteChildren,
+)
+
+interface OficinaRouteChildren {
+  OficinaAgendaRoute: typeof OficinaAgendaRoute
+  OficinaPerfilRoute: typeof OficinaPerfilRoute
+  OficinaPromocoesRoute: typeof OficinaPromocoesRoute
+  OficinaIndexRoute: typeof OficinaIndexRoute
+}
+
+const OficinaRouteChildren: OficinaRouteChildren = {
+  OficinaAgendaRoute: OficinaAgendaRoute,
+  OficinaPerfilRoute: OficinaPerfilRoute,
+  OficinaPromocoesRoute: OficinaPromocoesRoute,
+  OficinaIndexRoute: OficinaIndexRoute,
+}
+
+const OficinaRouteWithChildren =
+  OficinaRoute._addFileChildren(OficinaRouteChildren)
+
+interface PassageiroRouteChildren {
+  PassageiroCashbackRoute: typeof PassageiroCashbackRoute
+  PassageiroParceirosRoute: typeof PassageiroParceirosRoute
+  PassageiroPerfilRoute: typeof PassageiroPerfilRoute
+  PassageiroIndexRoute: typeof PassageiroIndexRoute
+}
+
+const PassageiroRouteChildren: PassageiroRouteChildren = {
+  PassageiroCashbackRoute: PassageiroCashbackRoute,
+  PassageiroParceirosRoute: PassageiroParceirosRoute,
+  PassageiroPerfilRoute: PassageiroPerfilRoute,
+  PassageiroIndexRoute: PassageiroIndexRoute,
+}
+
+const PassageiroRouteWithChildren = PassageiroRoute._addFileChildren(
+  PassageiroRouteChildren,
+)
+
+interface ProprietarioRouteChildren {
+  ProprietarioFinanceiroRoute: typeof ProprietarioFinanceiroRoute
+  ProprietarioMotoristasRoute: typeof ProprietarioMotoristasRoute
+  ProprietarioPerfilRoute: typeof ProprietarioPerfilRoute
+  ProprietarioIndexRoute: typeof ProprietarioIndexRoute
+  ProprietarioFrotaCarroIdRoute: typeof ProprietarioFrotaCarroIdRoute
+  ProprietarioFrotaNovoRoute: typeof ProprietarioFrotaNovoRoute
+}
+
+const ProprietarioRouteChildren: ProprietarioRouteChildren = {
+  ProprietarioFinanceiroRoute: ProprietarioFinanceiroRoute,
+  ProprietarioMotoristasRoute: ProprietarioMotoristasRoute,
+  ProprietarioPerfilRoute: ProprietarioPerfilRoute,
+  ProprietarioIndexRoute: ProprietarioIndexRoute,
+  ProprietarioFrotaCarroIdRoute: ProprietarioFrotaCarroIdRoute,
+  ProprietarioFrotaNovoRoute: ProprietarioFrotaNovoRoute,
+}
+
+const ProprietarioRouteWithChildren = ProprietarioRoute._addFileChildren(
+  ProprietarioRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  LojaRoute: LojaRouteWithChildren,
+  MotoristaRoute: MotoristaRouteWithChildren,
+  OficinaRoute: OficinaRouteWithChildren,
+  PassageiroRoute: PassageiroRouteWithChildren,
+  ProprietarioRoute: ProprietarioRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
