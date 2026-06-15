@@ -9,9 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MotoristaRouteImport } from './routes/motorista'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MotoristaIndexRouteImport } from './routes/motorista.index'
+import { Route as MotoristaPerfilRouteImport } from './routes/motorista.perfil'
+import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.beneficios'
+import { Route as MotoristaAlugueisRouteImport } from './routes/motorista.alugueis'
+import { Route as MotoristaBeneficiosParceiroIdRouteImport } from './routes/motorista.beneficios.$parceiroId'
+import { Route as MotoristaAlugueisCarroIdRouteImport } from './routes/motorista.alugueis.$carroId'
 
+const MotoristaRoute = MotoristaRouteImport.update({
+  id: '/motorista',
+  path: '/motorista',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -22,35 +34,122 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MotoristaIndexRoute = MotoristaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MotoristaRoute,
+} as any)
+const MotoristaPerfilRoute = MotoristaPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => MotoristaRoute,
+} as any)
+const MotoristaBeneficiosRoute = MotoristaBeneficiosRouteImport.update({
+  id: '/beneficios',
+  path: '/beneficios',
+  getParentRoute: () => MotoristaRoute,
+} as any)
+const MotoristaAlugueisRoute = MotoristaAlugueisRouteImport.update({
+  id: '/alugueis',
+  path: '/alugueis',
+  getParentRoute: () => MotoristaRoute,
+} as any)
+const MotoristaBeneficiosParceiroIdRoute =
+  MotoristaBeneficiosParceiroIdRouteImport.update({
+    id: '/$parceiroId',
+    path: '/$parceiroId',
+    getParentRoute: () => MotoristaBeneficiosRoute,
+  } as any)
+const MotoristaAlugueisCarroIdRoute =
+  MotoristaAlugueisCarroIdRouteImport.update({
+    id: '/$carroId',
+    path: '/$carroId',
+    getParentRoute: () => MotoristaAlugueisRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/motorista': typeof MotoristaRouteWithChildren
+  '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
+  '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
+  '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/motorista/': typeof MotoristaIndexRoute
+  '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
+  '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
+  '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
+  '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/motorista': typeof MotoristaIndexRoute
+  '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
+  '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/motorista': typeof MotoristaRouteWithChildren
+  '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
+  '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
+  '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/motorista/': typeof MotoristaIndexRoute
+  '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
+  '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/motorista'
+    | '/motorista/alugueis'
+    | '/motorista/beneficios'
+    | '/motorista/perfil'
+    | '/motorista/'
+    | '/motorista/alugueis/$carroId'
+    | '/motorista/beneficios/$parceiroId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth'
-  id: '__root__' | '/' | '/auth'
+  to:
+    | '/'
+    | '/auth'
+    | '/motorista/alugueis'
+    | '/motorista/beneficios'
+    | '/motorista/perfil'
+    | '/motorista'
+    | '/motorista/alugueis/$carroId'
+    | '/motorista/beneficios/$parceiroId'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/motorista'
+    | '/motorista/alugueis'
+    | '/motorista/beneficios'
+    | '/motorista/perfil'
+    | '/motorista/'
+    | '/motorista/alugueis/$carroId'
+    | '/motorista/beneficios/$parceiroId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  MotoristaRoute: typeof MotoristaRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/motorista': {
+      id: '/motorista'
+      path: '/motorista'
+      fullPath: '/motorista'
+      preLoaderRoute: typeof MotoristaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -65,12 +164,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/motorista/': {
+      id: '/motorista/'
+      path: '/'
+      fullPath: '/motorista/'
+      preLoaderRoute: typeof MotoristaIndexRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/motorista/perfil': {
+      id: '/motorista/perfil'
+      path: '/perfil'
+      fullPath: '/motorista/perfil'
+      preLoaderRoute: typeof MotoristaPerfilRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/motorista/beneficios': {
+      id: '/motorista/beneficios'
+      path: '/beneficios'
+      fullPath: '/motorista/beneficios'
+      preLoaderRoute: typeof MotoristaBeneficiosRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/motorista/alugueis': {
+      id: '/motorista/alugueis'
+      path: '/alugueis'
+      fullPath: '/motorista/alugueis'
+      preLoaderRoute: typeof MotoristaAlugueisRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/motorista/beneficios/$parceiroId': {
+      id: '/motorista/beneficios/$parceiroId'
+      path: '/$parceiroId'
+      fullPath: '/motorista/beneficios/$parceiroId'
+      preLoaderRoute: typeof MotoristaBeneficiosParceiroIdRouteImport
+      parentRoute: typeof MotoristaBeneficiosRoute
+    }
+    '/motorista/alugueis/$carroId': {
+      id: '/motorista/alugueis/$carroId'
+      path: '/$carroId'
+      fullPath: '/motorista/alugueis/$carroId'
+      preLoaderRoute: typeof MotoristaAlugueisCarroIdRouteImport
+      parentRoute: typeof MotoristaAlugueisRoute
+    }
   }
 }
+
+interface MotoristaAlugueisRouteChildren {
+  MotoristaAlugueisCarroIdRoute: typeof MotoristaAlugueisCarroIdRoute
+}
+
+const MotoristaAlugueisRouteChildren: MotoristaAlugueisRouteChildren = {
+  MotoristaAlugueisCarroIdRoute: MotoristaAlugueisCarroIdRoute,
+}
+
+const MotoristaAlugueisRouteWithChildren =
+  MotoristaAlugueisRoute._addFileChildren(MotoristaAlugueisRouteChildren)
+
+interface MotoristaBeneficiosRouteChildren {
+  MotoristaBeneficiosParceiroIdRoute: typeof MotoristaBeneficiosParceiroIdRoute
+}
+
+const MotoristaBeneficiosRouteChildren: MotoristaBeneficiosRouteChildren = {
+  MotoristaBeneficiosParceiroIdRoute: MotoristaBeneficiosParceiroIdRoute,
+}
+
+const MotoristaBeneficiosRouteWithChildren =
+  MotoristaBeneficiosRoute._addFileChildren(MotoristaBeneficiosRouteChildren)
+
+interface MotoristaRouteChildren {
+  MotoristaAlugueisRoute: typeof MotoristaAlugueisRouteWithChildren
+  MotoristaBeneficiosRoute: typeof MotoristaBeneficiosRouteWithChildren
+  MotoristaPerfilRoute: typeof MotoristaPerfilRoute
+  MotoristaIndexRoute: typeof MotoristaIndexRoute
+}
+
+const MotoristaRouteChildren: MotoristaRouteChildren = {
+  MotoristaAlugueisRoute: MotoristaAlugueisRouteWithChildren,
+  MotoristaBeneficiosRoute: MotoristaBeneficiosRouteWithChildren,
+  MotoristaPerfilRoute: MotoristaPerfilRoute,
+  MotoristaIndexRoute: MotoristaIndexRoute,
+}
+
+const MotoristaRouteWithChildren = MotoristaRoute._addFileChildren(
+  MotoristaRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  MotoristaRoute: MotoristaRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -59,7 +59,7 @@ function Detalhe() {
 
         <h2 className="mt-6 font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">Serviços</h2>
         <div className="mt-2 divide-y divide-border rounded-2xl border border-border bg-card">
-          {p.servicos.map((s) => {
+          {p.servicos.map((s: { nome: string; preco: number }) => {
             const comDesc = s.preco * (1 - p.desconto / 100);
             return (
               <div key={s.nome} className="flex items-center justify-between gap-3 px-4 py-3">
