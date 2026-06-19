@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, Banknote, Gift, Wrench, Car, TrendingUp } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { ganhosDoDia, parceiros } from "@/lib/mock-data";
+import { NivelHero } from "@/components/nivel/NivelHero";
+import { progressoMock } from "@/lib/niveis";
 
 export const Route = createFileRoute("/motorista/")({
   head: () => ({ meta: [{ title: "Início — Motorista | Conect" }] }),
@@ -13,14 +15,17 @@ function Home() {
   return (
     <>
       <PageSection>
-        <div className="gradient-primary relative overflow-hidden rounded-3xl p-5 text-primary-foreground shadow-glow">
-          <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10" />
-          <p className="text-xs font-medium opacity-90">Ganho líquido hoje</p>
+        <NivelHero corridas={progressoMock.corridas} />
+      </PageSection>
+
+      <PageSection className="pt-0">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <p className="text-xs font-medium text-muted-foreground">Ganho líquido hoje</p>
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="font-display text-4xl font-extrabold">R$ {ganhosDoDia.liquido.toFixed(2)}</span>
-            <span className="text-xs opacity-90">/ R$ {ganhosDoDia.bruto.toFixed(2)} bruto</span>
+            <span className="font-display text-3xl font-extrabold">R$ {ganhosDoDia.liquido.toFixed(2)}</span>
+            <span className="text-xs text-muted-foreground">/ R$ {ganhosDoDia.bruto.toFixed(2)} bruto</span>
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
+          <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
             <Stat label="Corridas" value={ganhosDoDia.corridas} />
             <Stat label="Horas" value={`${ganhosDoDia.horas}h`} />
             <Stat label="Aluguel" value={`R$ ${ganhosDoDia.aluguelDoDia}`} />
@@ -69,8 +74,8 @@ function Home() {
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl bg-white/15 px-3 py-2 backdrop-blur">
-      <div className="text-[10px] uppercase tracking-wider opacity-80">{label}</div>
+    <div className="rounded-xl bg-muted px-3 py-2">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="font-display text-base font-bold">{value}</div>
     </div>
   );

@@ -32,6 +32,7 @@ import { Route as OficinaPromocoesRouteImport } from './routes/oficina.promocoes
 import { Route as OficinaPerfilRouteImport } from './routes/oficina.perfil'
 import { Route as OficinaAgendaRouteImport } from './routes/oficina.agenda'
 import { Route as MotoristaPerfilRouteImport } from './routes/motorista.perfil'
+import { Route as MotoristaJornadaRouteImport } from './routes/motorista.jornada'
 import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.beneficios'
 import { Route as MotoristaAlugueisRouteImport } from './routes/motorista.alugueis'
 import { Route as LojaPerfilRouteImport } from './routes/loja.perfil'
@@ -156,6 +157,11 @@ const MotoristaPerfilRoute = MotoristaPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => MotoristaRoute,
 } as any)
+const MotoristaJornadaRoute = MotoristaJornadaRouteImport.update({
+  id: '/jornada',
+  path: '/jornada',
+  getParentRoute: () => MotoristaRoute,
+} as any)
 const MotoristaBeneficiosRoute = MotoristaBeneficiosRouteImport.update({
   id: '/beneficios',
   path: '/beneficios',
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
+  '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
+  '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
+  '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/loja/perfil'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
+    | '/motorista/jornada'
     | '/motorista/perfil'
     | '/oficina/agenda'
     | '/oficina/perfil'
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/loja/perfil'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
+    | '/motorista/jornada'
     | '/motorista/perfil'
     | '/oficina/agenda'
     | '/oficina/perfil'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/loja/perfil'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
+    | '/motorista/jornada'
     | '/motorista/perfil'
     | '/oficina/agenda'
     | '/oficina/perfil'
@@ -566,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MotoristaPerfilRouteImport
       parentRoute: typeof MotoristaRoute
     }
+    '/motorista/jornada': {
+      id: '/motorista/jornada'
+      path: '/jornada'
+      fullPath: '/motorista/jornada'
+      preLoaderRoute: typeof MotoristaJornadaRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
     '/motorista/beneficios': {
       id: '/motorista/beneficios'
       path: '/beneficios'
@@ -664,6 +683,7 @@ const MotoristaBeneficiosRouteWithChildren =
 interface MotoristaRouteChildren {
   MotoristaAlugueisRoute: typeof MotoristaAlugueisRouteWithChildren
   MotoristaBeneficiosRoute: typeof MotoristaBeneficiosRouteWithChildren
+  MotoristaJornadaRoute: typeof MotoristaJornadaRoute
   MotoristaPerfilRoute: typeof MotoristaPerfilRoute
   MotoristaIndexRoute: typeof MotoristaIndexRoute
 }
@@ -671,6 +691,7 @@ interface MotoristaRouteChildren {
 const MotoristaRouteChildren: MotoristaRouteChildren = {
   MotoristaAlugueisRoute: MotoristaAlugueisRouteWithChildren,
   MotoristaBeneficiosRoute: MotoristaBeneficiosRouteWithChildren,
+  MotoristaJornadaRoute: MotoristaJornadaRoute,
   MotoristaPerfilRoute: MotoristaPerfilRoute,
   MotoristaIndexRoute: MotoristaIndexRoute,
 }
