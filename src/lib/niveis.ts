@@ -2,7 +2,12 @@ import peregrinoImg from "@/assets/nivel-peregrino.png";
 import bigodeImg from "@/assets/nivel-bigode.png";
 import veinhoImg from "@/assets/nivel-veinho.png";
 
-export type NivelKey = "peregrino" | "bigode" | "veinho";
+export type NivelKey =
+  | "peregrino"
+  | "caixa-baixa"
+  | "de-responsa"
+  | "bigode"
+  | "veinho";
 
 export type NivelInfo = {
   key: NivelKey;
@@ -14,40 +19,74 @@ export type NivelInfo = {
   gradient: string;
   ilustracao: string;
   beneficios: string[];
-  cashbackBonus: number;
+  /** Taxa fixa que o motorista paga à Conect por viagem (em R$) */
+  taxaFixa: number;
 };
+
+const STEP = 1000;
 
 export const NIVEIS: NivelInfo[] = [
   {
     key: "peregrino",
     nome: "Peregrino",
-    frase: "Em jornada",
+    frase: "Começo da jornada",
     min: 0,
-    max: 200,
+    max: STEP,
     cor: "var(--nivel-peregrino)",
     gradient: "var(--gradient-peregrino)",
     ilustracao: peregrinoImg,
-    cashbackBonus: 0,
+    taxaFixa: 3,
     beneficios: [
+      "Taxa Conect R$ 3,00 por viagem",
       "Acesso ao Clube do Motorista",
-      "5% de cashback base em parceiros",
-      "Descontos exclusivos em oficinas",
+      "Descontos base em oficinas parceiras",
+    ],
+  },
+  {
+    key: "caixa-baixa",
+    nome: "Caixa Baixa",
+    frase: "Pegando o ritmo",
+    min: STEP,
+    max: STEP * 2,
+    cor: "var(--nivel-caixa-baixa)",
+    gradient: "var(--gradient-caixa-baixa)",
+    ilustracao: peregrinoImg,
+    taxaFixa: 2,
+    beneficios: [
+      "Taxa Conect R$ 2,00 por viagem",
+      "R$ 1,00 a menos que o Peregrino",
+      "Selo Caixa Baixa no perfil",
+    ],
+  },
+  {
+    key: "de-responsa",
+    nome: "De Responsa",
+    frase: "Bom de praça",
+    min: STEP * 2,
+    max: STEP * 3,
+    cor: "var(--nivel-de-responsa)",
+    gradient: "var(--gradient-de-responsa)",
+    ilustracao: bigodeImg,
+    taxaFixa: 1.5,
+    beneficios: [
+      "Taxa Conect R$ 1,50 por viagem",
+      "Prioridade em aluguéis de veículos",
+      "Descontos extras em oficinas",
     ],
   },
   {
     key: "bigode",
     nome: "Bigode",
     frase: "Na estrada há tempo",
-    min: 200,
-    max: 1000,
+    min: STEP * 3,
+    max: STEP * 4,
     cor: "var(--nivel-bigode)",
     gradient: "var(--gradient-bigode)",
     ilustracao: bigodeImg,
-    cashbackBonus: 5,
+    taxaFixa: 1,
     beneficios: [
-      "+5% de cashback bônus",
-      "Prioridade em aluguéis de veículos",
-      "Descontos extras em oficinas parceiras",
+      "Taxa Conect R$ 1,00 por viagem",
+      "Caução reduzida em aluguéis",
       "Selo Bigode no perfil",
     ],
   },
@@ -55,24 +94,24 @@ export const NIVEIS: NivelInfo[] = [
     key: "veinho",
     nome: "Veinho",
     frase: "Lenda da pista",
-    min: 1000,
+    min: STEP * 4,
     max: Infinity,
     cor: "var(--nivel-veinho)",
     gradient: "var(--gradient-veinho)",
     ilustracao: veinhoImg,
-    cashbackBonus: 15,
+    taxaFixa: 1,
     beneficios: [
-      "+15% de cashback bônus",
-      "Atendimento VIP",
+      "Taxa Conect R$ 1,00 por viagem",
       "Caução -50% em aluguéis",
-      "Selo dourado no perfil",
+      "Atendimento VIP e prioridade total",
       "Acesso antecipado a novos parceiros",
+      "Selo dourado no perfil",
     ],
   },
 ];
 
-export function getNivelByCorridas(corridas: number): NivelInfo {
-  return NIVEIS.find((n) => corridas >= n.min && corridas < n.max) ?? NIVEIS[0];
+export function getNivelByViagens(viagens: number): NivelInfo {
+  return NIVEIS.find((n) => viagens >= n.min && viagens < n.max) ?? NIVEIS[0];
 }
 
 export function getProximoNivel(atual: NivelKey): NivelInfo | null {
@@ -83,6 +122,107 @@ export function getProximoNivel(atual: NivelKey): NivelInfo | null {
 export function getNivel(key: NivelKey): NivelInfo {
   return NIVEIS.find((n) => n.key === key) ?? NIVEIS[0];
 }
+
+/** Progresso (0–1) dentro do nível atual */
+export function progressoNivel(viagens: number) {
+  const nivel = getNivelByViagens(viagens);
+  if (nivel.max === Infinity) return { pct: 1, feito: STEP, total: STEP, restante: 0, nivel };
+  const total = nivel.max - nivel.min;
+  const feito = viagens - nivel.min;
+  const restante = Math.max(0, nivel.max - viagens);
+  return { pct: Math.min(1, feito / total), feito, total, restante, nivel };
+}
+
+// ----------------- Regras mensais de manutenção -----------------
+
+export const REGRAS = {
+  caronasMin: 3,
+  rejeicoesMax: 100,
+  estrelasMin: 4.7,
+};
+
+export type ProgressoMotorista = {
+  viagensTotais: number;
+  viagensMes: number;
+  caronasMes: number;
+  rejeicoesMes: number;
+  mediaEstrelas: number;
+  elogiosMes: number;
+  diasRestantesMes: number;
+  viagensPorSemana: number[];
+  historicoMeses: { mes: string; nivel: NivelKey; status: "promovido" | "mantido" | "rebaixado" }[];
+};
+
+export const progressoMock: ProgressoMotorista = {
+  viagensTotais: 1247,
+  viagensMes: 184,
+  caronasMes: 2,
+  rejeicoesMes: 38,
+  mediaEstrelas: 4.82,
+  elogiosMes: 12,
+  diasRestantesMes: 9,
+  viagensPorSemana: [62, 48, 51, 23],
+  historicoMeses: [
+    { mes: "Jan", nivel: "peregrino", status: "mantido" },
+    { mes: "Fev", nivel: "peregrino", status: "mantido" },
+    { mes: "Mar", nivel: "peregrino", status: "mantido" },
+    { mes: "Abr", nivel: "caixa-baixa", status: "promovido" },
+    { mes: "Mai", nivel: "caixa-baixa", status: "mantido" },
+    { mes: "Jun", nivel: "caixa-baixa", status: "mantido" },
+  ],
+};
+
+export type RegraStatus = "ok" | "atencao" | "risco";
+
+export function statusRegra(valor: number, limite: number, tipo: "min" | "max"): RegraStatus {
+  if (tipo === "min") {
+    if (valor >= limite) return "ok";
+    if (valor >= limite * 0.5) return "atencao";
+    return "risco";
+  }
+  // max
+  if (valor >= limite) return "risco";
+  if (valor >= limite * 0.75) return "atencao";
+  return "ok";
+}
+
+export function regrasManutencao(p: ProgressoMotorista) {
+  const caronas = statusRegra(p.caronasMes, REGRAS.caronasMin, "min");
+  const rejeicoes = statusRegra(p.rejeicoesMes, REGRAS.rejeicoesMax, "max");
+  const estrelas = p.mediaEstrelas >= REGRAS.estrelasMin ? "ok" : p.mediaEstrelas >= REGRAS.estrelasMin - 0.2 ? "atencao" : "risco";
+  const pior: RegraStatus = [caronas, rejeicoes, estrelas].includes("risco")
+    ? "risco"
+    : [caronas, rejeicoes, estrelas].includes("atencao")
+      ? "atencao"
+      : "ok";
+  return { caronas, rejeicoes, estrelas, geral: pior };
+}
+
+/** Economia do mês vs nível Peregrino (taxa base R$3) */
+export function economiaMes(viagensMes: number, taxaAtual: number) {
+  const taxaBase = NIVEIS[0].taxaFixa;
+  return Math.max(0, (taxaBase - taxaAtual) * viagensMes);
+}
+
+/** Quanto o motorista paga em taxas neste mês */
+export function gastoMesEmTaxas(viagensMes: number, taxaAtual: number) {
+  return viagensMes * taxaAtual;
+}
+
+/** Simulador: se fizer +extra viagens, quanto economiza e quantos dias até o próximo nível */
+export function simularProximoNivel(p: ProgressoMotorista, extra: number) {
+  const nivel = getNivelByViagens(p.viagensTotais);
+  const proximo = getProximoNivel(nivel.key);
+  const taxaAtual = nivel.taxaFixa;
+  const novoTotal = p.viagensTotais + extra;
+  const novoNivel = getNivelByViagens(novoTotal);
+  const economiaExtra = (taxaAtual - novoNivel.taxaFixa) * Math.max(0, novoTotal - (proximo?.min ?? Infinity));
+  const economiaTotal = economiaMes(p.viagensMes + extra, novoNivel.taxaFixa) + economiaExtra;
+  const faltam = proximo ? Math.max(0, proximo.min - novoTotal) : 0;
+  return { novoNivel, economiaTotal, faltam, atingiuProximo: !!proximo && novoTotal >= proximo.min };
+}
+
+// ----------------- Missões e conquistas -----------------
 
 export type Missao = {
   id: string;
@@ -101,20 +241,18 @@ export type Conquista = {
 };
 
 export const missoesMock: Missao[] = [
-  { id: "ms1", titulo: "Maratona semanal", descricao: "Complete 20 corridas esta semana", progresso: 14, meta: 20, xp: 50 },
-  { id: "ms2", titulo: "Cuidando do carro", descricao: "Visite 1 oficina parceira", progresso: 0, meta: 1, xp: 30 },
-  { id: "ms3", titulo: "Indique um parceiro", descricao: "Convide 1 motorista para o Conect", progresso: 0, meta: 1, xp: 100 },
-  { id: "ms4", titulo: "Cashback em dia", descricao: "Use cashback em 3 lojas locais", progresso: 1, meta: 3, xp: 40 },
+  { id: "ms1", titulo: "Caronas solidárias", descricao: "Dê 3 caronas grátis este mês", progresso: 2, meta: 3, xp: 80 },
+  { id: "ms2", titulo: "Mantenha as rejeições", descricao: "Fique abaixo de 100 rejeições no mês", progresso: 38, meta: 100, xp: 60 },
+  { id: "ms3", titulo: "Ritmo da semana", descricao: "Complete 40 viagens nesta semana", progresso: 23, meta: 40, xp: 50 },
+  { id: "ms4", titulo: "Elogios", descricao: "Receba 15 elogios além das 5 estrelas", progresso: 12, meta: 15, xp: 70 },
 ];
 
 export const conquistasMock: Conquista[] = [
   { id: "cq1", titulo: "Primeira corrida", data: "12/03/2025", nivel: "peregrino" },
-  { id: "cq2", titulo: "50 corridas em uma semana", data: "08/05/2025", nivel: "peregrino" },
-  { id: "cq3", titulo: "Subiu para Bigode", data: "21/07/2025", nivel: "bigode" },
-  { id: "cq4", titulo: "Primeira oficina parceira", data: "02/09/2025", nivel: "bigode" },
+  { id: "cq2", titulo: "Subiu para Caixa Baixa", data: "21/04/2025", nivel: "caixa-baixa" },
+  { id: "cq3", titulo: "Mês perfeito sem rejeições", data: "30/05/2025", nivel: "caixa-baixa" },
+  { id: "cq4", titulo: "10 caronas solidárias", data: "15/06/2025", nivel: "caixa-baixa" },
 ];
 
-export const progressoMock = {
-  corridas: 412,
-  xpTotal: 1240,
-};
+// Compat: alias antigo
+export const getNivelByCorridas = getNivelByViagens;
