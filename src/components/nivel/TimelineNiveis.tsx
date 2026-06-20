@@ -23,14 +23,23 @@ export function TimelineNiveis({ atual }: { atual: NivelKey }) {
             </span>
             <div className={`rounded-2xl border p-4 ${ativo ? "border-primary/40 bg-card shadow-card" : "border-border bg-card/50"}`}>
               <div className="flex items-center gap-3">
-                <img src={n.ilustracao} alt="" width={48} height={48} loading="lazy" className={`h-12 w-12 rounded-xl object-contain ${bloqueado ? "opacity-30 grayscale" : ""}`} />
+                <div
+                  className="grid h-12 w-12 shrink-0 place-items-center rounded-xl font-display text-[11px] font-extrabold text-white"
+                  style={{
+                    backgroundImage: bloqueado ? "none" : n.gradient,
+                    backgroundColor: bloqueado ? "var(--muted)" : undefined,
+                    color: bloqueado ? "var(--muted-foreground)" : undefined,
+                  }}
+                >
+                  R${n.taxaFixa.toFixed(2).replace(".", ",")}
+                </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-display text-base font-bold">{n.nome}</h3>
                     {ativo && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">Atual</span>}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {n.min}{n.max === Infinity ? "+" : `–${n.max - 1}`} corridas · {n.frase}
+                    {n.min.toLocaleString("pt-BR")}{n.max === Infinity ? "+" : `–${(n.max - 1).toLocaleString("pt-BR")}`} viagens · {n.frase}
                   </p>
                 </div>
               </div>
