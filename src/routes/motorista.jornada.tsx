@@ -1,29 +1,48 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Trophy, Award } from "lucide-react";
+import { Trophy, Award, ShieldCheck, History, Activity, Calculator } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { NivelHero } from "@/components/nivel/NivelHero";
 import { MissaoCard } from "@/components/nivel/MissaoCard";
 import { TimelineNiveis } from "@/components/nivel/TimelineNiveis";
 import { NivelBadge } from "@/components/nivel/NivelBadge";
-import { getNivel, getNivelByCorridas, missoesMock, conquistasMock, progressoMock } from "@/lib/niveis";
+import { ManutencaoCard } from "@/components/nivel/ManutencaoCard";
+import { HistoricoNiveis } from "@/components/nivel/HistoricoNiveis";
+import { RitmoSemanal } from "@/components/nivel/RitmoSemanal";
+import { SimuladorProximoNivel } from "@/components/nivel/SimuladorProximoNivel";
+import { getNivel, getNivelByViagens, missoesMock, conquistasMock, progressoMock } from "@/lib/niveis";
 
 export const Route = createFileRoute("/motorista/jornada")({
   head: () => ({
     meta: [
       { title: "Minha Jornada — Conect" },
-      { name: "description", content: "Acompanhe seu nível, missões e conquistas no Clube do Motorista Conect." },
+      { name: "description", content: "Acompanhe seu nível, taxa por viagem, missões e conquistas no Clube do Motorista Conect." },
     ],
   }),
   component: Jornada,
 });
 
 function Jornada() {
-  const nivelAtual = getNivelByCorridas(progressoMock.corridas);
+  const nivelAtual = getNivelByViagens(progressoMock.viagensTotais);
 
   return (
     <>
       <PageSection>
-        <NivelHero corridas={progressoMock.corridas} />
+        <NivelHero viagens={progressoMock.viagensTotais} />
+      </PageSection>
+
+      <PageSection className="pt-0">
+        <SectionHeader icon={ShieldCheck} title="Status do mês" />
+        <ManutencaoCard progresso={progressoMock} />
+      </PageSection>
+
+      <PageSection className="pt-0">
+        <SectionHeader icon={Activity} title="Seu ritmo" />
+        <RitmoSemanal progresso={progressoMock} />
+      </PageSection>
+
+      <PageSection className="pt-0">
+        <SectionHeader icon={Calculator} title="E se eu acelerar?" />
+        <SimuladorProximoNivel progresso={progressoMock} />
       </PageSection>
 
       <PageSection className="pt-0">
@@ -36,6 +55,11 @@ function Jornada() {
       <PageSection className="pt-2">
         <SectionHeader icon={Award} title="Sua trajetória" />
         <TimelineNiveis atual={nivelAtual.key} />
+      </PageSection>
+
+      <PageSection className="pt-0">
+        <SectionHeader icon={History} title="Histórico de níveis" />
+        <HistoricoNiveis progresso={progressoMock} />
       </PageSection>
 
       <PageSection className="pt-0">

@@ -1,19 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
-import { getNivelByCorridas, getProximoNivel } from "@/lib/niveis";
+import { getProximoNivel, progressoNivel } from "@/lib/niveis";
 
-export function NivelHero({ corridas }: { corridas: number }) {
-  const nivel = getNivelByCorridas(corridas);
+export function NivelHero({ viagens }: { viagens: number }) {
+  const { nivel, pct, restante } = progressoNivel(viagens);
   const proximo = getProximoNivel(nivel.key);
-  const meta = proximo ? proximo.min : nivel.max;
-  const restante = proximo ? Math.max(0, proximo.min - corridas) : 0;
-  const total = proximo ? proximo.min - nivel.min : 1;
-  const feito = proximo ? corridas - nivel.min : total;
-  const pct = Math.min(100, Math.round((feito / total) * 100));
-
   const r = 38;
   const c = 2 * Math.PI * r;
-  const dash = (pct / 100) * c;
+  const dash = pct * c;
 
   return (
     <Link
@@ -28,11 +22,7 @@ export function NivelHero({ corridas }: { corridas: number }) {
         <div className="relative grid h-24 w-24 place-items-center">
           <svg viewBox="0 0 100 100" className="absolute inset-0 -rotate-90">
             <circle cx="50" cy="50" r={r} stroke="rgba(255,255,255,0.2)" strokeWidth="6" fill="none" />
-            <circle
-              cx="50" cy="50" r={r}
-              stroke="white" strokeWidth="6" fill="none" strokeLinecap="round"
-              strokeDasharray={`${dash} ${c}`}
-            />
+            <circle cx="50" cy="50" r={r} stroke="white" strokeWidth="6" fill="none" strokeLinecap="round" strokeDasharray={`${dash} ${c}`} />
           </svg>
           <img src={nivel.ilustracao} alt={nivel.nome} width={80} height={80} loading="lazy" className="h-20 w-20 rounded-full bg-white/15 object-contain p-1" />
         </div>
@@ -40,9 +30,11 @@ export function NivelHero({ corridas }: { corridas: number }) {
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-widest opacity-80">{nivel.frase}</p>
           <h2 className="font-display text-2xl font-extrabold leading-tight">{nivel.nome}</h2>
-          <p className="mt-1 text-xs opacity-90">
-            {proximo ? <>Faltam <b>{restante}</b> corridas para <b>{proximo.nome}</b></> : <>Você é uma lenda</>}
-          </p>
+          <div className="mt-1.5 inline-flex items-baseline gap-1 rounded-lg bg-white/15 px-2.5 py-1 backdrop-blur">
+            <span className="text-[10px] uppercase tracking-wider opacity-80">Você paga</span>
+            <span className="font-display text-base font-extrabold">R$ {nivel.taxaFixa.toFixed(2).replace(".", ",")}</span>
+            <span className="text-[10px] opacity-80">/viagem</span>
+          </div>
         </div>
 
         <ChevronRight className="h-5 w-5 opacity-80" />
@@ -50,11 +42,13 @@ export function NivelHero({ corridas }: { corridas: number }) {
 
       <div className="relative mt-4">
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/20">
-          <div className="h-full rounded-full bg-white" style={{ width: `${pct}%` }} />
+          <div className="h-full rounded-full bg-white" style={{ width: `${Math.round(pct * 100)}%` }} />
         </div>
-        <div className="mt-1.5 flex justify-between text-[10px] font-semibold opacity-80">
-          <span>{corridas} corridas</span>
-          <span>{proximo ? `meta ${meta}` : "máximo"}</span>
+        <div className="mt-1.5 flex justify-between text-[10px] font-semibold opacity-90">
+          <span>{viagens.toLocaleString("pt-BR")} viagens</span>
+          <span>
+            {proximo ? <>faltam {restante.toLocaleString("pt-BR")} para {proximo.nome}</> : "nível máximo"}
+          </span>
         </div>
       </div>
     </Link>

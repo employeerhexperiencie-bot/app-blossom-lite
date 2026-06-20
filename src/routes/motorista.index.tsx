@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, Banknote, Gift, Wrench, Car, TrendingUp } from "lucide-react";
+import { ArrowUpRight, Banknote, Gift, Wrench, Car, TrendingUp, PiggyBank } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { ganhosDoDia, parceiros } from "@/lib/mock-data";
 import { NivelHero } from "@/components/nivel/NivelHero";
-import { progressoMock } from "@/lib/niveis";
+import { StatusMesStrip } from "@/components/nivel/StatusMesStrip";
+import { economiaMes, gastoMesEmTaxas, getNivelByViagens, progressoMock } from "@/lib/niveis";
 
 export const Route = createFileRoute("/motorista/")({
   head: () => ({ meta: [{ title: "Início — Motorista | Conect" }] }),
@@ -12,10 +13,39 @@ export const Route = createFileRoute("/motorista/")({
 
 function Home() {
   const topParceiros = parceiros.slice(0, 3);
+  const nivel = getNivelByViagens(progressoMock.viagensTotais);
+  const economia = economiaMes(progressoMock.viagensMes, nivel.taxaFixa);
+  const gasto = gastoMesEmTaxas(progressoMock.viagensMes, nivel.taxaFixa);
+
   return (
     <>
       <PageSection>
-        <NivelHero corridas={progressoMock.corridas} />
+        <NivelHero viagens={progressoMock.viagensTotais} />
+      </PageSection>
+
+      <PageSection className="pt-0">
+        <StatusMesStrip progresso={progressoMock} />
+      </PageSection>
+
+      <PageSection className="pt-0">
+        <Link
+          to="/motorista/jornada"
+          className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-success/30 bg-success/5 p-4 shadow-card"
+        >
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-success/15 text-success">
+            <PiggyBank className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs text-muted-foreground">Economia do mês vs Peregrino</div>
+            <div className="font-display text-lg font-extrabold text-success">
+              R$ {economia.toFixed(2).replace(".", ",")}
+            </div>
+            <div className="text-[11px] text-muted-foreground">
+              Você pagou R$ {gasto.toFixed(2).replace(".", ",")} em taxas em {progressoMock.viagensMes} viagens
+            </div>
+          </div>
+          <ArrowUpRight className="h-4 w-4 text-success" />
+        </Link>
       </PageSection>
 
       <PageSection className="pt-0">

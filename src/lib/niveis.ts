@@ -19,7 +19,6 @@ export type NivelInfo = {
   gradient: string;
   ilustracao: string;
   beneficios: string[];
-  /** Taxa fixa que o motorista paga à Conect por viagem (em R$) */
   taxaFixa: number;
 };
 
@@ -123,7 +122,6 @@ export function getNivel(key: NivelKey): NivelInfo {
   return NIVEIS.find((n) => n.key === key) ?? NIVEIS[0];
 }
 
-/** Progresso (0–1) dentro do nível atual */
 export function progressoNivel(viagens: number) {
   const nivel = getNivelByViagens(viagens);
   if (nivel.max === Infinity) return { pct: 1, feito: STEP, total: STEP, restante: 0, nivel };
@@ -133,13 +131,7 @@ export function progressoNivel(viagens: number) {
   return { pct: Math.min(1, feito / total), feito, total, restante, nivel };
 }
 
-// ----------------- Regras mensais de manutenção -----------------
-
-export const REGRAS = {
-  caronasMin: 3,
-  rejeicoesMax: 100,
-  estrelasMin: 4.7,
-};
+export const REGRAS = { caronasMin: 3, rejeicoesMax: 100, estrelasMin: 4.7 };
 
 export type ProgressoMotorista = {
   viagensTotais: number;
@@ -180,7 +172,6 @@ export function statusRegra(valor: number, limite: number, tipo: "min" | "max"):
     if (valor >= limite * 0.5) return "atencao";
     return "risco";
   }
-  // max
   if (valor >= limite) return "risco";
   if (valor >= limite * 0.75) return "atencao";
   return "ok";
@@ -189,40 +180,31 @@ export function statusRegra(valor: number, limite: number, tipo: "min" | "max"):
 export function regrasManutencao(p: ProgressoMotorista) {
   const caronas = statusRegra(p.caronasMes, REGRAS.caronasMin, "min");
   const rejeicoes = statusRegra(p.rejeicoesMes, REGRAS.rejeicoesMax, "max");
-  const estrelas = p.mediaEstrelas >= REGRAS.estrelasMin ? "ok" : p.mediaEstrelas >= REGRAS.estrelasMin - 0.2 ? "atencao" : "risco";
-  const pior: RegraStatus = [caronas, rejeicoes, estrelas].includes("risco")
-    ? "risco"
-    : [caronas, rejeicoes, estrelas].includes("atencao")
-      ? "atencao"
-      : "ok";
-  return { caronas, rejeicoes, estrelas, geral: pior };
+  const estrelas: RegraStatus =
+    p.mediaEstrelas >= REGRAS.estrelasMin ? "ok" : p.mediaEstrelas >= REGRAS.estrelasMin - 0.2 ? "atencao" : "risco";
+  const arr = [caronas, rejeicoes, estrelas];
+  const geral: RegraStatus = arr.includes("risco") ? "risco" : arr.includes("atencao") ? "atencao" : "ok";
+  return { caronas, rejeicoes, estrelas, geral };
 }
 
-/** Economia do mês vs nível Peregrino (taxa base R$3) */
 export function economiaMes(viagensMes: number, taxaAtual: number) {
   const taxaBase = NIVEIS[0].taxaFixa;
   return Math.max(0, (taxaBase - taxaAtual) * viagensMes);
 }
 
-/** Quanto o motorista paga em taxas neste mês */
 export function gastoMesEmTaxas(viagensMes: number, taxaAtual: number) {
   return viagensMes * taxaAtual;
 }
 
-/** Simulador: se fizer +extra viagens, quanto economiza e quantos dias até o próximo nível */
 export function simularProximoNivel(p: ProgressoMotorista, extra: number) {
   const nivel = getNivelByViagens(p.viagensTotais);
   const proximo = getProximoNivel(nivel.key);
-  const taxaAtual = nivel.taxaFixa;
   const novoTotal = p.viagensTotais + extra;
   const novoNivel = getNivelByViagens(novoTotal);
-  const economiaExtra = (taxaAtual - novoNivel.taxaFixa) * Math.max(0, novoTotal - (proximo?.min ?? Infinity));
-  const economiaTotal = economiaMes(p.viagensMes + extra, novoNivel.taxaFixa) + economiaExtra;
+  const economiaTotal = economiaMes(p.viagensMes + extra, novoNivel.taxaFixa);
   const faltam = proximo ? Math.max(0, proximo.min - novoTotal) : 0;
   return { novoNivel, economiaTotal, faltam, atingiuProximo: !!proximo && novoTotal >= proximo.min };
 }
-
-// ----------------- Missões e conquistas -----------------
 
 export type Missao = {
   id: string;
@@ -254,5 +236,4 @@ export const conquistasMock: Conquista[] = [
   { id: "cq4", titulo: "10 caronas solidárias", data: "15/06/2025", nivel: "caixa-baixa" },
 ];
 
-// Compat: alias antigo
 export const getNivelByCorridas = getNivelByViagens;

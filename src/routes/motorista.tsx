@@ -3,7 +3,7 @@ import { Home, Wrench, Car, User, Trophy } from "lucide-react";
 import { AppShell, type Tab } from "@/components/AppShell";
 import { useConect } from "@/lib/store";
 import { NivelBadge } from "@/components/nivel/NivelBadge";
-import { getNivelByCorridas, progressoMock } from "@/lib/niveis";
+import { getNivelByViagens, progressoMock } from "@/lib/niveis";
 
 export const Route = createFileRoute("/motorista")({
   component: MotoristaLayout,
@@ -19,7 +19,7 @@ const tabs: Tab[] = [
 
 function MotoristaLayout() {
   const nome = useConect((s) => s.nomeUsuario) || "Motorista";
-  const nivel = getNivelByCorridas(progressoMock.corridas);
+  const nivel = getNivelByViagens(progressoMock.viagensTotais);
   return (
     <AppShell
       title={`Olá, ${nome.split(" ")[0]}`}
