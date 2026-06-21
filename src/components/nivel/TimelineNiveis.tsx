@@ -24,14 +24,20 @@ export function TimelineNiveis({ atual }: { atual: NivelKey }) {
             <div className={`rounded-2xl border p-4 ${ativo ? "border-primary/40 bg-card shadow-card" : "border-border bg-card/50"}`}>
               <div className="flex items-center gap-3">
                 <div
-                  className="grid h-12 w-12 shrink-0 place-items-center rounded-xl font-display text-[11px] font-extrabold text-white"
+                  className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl"
                   style={{
                     backgroundImage: bloqueado ? "none" : n.gradient,
                     backgroundColor: bloqueado ? "var(--muted)" : undefined,
-                    color: bloqueado ? "var(--muted-foreground)" : undefined,
                   }}
                 >
-                  R${n.taxaFixa.toFixed(2).replace(".", ",")}
+                  <img
+                    src={n.ilustracao}
+                    alt={`Avatar ${n.nome}`}
+                    className={`h-full w-full object-cover ${bloqueado ? "opacity-40 grayscale" : ""}`}
+                  />
+                  <span className="absolute bottom-0 left-0 right-0 bg-black/55 py-0.5 text-center font-display text-[10px] font-extrabold text-white">
+                    R${n.taxaFixa.toFixed(2).replace(".", ",")}
+                  </span>
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
