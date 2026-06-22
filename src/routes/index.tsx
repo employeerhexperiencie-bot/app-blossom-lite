@@ -69,6 +69,13 @@ function Splash() {
         <div className="mt-8 rounded-2xl border border-dashed border-border bg-muted/40 p-4 text-xs text-muted-foreground">
           <strong className="text-foreground">Protótipo navegável.</strong> Sem cadastro real — escolha um perfil e explore.
         </div>
+
+        <Link
+          to="/admin"
+          className="mt-3 block text-center text-[11px] font-medium text-muted-foreground/70 underline-offset-2 hover:text-primary hover:underline"
+        >
+          Acesso administrador Conect →
+        </Link>
       </section>
     </div>
   );

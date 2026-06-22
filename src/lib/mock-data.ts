@@ -6,7 +6,7 @@ export type Parceiro = {
   id: string;
   nome: string;
   categoria: "Mecânica" | "Borracharia" | "Lava-rápido" | "Troca de óleo" | "Funilaria" | "Elétrica" | "Guincho";
-  desconto: number; // %
+  desconto: number;
   distanciaKm: number;
   endereco: string;
   horario: string;
@@ -62,8 +62,35 @@ export type Loja = {
   endereco: string;
 };
 
-// CAR IMAGES (placeholders via picsum-like deterministic seeds)
-const carImg = (seed: string) => `https://images.unsplash.com/photo-${seed}?w=600&h=400&fit=crop`;
+export type Corrida = {
+  id: string;
+  origem: string;
+  destino: string;
+  distanciaKm: number;
+  tempoMin: number;
+  valor: number;
+  passageiro: string;
+  passageiroRating: number;
+  formaPagamento: "Cartão" | "Pix" | "Dinheiro";
+};
+
+export type RespostaOrcamento = {
+  oficinaId: string;
+  oficinaNome: string;
+  valor: number;
+  prazo: string;
+  rating: number;
+};
+
+export type Orcamento = {
+  id: string;
+  servico: string;
+  veiculo: string;
+  descricao: string;
+  data: string;
+  status: "aguardando" | "respondido" | "fechado";
+  respostas: RespostaOrcamento[];
+};
 
 export const parceiros: Parceiro[] = [
   {
@@ -132,37 +159,11 @@ export const parceiros: Parceiro[] = [
 ];
 
 export const carros: Carro[] = [
-  {
-    id: "c1", modelo: "Onix", marca: "Chevrolet", ano: 2022, placa: "ABC-1D23",
-    diaria: 110, mensal: 2400, caucao: 1500, km: 38000, cidade: "São Paulo",
-    seguro: true, proprietario: "Carlos Mendes", status: "alugado",
-    motoristaAtual: "João Silva",
-    foto: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&h=400&fit=crop",
-  },
-  {
-    id: "c2", modelo: "HB20", marca: "Hyundai", ano: 2023, placa: "DEF-4G56",
-    diaria: 120, mensal: 2600, caucao: 1500, km: 22000, cidade: "São Paulo",
-    seguro: true, proprietario: "Carlos Mendes", status: "disponivel",
-    foto: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&h=400&fit=crop",
-  },
-  {
-    id: "c3", modelo: "Corolla", marca: "Toyota", ano: 2021, placa: "GHI-7J89",
-    diaria: 180, mensal: 3800, caucao: 2500, km: 55000, cidade: "São Paulo",
-    seguro: true, proprietario: "Carlos Mendes", status: "disponivel",
-    foto: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=400&fit=crop",
-  },
-  {
-    id: "c4", modelo: "Kwid", marca: "Renault", ano: 2022, placa: "JKL-0M12",
-    diaria: 95, mensal: 2100, caucao: 1200, km: 41000, cidade: "Campinas",
-    seguro: false, proprietario: "Ana Pereira", status: "manutencao",
-    foto: "https://images.unsplash.com/photo-1542362567-b07e54358753?w=600&h=400&fit=crop",
-  },
-  {
-    id: "c5", modelo: "Cronos", marca: "Fiat", ano: 2023, placa: "NOP-3Q45",
-    diaria: 130, mensal: 2800, caucao: 1500, km: 18000, cidade: "São Paulo",
-    seguro: true, proprietario: "Ana Pereira", status: "disponivel",
-    foto: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&h=400&fit=crop",
-  },
+  { id: "c1", modelo: "Onix", marca: "Chevrolet", ano: 2022, placa: "ABC-1D23", diaria: 110, mensal: 2400, caucao: 1500, km: 38000, cidade: "São Paulo", seguro: true, proprietario: "Carlos Mendes", status: "alugado", motoristaAtual: "João Silva", foto: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&h=400&fit=crop" },
+  { id: "c2", modelo: "HB20", marca: "Hyundai", ano: 2023, placa: "DEF-4G56", diaria: 120, mensal: 2600, caucao: 1500, km: 22000, cidade: "São Paulo", seguro: true, proprietario: "Carlos Mendes", status: "disponivel", foto: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&h=400&fit=crop" },
+  { id: "c3", modelo: "Corolla", marca: "Toyota", ano: 2021, placa: "GHI-7J89", diaria: 180, mensal: 3800, caucao: 2500, km: 55000, cidade: "São Paulo", seguro: true, proprietario: "Carlos Mendes", status: "disponivel", foto: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=400&fit=crop" },
+  { id: "c4", modelo: "Kwid", marca: "Renault", ano: 2022, placa: "JKL-0M12", diaria: 95, mensal: 2100, caucao: 1200, km: 41000, cidade: "Campinas", seguro: false, proprietario: "Ana Pereira", status: "manutencao", foto: "https://images.unsplash.com/photo-1542362567-b07e54358753?w=600&h=400&fit=crop" },
+  { id: "c5", modelo: "Cronos", marca: "Fiat", ano: 2023, placa: "NOP-3Q45", diaria: 130, mensal: 2800, caucao: 1500, km: 18000, cidade: "São Paulo", seguro: true, proprietario: "Ana Pereira", status: "disponivel", foto: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&h=400&fit=crop" },
 ];
 
 export const solicitacoes: Solicitacao[] = [
@@ -193,21 +194,12 @@ export const motoristas = [
 ];
 
 export const recebimentosMensais = [
-  { mes: "Jan", valor: 6200 },
-  { mes: "Fev", valor: 7400 },
-  { mes: "Mar", valor: 8100 },
-  { mes: "Abr", valor: 7800 },
-  { mes: "Mai", valor: 9200 },
-  { mes: "Jun", valor: 9800 },
+  { mes: "Jan", valor: 6200 }, { mes: "Fev", valor: 7400 }, { mes: "Mar", valor: 8100 },
+  { mes: "Abr", valor: 7800 }, { mes: "Mai", valor: 9200 }, { mes: "Jun", valor: 9800 },
 ];
 
 export const ganhosDoDia = {
-  bruto: 287.5,
-  liquido: 218.4,
-  corridas: 12,
-  horas: 7.5,
-  cashback: 34.6,
-  aluguelDoDia: 80,
+  bruto: 287.5, liquido: 218.4, corridas: 12, horas: 7.5, cashback: 34.6, aluguelDoDia: 80,
 };
 
 export const cashbackHistorico = [
@@ -215,6 +207,32 @@ export const cashbackHistorico = [
   { id: "ch2", origem: "Mercado Bom Preço", valor: -12.0, data: "Ontem" },
   { id: "ch3", origem: "Corrida #2820", valor: 3.8, data: "Ontem" },
   { id: "ch4", origem: "Posto Estrela", valor: 2.1, data: "2 dias" },
+];
+
+export const corridasDisponiveis: Corrida[] = [
+  { id: "co1", origem: "Av. Paulista, 1500", destino: "Aeroporto de Congonhas", distanciaKm: 8.4, tempoMin: 22, valor: 34.5, passageiro: "Marina S.", passageiroRating: 4.9, formaPagamento: "Cartão" },
+  { id: "co2", origem: "Shopping Ibirapuera", destino: "Vila Madalena", distanciaKm: 6.1, tempoMin: 18, valor: 24.8, passageiro: "Rafael T.", passageiroRating: 4.7, formaPagamento: "Pix" },
+  { id: "co3", origem: "Rua Augusta, 200", destino: "Estação Sé", distanciaKm: 3.2, tempoMin: 12, valor: 14.2, passageiro: "Bianca M.", passageiroRating: 4.8, formaPagamento: "Cartão" },
+  { id: "co4", origem: "Mooca Plaza", destino: "Tatuapé", distanciaKm: 4.5, tempoMin: 15, valor: 18.0, passageiro: "Diego R.", passageiroRating: 4.6, formaPagamento: "Dinheiro" },
+  { id: "co5", origem: "Av. Brigadeiro, 900", destino: "Brooklin", distanciaKm: 9.8, tempoMin: 28, valor: 41.0, passageiro: "Helena P.", passageiroRating: 5.0, formaPagamento: "Cartão" },
+];
+
+export const orcamentosMock: Orcamento[] = [
+  {
+    id: "or1", servico: "Troca de óleo + filtro", veiculo: "Onix 2022", descricao: "Carro com 38.000 km, óleo trocado pela última vez há 6 meses.",
+    data: "Hoje, 11:20", status: "respondido",
+    respostas: [
+      { oficinaId: "p4", oficinaNome: "Óleo & Cia", valor: 165, prazo: "Mesmo dia", rating: 4.7 },
+      { oficinaId: "p1", oficinaNome: "Auto Mecânica Silva", valor: 180, prazo: "Amanhã", rating: 4.8 },
+    ],
+  },
+  {
+    id: "or2", servico: "Conserto pneu", veiculo: "Onix 2022", descricao: "Pneu dianteiro direito furou.",
+    data: "Ontem", status: "fechado",
+    respostas: [
+      { oficinaId: "p2", oficinaNome: "Borracharia 24h Express", valor: 35, prazo: "30 min", rating: 4.6 },
+    ],
+  },
 ];
 
 export const profileLabels: Record<ProfileKey, { title: string; desc: string; emoji: string }> = {
