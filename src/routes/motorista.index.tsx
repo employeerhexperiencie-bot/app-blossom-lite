@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, Banknote, Gift, Wrench, Car, TrendingUp, PiggyBank } from "lucide-react";
+import { ArrowUpRight, Banknote, Gift, Wrench, Car, TrendingUp, PiggyBank, ShieldCheck, Navigation, CheckCircle2 } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { ganhosDoDia, parceiros } from "@/lib/mock-data";
 import { NivelHero } from "@/components/nivel/NivelHero";
 import { StatusMesStrip } from "@/components/nivel/StatusMesStrip";
 import { economiaMes, gastoMesEmTaxas, getNivelByViagens, progressoMock } from "@/lib/niveis";
+import { useConect, checkinValido } from "@/lib/store";
 
 export const Route = createFileRoute("/motorista/")({
   head: () => ({ meta: [{ title: "Início — Motorista | Conect" }] }),
@@ -16,10 +17,32 @@ function Home() {
   const nivel = getNivelByViagens(progressoMock.viagensTotais);
   const economia = economiaMes(progressoMock.viagensMes, nivel.taxaFixa);
   const gasto = gastoMesEmTaxas(progressoMock.viagensMes, nivel.taxaFixa);
+  const checkin = useConect((s) => s.checkin);
+  const liberado = checkinValido(checkin);
 
   return (
     <>
       <PageSection>
+        <Link
+          to={liberado ? "/motorista/corridas" : "/motorista/checkin"}
+          className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border p-4 shadow-card transition-colors ${
+            liberado ? "border-success/40 bg-success/5" : "border-warning/40 bg-warning/5"
+          }`}
+        >
+          <div className={`grid h-11 w-11 place-items-center rounded-xl ${liberado ? "bg-success/15 text-success" : "bg-warning/15 text-warning"}`}>
+            {liberado ? <CheckCircle2 className="h-5 w-5" /> : <ShieldCheck className="h-5 w-5" />}
+          </div>
+          <div className="min-w-0">
+            <div className="font-semibold">{liberado ? "Pronto para rodar" : "Faça o check-in do dia"}</div>
+            <div className="text-xs text-muted-foreground">
+              {liberado ? "Check-in aprovado. Vá para Corridas." : "Selfie + 3 fotos do carro para liberar corridas."}
+            </div>
+          </div>
+          {liberado ? <Navigation className="h-4 w-4 text-success" /> : <ArrowUpRight className="h-4 w-4 text-warning" />}
+        </Link>
+      </PageSection>
+
+      <PageSection className="pt-0">
         <NivelHero viagens={progressoMock.viagensTotais} />
       </PageSection>
 
@@ -73,7 +96,7 @@ function Home() {
       <PageSection className="pt-0">
         <SectionHeader title="Acesso rápido" />
         <div className="grid grid-cols-2 gap-3">
-          <QuickLink to="/motorista/beneficios" icon={Wrench} label="Encontrar oficinas" />
+          <QuickLink to="/motorista/orcamentos" icon={Wrench} label="Pedir orçamento" />
           <QuickLink to="/motorista/alugueis" icon={Car} label="Alugar um carro" />
         </div>
       </PageSection>

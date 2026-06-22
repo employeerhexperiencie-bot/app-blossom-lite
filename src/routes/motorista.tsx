@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { Home, Wrench, Car, User, Trophy } from "lucide-react";
+import { Home, Wrench, Navigation, User, Trophy } from "lucide-react";
 import { AppShell, type Tab } from "@/components/AppShell";
 import { useConect } from "@/lib/store";
 import { NivelBadge } from "@/components/nivel/NivelBadge";
@@ -11,9 +11,9 @@ export const Route = createFileRoute("/motorista")({
 
 const tabs: Tab[] = [
   { to: "/motorista", label: "Início", icon: Home },
-  { to: "/motorista/beneficios", label: "Benefícios", icon: Wrench },
+  { to: "/motorista/corridas", label: "Corridas", icon: Navigation },
   { to: "/motorista/jornada", label: "Jornada", icon: Trophy },
-  { to: "/motorista/alugueis", label: "Aluguéis", icon: Car },
+  { to: "/motorista/beneficios", label: "Oficinas", icon: Wrench },
   { to: "/motorista/perfil", label: "Perfil", icon: User },
 ];
 
