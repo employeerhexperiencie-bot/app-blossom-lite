@@ -1,4 +1,6 @@
 import peregrinoImg from "@/assets/nivel-peregrino.png";
+import caixaBaixaImg from "@/assets/nivel-caixa-baixa.png";
+import deResponsaImg from "@/assets/nivel-de-responsa.png";
 import bigodeImg from "@/assets/nivel-bigode.png";
 import veinhoImg from "@/assets/nivel-veinho.png";
 
@@ -36,7 +38,7 @@ export const NIVEIS: NivelInfo[] = [
     ilustracao: peregrinoImg,
     taxaFixa: 3,
     beneficios: [
-      "Taxa Conect R$ 3,00 por viagem",
+      "Taxa TCHI LÉVA R$ 3,00 por viagem",
       "Acesso ao Clube do Motorista",
       "Descontos base em oficinas parceiras",
     ],
@@ -49,10 +51,10 @@ export const NIVEIS: NivelInfo[] = [
     max: STEP * 2,
     cor: "var(--nivel-caixa-baixa)",
     gradient: "var(--gradient-caixa-baixa)",
-    ilustracao: peregrinoImg,
+    ilustracao: caixaBaixaImg,
     taxaFixa: 2,
     beneficios: [
-      "Taxa Conect R$ 2,00 por viagem",
+      "Taxa TCHI LÉVA R$ 2,00 por viagem",
       "R$ 1,00 a menos que o Peregrino",
       "Selo Caixa Baixa no perfil",
     ],
@@ -65,10 +67,10 @@ export const NIVEIS: NivelInfo[] = [
     max: STEP * 3,
     cor: "var(--nivel-de-responsa)",
     gradient: "var(--gradient-de-responsa)",
-    ilustracao: bigodeImg,
+    ilustracao: deResponsaImg,
     taxaFixa: 1.5,
     beneficios: [
-      "Taxa Conect R$ 1,50 por viagem",
+      "Taxa TCHI LÉVA R$ 1,50 por viagem",
       "Prioridade em aluguéis de veículos",
       "Descontos extras em oficinas",
     ],
@@ -84,7 +86,7 @@ export const NIVEIS: NivelInfo[] = [
     ilustracao: bigodeImg,
     taxaFixa: 1,
     beneficios: [
-      "Taxa Conect R$ 1,00 por viagem",
+      "Taxa TCHI LÉVA R$ 1,00 por viagem",
       "Caução reduzida em aluguéis",
       "Selo Bigode no perfil",
     ],
@@ -100,7 +102,7 @@ export const NIVEIS: NivelInfo[] = [
     ilustracao: veinhoImg,
     taxaFixa: 1,
     beneficios: [
-      "Taxa Conect R$ 1,00 por viagem",
+      "Taxa TCHI LÉVA R$ 1,00 por viagem",
       "Caução -50% em aluguéis",
       "Atendimento VIP e prioridade total",
       "Acesso antecipado a novos parceiros",
