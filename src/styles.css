@@ -129,13 +129,13 @@
 
   /* Níveis do motorista — graffiti color signatures */
   --nivel-peregrino: oklch(0.78 0.14 85);
-  --nivel-caixa-baixa: oklch(0.74 0.14 210);
-  --nivel-de-responsa: oklch(0.82 0.22 140);
+  --nivel-juvenil: oklch(0.74 0.14 210);
+  --nivel-calca-branca: oklch(0.82 0.22 140);
   --nivel-bigode: oklch(0.72 0.2 50);
   --nivel-veinho: oklch(0.86 0.18 95);
   --gradient-peregrino: linear-gradient(135deg, oklch(0.82 0.13 85), oklch(0.45 0.1 65));
-  --gradient-caixa-baixa: linear-gradient(135deg, oklch(0.78 0.14 210), oklch(0.4 0.12 235));
-  --gradient-de-responsa: linear-gradient(135deg, oklch(0.82 0.22 140), oklch(0.4 0.15 155));
+  --gradient-juvenil: linear-gradient(135deg, oklch(0.78 0.14 210), oklch(0.4 0.12 235));
+  --gradient-calca-branca: linear-gradient(135deg, oklch(0.82 0.22 140), oklch(0.4 0.15 155));
   --gradient-bigode: linear-gradient(135deg, oklch(0.74 0.2 50), oklch(0.4 0.16 30));
   --gradient-veinho: linear-gradient(135deg, oklch(0.88 0.18 95), oklch(0.5 0.18 70));
 

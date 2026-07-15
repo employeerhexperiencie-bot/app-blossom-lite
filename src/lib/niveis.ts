@@ -1,13 +1,19 @@
-import peregrinoImg from "@/assets/nivel-peregrino.png";
-import caixaBaixaImg from "@/assets/nivel-caixa-baixa.png";
-import deResponsaImg from "@/assets/nivel-de-responsa.png";
-import bigodeImg from "@/assets/nivel-bigode.png";
-import veinhoImg from "@/assets/nivel-veinho.png";
+import peregrinoAsset from "@/assets/nivel-peregrino.png.asset.json";
+import juvenilAsset from "@/assets/nivel-juvenil.png.asset.json";
+import calcaBrancaAsset from "@/assets/nivel-calca-branca.png.asset.json";
+import bigodeAsset from "@/assets/nivel-bigode.png.asset.json";
+import veinhoAsset from "@/assets/nivel-veinho.png.asset.json";
+
+const peregrinoImg = peregrinoAsset.url;
+const juvenilImg = juvenilAsset.url;
+const calcaBrancaImg = calcaBrancaAsset.url;
+const bigodeImg = bigodeAsset.url;
+const veinhoImg = veinhoAsset.url;
 
 export type NivelKey =
   | "peregrino"
-  | "caixa-baixa"
-  | "de-responsa"
+  | "juvenil"
+  | "calca-branca"
   | "bigode"
   | "veinho";
 
@@ -44,30 +50,30 @@ export const NIVEIS: NivelInfo[] = [
     ],
   },
   {
-    key: "caixa-baixa",
-    nome: "Caixa Baixa",
+    key: "juvenil",
+    nome: "Juvenil",
     frase: "Pegando o ritmo",
     min: STEP,
     max: STEP * 2,
-    cor: "var(--nivel-caixa-baixa)",
-    gradient: "var(--gradient-caixa-baixa)",
-    ilustracao: caixaBaixaImg,
+    cor: "var(--nivel-juvenil)",
+    gradient: "var(--gradient-juvenil)",
+    ilustracao: juvenilImg,
     taxaFixa: 2,
     beneficios: [
       "Taxa TCHI LÉVA R$ 2,00 por viagem",
       "R$ 1,00 a menos que o Peregrino",
-      "Selo Caixa Baixa no perfil",
+      "Selo Juvenil no perfil",
     ],
   },
   {
-    key: "de-responsa",
-    nome: "De Responsa",
+    key: "calca-branca",
+    nome: "Calça Branca",
     frase: "Bom de praça",
     min: STEP * 2,
     max: STEP * 3,
-    cor: "var(--nivel-de-responsa)",
-    gradient: "var(--gradient-de-responsa)",
-    ilustracao: deResponsaImg,
+    cor: "var(--nivel-calca-branca)",
+    gradient: "var(--gradient-calca-branca)",
+    ilustracao: calcaBrancaImg,
     taxaFixa: 1.5,
     beneficios: [
       "Taxa TCHI LÉVA R$ 1,50 por viagem",
@@ -160,9 +166,9 @@ export const progressoMock: ProgressoMotorista = {
     { mes: "Jan", nivel: "peregrino", status: "mantido" },
     { mes: "Fev", nivel: "peregrino", status: "mantido" },
     { mes: "Mar", nivel: "peregrino", status: "mantido" },
-    { mes: "Abr", nivel: "caixa-baixa", status: "promovido" },
-    { mes: "Mai", nivel: "caixa-baixa", status: "mantido" },
-    { mes: "Jun", nivel: "caixa-baixa", status: "mantido" },
+    { mes: "Abr", nivel: "juvenil", status: "promovido" },
+    { mes: "Mai", nivel: "juvenil", status: "mantido" },
+    { mes: "Jun", nivel: "juvenil", status: "mantido" },
   ],
 };
 
@@ -233,9 +239,9 @@ export const missoesMock: Missao[] = [
 
 export const conquistasMock: Conquista[] = [
   { id: "cq1", titulo: "Primeira corrida", data: "12/03/2025", nivel: "peregrino" },
-  { id: "cq2", titulo: "Subiu para Caixa Baixa", data: "21/04/2025", nivel: "caixa-baixa" },
-  { id: "cq3", titulo: "Mês perfeito sem rejeições", data: "30/05/2025", nivel: "caixa-baixa" },
-  { id: "cq4", titulo: "10 caronas solidárias", data: "15/06/2025", nivel: "caixa-baixa" },
+  { id: "cq2", titulo: "Subiu para Juvenil", data: "21/04/2025", nivel: "juvenil" },
+  { id: "cq3", titulo: "Mês perfeito sem rejeições", data: "30/05/2025", nivel: "juvenil" },
+  { id: "cq4", titulo: "10 caronas solidárias", data: "15/06/2025", nivel: "juvenil" },
 ];
 
 export const getNivelByCorridas = getNivelByViagens;
