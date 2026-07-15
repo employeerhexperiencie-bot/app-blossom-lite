@@ -6,7 +6,7 @@ import { profileLabels, type ProfileKey } from "@/lib/mock-data";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Conect — escolha seu perfil" },
+      { title: "TCHI LÉVA — escolha seu perfil" },
       { name: "description", content: "Motoristas, oficinas, proprietários, passageiros e lojas em um só app." },
     ],
   }),
@@ -25,7 +25,7 @@ function Splash() {
             <Sparkles className="h-3.5 w-3.5" /> Clube do Motorista
           </div>
           <h1 className="mt-4 font-display text-4xl font-extrabold leading-[1.05] tracking-tight">
-            Conect.
+            TCHI LÉVA.
           </h1>
           <p className="mt-2 max-w-xs text-sm text-muted-foreground">
             Um ecossistema para motoristas economizarem, oficinas crescerem e proprietários alugarem com tranquilidade.
@@ -74,7 +74,7 @@ function Splash() {
           to="/admin"
           className="mt-3 block text-center text-[11px] font-medium text-muted-foreground/70 underline-offset-2 hover:text-primary hover:underline"
         >
-          Acesso administrador Conect →
+          Acesso administrador TCHI LÉVA →
         </Link>
       </section>
     </div>

@@ -3,7 +3,7 @@ import { PageSection } from "@/components/AppShell";
 import { cashbackHistorico } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/passageiro/cashback")({
-  head: () => ({ meta: [{ title: "Cashback — Conect" }] }),
+  head: () => ({ meta: [{ title: "Cashback — TCHI LÉVA" }] }),
   component: Cashback,
 });
 

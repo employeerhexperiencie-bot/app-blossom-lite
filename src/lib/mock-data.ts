@@ -1,4 +1,4 @@
-// Mock data for Conect MVP (no database)
+// Mock data for TCHI LÉVA MVP (no database)
 
 export type ProfileKey = "motorista" | "proprietario" | "oficina" | "passageiro" | "loja";
 

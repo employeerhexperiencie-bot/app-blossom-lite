@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/loja/campanhas")({
-  head: () => ({ meta: [{ title: "Campanhas — Conect Loja" }] }),
+  head: () => ({ meta: [{ title: "Campanhas — TCHI LÉVA Loja" }] }),
   component: Camp,
 });
 
 const camp = [
   { id: 1, titulo: "10% de volta em compras acima de R$ 50", validade: "30/06" },
-  { id: 2, titulo: "Frete grátis para usuários Conect", validade: "31/12" },
+  { id: 2, titulo: "Frete grátis para usuários TCHI LÉVA", validade: "31/12" },
 ];
 
 function Camp() {

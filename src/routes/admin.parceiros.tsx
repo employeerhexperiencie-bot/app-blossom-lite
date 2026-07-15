@@ -3,7 +3,7 @@ import { CheckCircle2, Clock, XCircle, Wrench, Store, Car } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 
 export const Route = createFileRoute("/admin/parceiros")({
-  head: () => ({ meta: [{ title: "Parceiros — Admin | Conect" }] }),
+  head: () => ({ meta: [{ title: "Parceiros — Admin | TCHI LÉVA" }] }),
   component: Parceiros,
 });
 

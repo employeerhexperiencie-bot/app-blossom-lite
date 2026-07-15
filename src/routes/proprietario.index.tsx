@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { carros, type Carro } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/proprietario/")({
-  head: () => ({ meta: [{ title: "Frota — Conect Proprietário" }] }),
+  head: () => ({ meta: [{ title: "Frota — TCHI LÉVA Proprietário" }] }),
   component: Frota,
 });
 

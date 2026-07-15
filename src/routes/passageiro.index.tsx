@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/passageiro/")({
-  head: () => ({ meta: [{ title: "Início — Passageiro Conect" }] }),
+  head: () => ({ meta: [{ title: "Início — Passageiro TCHI LÉVA" }] }),
   component: Home,
 });
 

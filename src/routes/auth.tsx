@@ -13,7 +13,7 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     perfil: (s.perfil as ProfileKey) || "motorista",
   }),
-  head: () => ({ meta: [{ title: "Entrar — Conect" }] }),
+  head: () => ({ meta: [{ title: "Entrar — TCHI LÉVA" }] }),
   component: AuthPage,
 });
 

@@ -14,8 +14,8 @@ import { getNivel, getNivelByViagens, missoesMock, conquistasMock, progressoMock
 export const Route = createFileRoute("/motorista/jornada")({
   head: () => ({
     meta: [
-      { title: "Minha Jornada — Conect" },
-      { name: "description", content: "Acompanhe seu nível, taxa por viagem, missões e conquistas no Clube do Motorista Conect." },
+      { title: "Minha Jornada — TCHI LÉVA" },
+      { name: "description", content: "Acompanhe seu nível, taxa por viagem, missões e conquistas no Clube do Motorista TCHI LÉVA." },
     ],
   }),
   component: Jornada,

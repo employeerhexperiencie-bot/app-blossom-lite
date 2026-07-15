@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useConect } from "@/lib/store";
 
 export const Route = createFileRoute("/motorista/perfil")({
-  head: () => ({ meta: [{ title: "Perfil — Conect" }] }),
+  head: () => ({ meta: [{ title: "Perfil — TCHI LÉVA" }] }),
   component: Perfil,
 });
 
@@ -22,7 +22,7 @@ function Perfil() {
         </div>
         <div className="min-w-0">
           <div className="truncate font-display text-lg font-bold">{nome}</div>
-          <div className="text-xs text-muted-foreground">Motorista Conect · São Paulo</div>
+          <div className="text-xs text-muted-foreground">Motorista TCHI LÉVA · São Paulo</div>
         </div>
       </div>
 

@@ -4,7 +4,7 @@ import { recebimentosMensais } from "@/lib/mock-data";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export const Route = createFileRoute("/proprietario/financeiro")({
-  head: () => ({ meta: [{ title: "Financeiro — Conect" }] }),
+  head: () => ({ meta: [{ title: "Financeiro — TCHI LÉVA" }] }),
   component: Financeiro,
 });
 

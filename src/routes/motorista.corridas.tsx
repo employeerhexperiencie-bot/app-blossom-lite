@@ -6,7 +6,7 @@ import { corridasDisponiveis } from "@/lib/mock-data";
 import { useConect, checkinValido } from "@/lib/store";
 
 export const Route = createFileRoute("/motorista/corridas")({
-  head: () => ({ meta: [{ title: "Corridas — Motorista | Conect" }] }),
+  head: () => ({ meta: [{ title: "Corridas — Motorista | TCHI LÉVA" }] }),
   component: Corridas,
 });
 

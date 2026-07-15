@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { carros } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/motorista/alugueis")({
-  head: () => ({ meta: [{ title: "Aluguéis — Conect" }] }),
+  head: () => ({ meta: [{ title: "Aluguéis — TCHI LÉVA" }] }),
   component: Alugueis,
 });
 

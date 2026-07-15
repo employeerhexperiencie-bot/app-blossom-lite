@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useConect } from "@/lib/store";
 
 export const Route = createFileRoute("/oficina/perfil")({
-  head: () => ({ meta: [{ title: "Perfil — Conect Oficina" }] }),
+  head: () => ({ meta: [{ title: "Perfil — TCHI LÉVA Oficina" }] }),
   component: Perfil,
 });
 

@@ -13,7 +13,7 @@ const tabs: Tab[] = [
 
 function Layout() {
   return (
-    <AppShell title="Conect" tabs={tabs}>
+    <AppShell title="TCHI LÉVA" tabs={tabs}>
       <Outlet />
     </AppShell>
   );

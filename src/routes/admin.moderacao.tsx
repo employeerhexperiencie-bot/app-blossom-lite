@@ -3,7 +3,7 @@ import { ShieldAlert, FileText, Gavel, CheckCircle2 } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 
 export const Route = createFileRoute("/admin/moderacao")({
-  head: () => ({ meta: [{ title: "Moderação — Admin | Conect" }] }),
+  head: () => ({ meta: [{ title: "Moderação — Admin | TCHI LÉVA" }] }),
   component: Moderacao,
 });
 

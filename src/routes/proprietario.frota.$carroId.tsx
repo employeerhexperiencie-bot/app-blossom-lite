@@ -11,7 +11,7 @@ export const Route = createFileRoute("/proprietario/frota/$carroId")({
     return c;
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: loaderData ? `${loaderData.modelo} — Conect` : "Carro" }],
+    meta: [{ title: loaderData ? `${loaderData.modelo} — TCHI LÉVA` : "Carro" }],
   }),
   component: Detalhe,
   notFoundComponent: () => <div className="p-10 text-center text-muted-foreground">Carro não encontrado.</div>,

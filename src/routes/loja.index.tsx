@@ -3,7 +3,7 @@ import { PageSection } from "@/components/AppShell";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 export const Route = createFileRoute("/loja/")({
-  head: () => ({ meta: [{ title: "Dashboard — Conect Loja" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — TCHI LÉVA Loja" }] }),
   component: Dash,
 });
 

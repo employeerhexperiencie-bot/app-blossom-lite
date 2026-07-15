@@ -15,7 +15,7 @@ export const Route = createFileRoute("/motorista/alugueis/$carroId")({
     return c;
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: loaderData ? `${loaderData.marca} ${loaderData.modelo} — Conect` : "Carro" }],
+    meta: [{ title: loaderData ? `${loaderData.marca} ${loaderData.modelo} — TCHI LÉVA` : "Carro" }],
   }),
   component: CarroDetalhe,
   notFoundComponent: () => <div className="p-10 text-center text-muted-foreground">Carro não encontrado.</div>,

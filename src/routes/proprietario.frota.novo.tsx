@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/proprietario/frota/novo")({
-  head: () => ({ meta: [{ title: "Cadastrar carro — Conect" }] }),
+  head: () => ({ meta: [{ title: "Cadastrar carro — TCHI LÉVA" }] }),
   component: Novo,
 });
 

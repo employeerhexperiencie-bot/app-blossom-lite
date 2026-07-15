@@ -4,7 +4,7 @@ import { PageSection } from "@/components/AppShell";
 import { recebimentosMensais } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/admin/financeiro")({
-  head: () => ({ meta: [{ title: "Financeiro — Admin | Conect" }] }),
+  head: () => ({ meta: [{ title: "Financeiro — Admin | TCHI LÉVA" }] }),
   component: Financeiro,
 });
 
