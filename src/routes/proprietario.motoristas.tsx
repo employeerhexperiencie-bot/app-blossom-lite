@@ -4,7 +4,7 @@ import { PageSection } from "@/components/AppShell";
 import { motoristas } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/proprietario/motoristas")({
-  head: () => ({ meta: [{ title: "Motoristas — Conect" }] }),
+  head: () => ({ meta: [{ title: "Motoristas — TCHI LÉVA" }] }),
   component: Motoristas,
 });
 

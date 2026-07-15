@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageSection } from "@/components/AppShell";
 
 export const Route = createFileRoute("/oficina/agenda")({
-  head: () => ({ meta: [{ title: "Agenda — Conect Oficina" }] }),
+  head: () => ({ meta: [{ title: "Agenda — TCHI LÉVA Oficina" }] }),
   component: Agenda,
 });
 

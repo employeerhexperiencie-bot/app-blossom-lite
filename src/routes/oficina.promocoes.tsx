@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { promocoes as initial } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/oficina/promocoes")({
-  head: () => ({ meta: [{ title: "Promoções — Conect Oficina" }] }),
+  head: () => ({ meta: [{ title: "Promoções — TCHI LÉVA Oficina" }] }),
   component: Promocoes,
 });
 

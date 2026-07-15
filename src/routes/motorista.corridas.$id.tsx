@@ -8,7 +8,7 @@ import { useConect } from "@/lib/store";
 import { getNivelByViagens, progressoMock } from "@/lib/niveis";
 
 export const Route = createFileRoute("/motorista/corridas/$id")({
-  head: () => ({ meta: [{ title: "Corrida em andamento — Conect" }] }),
+  head: () => ({ meta: [{ title: "Corrida em andamento — TCHI LÉVA" }] }),
   component: CorridaDetalhe,
   notFoundComponent: () => (
     <PageSection>
@@ -52,7 +52,7 @@ function CorridaDetalhe() {
 
           <div className="mt-5 rounded-xl border border-border bg-card p-4 text-left">
             <Linha label="Valor da corrida" value={`R$ ${corrida.valor.toFixed(2)}`} />
-            <Linha label={`Taxa Conect (${nivel.nome})`} value={`- R$ ${taxa.toFixed(2)}`} />
+            <Linha label={`Taxa TCHI LÉVA (${nivel.nome})`} value={`- R$ ${taxa.toFixed(2)}`} />
             <div className="my-2 border-t border-dashed border-border" />
             <Linha label="Você recebeu" value={`R$ ${liquido.toFixed(2)}`} bold />
           </div>

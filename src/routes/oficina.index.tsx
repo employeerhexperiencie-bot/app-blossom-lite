@@ -4,7 +4,7 @@ import { PageSection } from "@/components/AppShell";
 import { solicitacoes, type Solicitacao } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/oficina/")({
-  head: () => ({ meta: [{ title: "Solicitações — Conect Oficina" }] }),
+  head: () => ({ meta: [{ title: "Solicitações — TCHI LÉVA Oficina" }] }),
   component: Solicitacoes,
 });
 

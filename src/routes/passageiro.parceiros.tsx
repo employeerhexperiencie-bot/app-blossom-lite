@@ -3,7 +3,7 @@ import { PageSection } from "@/components/AppShell";
 import { lojas } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/passageiro/parceiros")({
-  head: () => ({ meta: [{ title: "Lojas parceiras — Conect" }] }),
+  head: () => ({ meta: [{ title: "Lojas parceiras — TCHI LÉVA" }] }),
   component: Parceiros,
 });
 

@@ -8,7 +8,7 @@ import { economiaMes, gastoMesEmTaxas, getNivelByViagens, progressoMock } from "
 import { useConect, checkinValido } from "@/lib/store";
 
 export const Route = createFileRoute("/motorista/")({
-  head: () => ({ meta: [{ title: "Início — Motorista | Conect" }] }),
+  head: () => ({ meta: [{ title: "Início — Motorista | TCHI LÉVA" }] }),
   component: Home,
 });
 

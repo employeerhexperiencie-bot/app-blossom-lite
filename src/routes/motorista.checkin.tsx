@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useConect, checkinCompleto, checkinValido } from "@/lib/store";
 
 export const Route = createFileRoute("/motorista/checkin")({
-  head: () => ({ meta: [{ title: "Check-in diário — Motorista | Conect" }] }),
+  head: () => ({ meta: [{ title: "Check-in diário — Motorista | TCHI LÉVA" }] }),
   component: Checkin,
 });
 

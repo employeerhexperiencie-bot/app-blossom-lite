@@ -16,7 +16,7 @@ const tabs: Tab[] = [
 function AdminLayout() {
   return (
     <AppShell
-      title="Conect — Admin"
+      title="TCHI LÉVA — Admin"
       tabs={tabs}
       right={
         <div className="grid h-10 w-10 place-items-center rounded-full bg-foreground text-background text-sm font-bold">

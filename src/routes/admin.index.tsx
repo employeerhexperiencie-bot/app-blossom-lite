@@ -4,7 +4,7 @@ import { PageSection } from "@/components/AppShell";
 import { corridasDisponiveis, parceiros, lojas, motoristas, carros } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "KPIs — Admin | Conect" }] }),
+  head: () => ({ meta: [{ title: "KPIs — Admin | TCHI LÉVA" }] }),
   component: AdminKPIs,
 });
 

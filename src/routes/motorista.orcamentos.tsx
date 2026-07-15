@@ -10,7 +10,7 @@ import { orcamentosMock } from "@/lib/mock-data";
 import { useConect } from "@/lib/store";
 
 export const Route = createFileRoute("/motorista/orcamentos")({
-  head: () => ({ meta: [{ title: "Orçamentos — Motorista | Conect" }] }),
+  head: () => ({ meta: [{ title: "Orçamentos — Motorista | TCHI LÉVA" }] }),
   component: Orcamentos,
 });
 

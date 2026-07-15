@@ -14,7 +14,7 @@ export const Route = createFileRoute("/motorista/beneficios/$parceiroId")({
     return p;
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: loaderData ? `${loaderData.nome} — Conect` : "Parceiro" }],
+    meta: [{ title: loaderData ? `${loaderData.nome} — TCHI LÉVA` : "Parceiro" }],
   }),
   component: Detalhe,
   notFoundComponent: () => (
@@ -35,7 +35,7 @@ function Detalhe() {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="absolute right-4 top-4 rounded-full bg-success px-3 py-1.5 text-sm font-bold text-success-foreground shadow-soft">
-          -{p.desconto}% para motoristas Conect
+          -{p.desconto}% para motoristas TCHI LÉVA
         </div>
       </div>
 
