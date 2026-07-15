@@ -1,8 +1,14 @@
-import peregrinoImg from "@/assets/nivel-peregrino.png";
-import caixaBaixaImg from "@/assets/nivel-caixa-baixa.png";
-import deResponsaImg from "@/assets/nivel-de-responsa.png";
-import bigodeImg from "@/assets/nivel-bigode.png";
-import veinhoImg from "@/assets/nivel-veinho.png";
+import peregrinoAsset from "@/assets/nivel-peregrino.png.asset.json";
+import juvenilAsset from "@/assets/nivel-juvenil.png.asset.json";
+import calcaBrancaAsset from "@/assets/nivel-calca-branca.png.asset.json";
+import bigodeAsset from "@/assets/nivel-bigode.png.asset.json";
+import veinhoAsset from "@/assets/nivel-veinho.png.asset.json";
+
+const peregrinoImg = peregrinoAsset.url;
+const juvenilImg = juvenilAsset.url;
+const calcaBrancaImg = calcaBrancaAsset.url;
+const bigodeImg = bigodeAsset.url;
+const veinhoImg = veinhoAsset.url;
 
 export type NivelKey =
   | "peregrino"
