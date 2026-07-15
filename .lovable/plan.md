@@ -1,35 +1,31 @@
 ## Objetivo
-Adotar os 5 personagens da imagem enviada como avatares oficiais dos níveis do motorista e renomear os níveis intermediários para bater com a nomenclatura da arte.
+Adotar o grafite enviado como logo oficial e substituir todas as menções a "Conect" por **TCHI LÉVA** no app.
 
-## Renomeações
-| # | Nome atual | Novo nome | Chave (key) |
-|---|---|---|---|
-| 1 | Peregrino | Peregrino | `peregrino` (mantém) |
-| 2 | Caixa Baixa | **Juvenil** | `juvenil` (renomeia) |
-| 3 | De Responsa | **Calça Branca** | `calca-branca` (renomeia) |
-| 4 | Bigode | Bigode | `bigode` (mantém) |
-| 5 | Veinho | Veinho | `veinho` (mantém) |
+## Escopo textual (user-facing)
+Substituir em todos os textos exibidos ao usuário:
+- Títulos de páginas (`head().meta.title`): "— Conect" → "— TCHI LÉVA" (26 rotas).
+- Strings de UI: `AppShell title="Conect"`, "Membro Conect", "Loja parceira Conect", "Motorista Conect · São Paulo", "motoristas Conect", "usuários Conect", "Taxa Conect (…)", "Clube do Motorista Conect", "Acesso administrador Conect", "Conect." no hero da home, "Conect — Admin" etc.
+- Comentário `mock-data.ts`: "Conect MVP" → "TCHI LÉVA MVP".
 
-As faixas de viagens (0–1k, 1k–2k, …), taxas fixas (R$3 → R$1), gradientes e benefícios permanecem exatamente iguais — só nome, frase e imagem mudam nos níveis 2 e 3.
+## Preservado (identificadores de código — NÃO renomear)
+Para não quebrar o app, mantemos os símbolos internos:
+- `useConect` hook (store)
+- `ConectState` type
+- Chave de persistência do zustand `"conect-state"` (renomear apagaria o estado salvo dos usuários)
 
-## Ativos (imagens)
-- Recortar os 5 personagens da imagem `IMG-20260714-WA0036.jpg` em 5 PNGs individuais com fundo transparente (um por boneco).
-- Subir cada um via `lovable-assets` e substituir os pointers atuais:
-  - `src/assets/nivel-peregrino.png` → boneco 1 (mochileiro com mapa)
-  - `src/assets/nivel-juvenil.png` (novo) → boneco 2 (camiseta laranja) — remover `nivel-caixa-baixa.png`
-  - `src/assets/nivel-calca-branca.png` (novo) → boneco 3 (terno + calça branca) — remover `nivel-de-responsa.png`
-  - `src/assets/nivel-bigode.png` → boneco 4 (braços cruzados, bigode)
-  - `src/assets/nivel-veinho.png` → boneco 5 (grisalho, óculos, musculoso)
+Isso é invisível ao usuário — só aparece no código-fonte.
 
-## Código a ajustar
-- **`src/lib/niveis.ts`**: renomear as keys `caixa-baixa` → `juvenil` e `de-responsa` → `calca-branca`, trocar `nome`, `frase`, `ilustracao` e os imports. Atualizar `historicoMeses` e `conquistasMock` que referenciam as keys antigas.
-- **`src/styles.css`**: renomear as CSS vars `--nivel-caixa-baixa`/`--gradient-caixa-baixa` → `--nivel-juvenil`/`--gradient-juvenil` e `--nivel-de-responsa`/`--gradient-de-responsa` → `--nivel-calca-branca`/`--gradient-calca-branca` (mantendo as cores).
-- **Textos hardcoded**: buscar por "Caixa Baixa" e "De Responsa" no projeto (ex.: benefícios que citam "R$ 1,00 a menos que o Peregrino", "Selo Caixa Baixa no perfil") e reescrever para "Selo Juvenil" e afins.
+## Logo
+- Subir `IMG-20260628-WA0007.jpg` via `lovable-assets` como `src/assets/tchileva-logo.png.asset.json` (logo cheio para telas grandes).
+- Gerar um favicon quadrado 512×512 focado no lettering verde "TCHI LÉVA" (recortando do arquivo) e salvar em `public/favicon.png`; remover `public/favicon.ico`.
+- Atualizar `src/routes/__root.tsx` para trocar `{ rel: "icon", href: "/favicon.ico" }` por `{ rel: "icon", type: "image/png", href: "/favicon.png" }` e ajustar `title`/`description` para TCHI LÉVA.
+- Atualizar `src/components/BrandMark.tsx` para usar o novo logo (mantém API do componente para não mexer no `AppShell`).
+- Substituir o `tchileva-mark.png` atual (que era um mock antigo) pelo novo asset.
 
-## Preservado (não muda)
-- Rotas, telas, fluxos, `store.ts`, componentes (`NivelHero`, `TimelineNiveis`, `HistoricoNiveis`, `NivelBadge`).
-- Faixas de viagem, taxas fixas, gradientes de cor, regras de manutenção, missões, simulador.
-- Identidade visual TCHI LÉVA (fontes, tokens, grain, tag-stroke).
+## Home / Auth
+- `src/routes/index.tsx`: no hero da landing, trocar palavra "Conect." pelo brandmark TCHI LÉVA (imagem grande do logo).
+- `src/routes/auth.tsx`: substituir menções "Conect" e usar o logo no topo do card de login.
 
 ## Validação
-- Rodar o app e conferir `/motorista` e `/motorista/jornada`: hero, timeline, badges e histórico devem mostrar os 5 novos avatares e nomes corretos, sem quebrar layout.
+- `rg -n "Conect|conect" src/` deve retornar apenas `useConect`, `ConectState`, `"conect-state"` (código interno).
+- Abrir `/`, `/auth`, `/motorista`, `/admin` e conferir header/favicon/títulos.
