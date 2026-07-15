@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import logo from "@/assets/tchileva-logo.jpg.asset.json";
 import { profileLabels, type ProfileKey } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/")({
@@ -24,10 +25,10 @@ function Splash() {
           <div className="inline-flex items-center gap-2 rounded-full bg-card/70 px-3 py-1 text-xs font-semibold text-primary shadow-soft backdrop-blur">
             <Sparkles className="h-3.5 w-3.5" /> Clube do Motorista
           </div>
-          <h1 className="mt-4 font-display text-4xl font-extrabold leading-[1.05] tracking-tight">
-            TCHI LÉVA.
-          </h1>
-          <p className="mt-2 max-w-xs text-sm text-muted-foreground">
+          <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 shadow-glow">
+            <img src={logo.url} alt="TCHI LÉVA" className="block h-auto w-full" loading="eager" />
+          </div>
+          <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             Um ecossistema para motoristas economizarem, oficinas crescerem e proprietários alugarem com tranquilidade.
           </p>
         </div>

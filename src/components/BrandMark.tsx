@@ -1,15 +1,15 @@
-import mark from "@/assets/tchileva-mark.png";
+import logo from "@/assets/tchileva-logo.jpg.asset.json";
 
 export function BrandMark({ size = 32, withWordmark = false }: { size?: number; withWordmark?: boolean }) {
   return (
     <div className="flex items-center gap-2">
       <img
-        src={mark}
+        src={logo.url}
         alt="TCHI LÉVA"
         width={size}
         height={size}
         loading="eager"
-        className="shrink-0 drop-shadow-[0_3px_8px_rgba(255,180,0,0.35)]"
+        className="shrink-0 rounded-lg object-cover shadow-[0_3px_10px_rgba(0,0,0,0.35)]"
         style={{ width: size, height: size }}
       />
       {withWordmark && (
