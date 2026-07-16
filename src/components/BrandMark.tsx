@@ -1,4 +1,4 @@
-import logo from "@/assets/tchileva-logo.jpg.asset.json";
+import logo from "@/assets/tchileva-logo.png.asset.json";
 
 export function BrandMark({ size = 32, withWordmark = false }: { size?: number; withWordmark?: boolean }) {
   return (
