@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
-import logo from "@/assets/tchileva-logo.jpg.asset.json";
+import logo from "@/assets/tchileva-logo.png.asset.json";
 import { profileLabels, type ProfileKey } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/")({
