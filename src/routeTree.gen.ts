@@ -25,8 +25,10 @@ import { Route as MotoristaIndexRouteImport } from './routes/motorista.index'
 import { Route as LojaIndexRouteImport } from './routes/loja.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProprietarioPerfilRouteImport } from './routes/proprietario.perfil'
+import { Route as ProprietarioNotificacoesRouteImport } from './routes/proprietario.notificacoes'
 import { Route as ProprietarioMotoristasRouteImport } from './routes/proprietario.motoristas'
 import { Route as ProprietarioFinanceiroRouteImport } from './routes/proprietario.financeiro'
+import { Route as ProprietarioAgendaRouteImport } from './routes/proprietario.agenda'
 import { Route as PassageiroPerfilRouteImport } from './routes/passageiro.perfil'
 import { Route as PassageiroParceirosRouteImport } from './routes/passageiro.parceiros'
 import { Route as PassageiroCashbackRouteImport } from './routes/passageiro.cashback'
@@ -45,8 +47,12 @@ import { Route as LojaCampanhasRouteImport } from './routes/loja.campanhas'
 import { Route as AdminParceirosRouteImport } from './routes/admin.parceiros'
 import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
+import { Route as ProprietarioFrotaIndexRouteImport } from './routes/proprietario.frota.index'
+import { Route as ProprietarioContratosIndexRouteImport } from './routes/proprietario.contratos.index'
 import { Route as ProprietarioFrotaNovoRouteImport } from './routes/proprietario.frota.novo'
 import { Route as ProprietarioFrotaCarroIdRouteImport } from './routes/proprietario.frota.$carroId'
+import { Route as ProprietarioContratosNovoRouteImport } from './routes/proprietario.contratos.novo'
+import { Route as ProprietarioContratosIdRouteImport } from './routes/proprietario.contratos.$id'
 import { Route as MotoristaCorridasIdRouteImport } from './routes/motorista.corridas.$id'
 import { Route as MotoristaBeneficiosParceiroIdRouteImport } from './routes/motorista.beneficios.$parceiroId'
 import { Route as MotoristaAlugueisCarroIdRouteImport } from './routes/motorista.alugueis.$carroId'
@@ -131,6 +137,12 @@ const ProprietarioPerfilRoute = ProprietarioPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => ProprietarioRoute,
 } as any)
+const ProprietarioNotificacoesRoute =
+  ProprietarioNotificacoesRouteImport.update({
+    id: '/notificacoes',
+    path: '/notificacoes',
+    getParentRoute: () => ProprietarioRoute,
+  } as any)
 const ProprietarioMotoristasRoute = ProprietarioMotoristasRouteImport.update({
   id: '/motoristas',
   path: '/motoristas',
@@ -139,6 +151,11 @@ const ProprietarioMotoristasRoute = ProprietarioMotoristasRouteImport.update({
 const ProprietarioFinanceiroRoute = ProprietarioFinanceiroRouteImport.update({
   id: '/financeiro',
   path: '/financeiro',
+  getParentRoute: () => ProprietarioRoute,
+} as any)
+const ProprietarioAgendaRoute = ProprietarioAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
   getParentRoute: () => ProprietarioRoute,
 } as any)
 const PassageiroPerfilRoute = PassageiroPerfilRouteImport.update({
@@ -231,6 +248,17 @@ const AdminFinanceiroRoute = AdminFinanceiroRouteImport.update({
   path: '/financeiro',
   getParentRoute: () => AdminRoute,
 } as any)
+const ProprietarioFrotaIndexRoute = ProprietarioFrotaIndexRouteImport.update({
+  id: '/frota/',
+  path: '/frota/',
+  getParentRoute: () => ProprietarioRoute,
+} as any)
+const ProprietarioContratosIndexRoute =
+  ProprietarioContratosIndexRouteImport.update({
+    id: '/contratos/',
+    path: '/contratos/',
+    getParentRoute: () => ProprietarioRoute,
+  } as any)
 const ProprietarioFrotaNovoRoute = ProprietarioFrotaNovoRouteImport.update({
   id: '/frota/novo',
   path: '/frota/novo',
@@ -242,6 +270,17 @@ const ProprietarioFrotaCarroIdRoute =
     path: '/frota/$carroId',
     getParentRoute: () => ProprietarioRoute,
   } as any)
+const ProprietarioContratosNovoRoute =
+  ProprietarioContratosNovoRouteImport.update({
+    id: '/contratos/novo',
+    path: '/contratos/novo',
+    getParentRoute: () => ProprietarioRoute,
+  } as any)
+const ProprietarioContratosIdRoute = ProprietarioContratosIdRouteImport.update({
+  id: '/contratos/$id',
+  path: '/contratos/$id',
+  getParentRoute: () => ProprietarioRoute,
+} as any)
 const MotoristaCorridasIdRoute = MotoristaCorridasIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -288,8 +327,10 @@ export interface FileRoutesByFullPath {
   '/passageiro/cashback': typeof PassageiroCashbackRoute
   '/passageiro/parceiros': typeof PassageiroParceirosRoute
   '/passageiro/perfil': typeof PassageiroPerfilRoute
+  '/proprietario/agenda': typeof ProprietarioAgendaRoute
   '/proprietario/financeiro': typeof ProprietarioFinanceiroRoute
   '/proprietario/motoristas': typeof ProprietarioMotoristasRoute
+  '/proprietario/notificacoes': typeof ProprietarioNotificacoesRoute
   '/proprietario/perfil': typeof ProprietarioPerfilRoute
   '/admin/': typeof AdminIndexRoute
   '/loja/': typeof LojaIndexRoute
@@ -300,8 +341,12 @@ export interface FileRoutesByFullPath {
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
+  '/proprietario/contratos/$id': typeof ProprietarioContratosIdRoute
+  '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
+  '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
+  '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -325,8 +370,10 @@ export interface FileRoutesByTo {
   '/passageiro/cashback': typeof PassageiroCashbackRoute
   '/passageiro/parceiros': typeof PassageiroParceirosRoute
   '/passageiro/perfil': typeof PassageiroPerfilRoute
+  '/proprietario/agenda': typeof ProprietarioAgendaRoute
   '/proprietario/financeiro': typeof ProprietarioFinanceiroRoute
   '/proprietario/motoristas': typeof ProprietarioMotoristasRoute
+  '/proprietario/notificacoes': typeof ProprietarioNotificacoesRoute
   '/proprietario/perfil': typeof ProprietarioPerfilRoute
   '/admin': typeof AdminIndexRoute
   '/loja': typeof LojaIndexRoute
@@ -337,8 +384,12 @@ export interface FileRoutesByTo {
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
+  '/proprietario/contratos/$id': typeof ProprietarioContratosIdRoute
+  '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
+  '/proprietario/contratos': typeof ProprietarioContratosIndexRoute
+  '/proprietario/frota': typeof ProprietarioFrotaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -369,8 +420,10 @@ export interface FileRoutesById {
   '/passageiro/cashback': typeof PassageiroCashbackRoute
   '/passageiro/parceiros': typeof PassageiroParceirosRoute
   '/passageiro/perfil': typeof PassageiroPerfilRoute
+  '/proprietario/agenda': typeof ProprietarioAgendaRoute
   '/proprietario/financeiro': typeof ProprietarioFinanceiroRoute
   '/proprietario/motoristas': typeof ProprietarioMotoristasRoute
+  '/proprietario/notificacoes': typeof ProprietarioNotificacoesRoute
   '/proprietario/perfil': typeof ProprietarioPerfilRoute
   '/admin/': typeof AdminIndexRoute
   '/loja/': typeof LojaIndexRoute
@@ -381,8 +434,12 @@ export interface FileRoutesById {
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
+  '/proprietario/contratos/$id': typeof ProprietarioContratosIdRoute
+  '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
+  '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
+  '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -414,8 +471,10 @@ export interface FileRouteTypes {
     | '/passageiro/cashback'
     | '/passageiro/parceiros'
     | '/passageiro/perfil'
+    | '/proprietario/agenda'
     | '/proprietario/financeiro'
     | '/proprietario/motoristas'
+    | '/proprietario/notificacoes'
     | '/proprietario/perfil'
     | '/admin/'
     | '/loja/'
@@ -426,8 +485,12 @@ export interface FileRouteTypes {
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
+    | '/proprietario/contratos/$id'
+    | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
+    | '/proprietario/contratos/'
+    | '/proprietario/frota/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -451,8 +514,10 @@ export interface FileRouteTypes {
     | '/passageiro/cashback'
     | '/passageiro/parceiros'
     | '/passageiro/perfil'
+    | '/proprietario/agenda'
     | '/proprietario/financeiro'
     | '/proprietario/motoristas'
+    | '/proprietario/notificacoes'
     | '/proprietario/perfil'
     | '/admin'
     | '/loja'
@@ -463,8 +528,12 @@ export interface FileRouteTypes {
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
+    | '/proprietario/contratos/$id'
+    | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
+    | '/proprietario/contratos'
+    | '/proprietario/frota'
   id:
     | '__root__'
     | '/'
@@ -494,8 +563,10 @@ export interface FileRouteTypes {
     | '/passageiro/cashback'
     | '/passageiro/parceiros'
     | '/passageiro/perfil'
+    | '/proprietario/agenda'
     | '/proprietario/financeiro'
     | '/proprietario/motoristas'
+    | '/proprietario/notificacoes'
     | '/proprietario/perfil'
     | '/admin/'
     | '/loja/'
@@ -506,8 +577,12 @@ export interface FileRouteTypes {
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
+    | '/proprietario/contratos/$id'
+    | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
+    | '/proprietario/contratos/'
+    | '/proprietario/frota/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -636,6 +711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProprietarioPerfilRouteImport
       parentRoute: typeof ProprietarioRoute
     }
+    '/proprietario/notificacoes': {
+      id: '/proprietario/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/proprietario/notificacoes'
+      preLoaderRoute: typeof ProprietarioNotificacoesRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
     '/proprietario/motoristas': {
       id: '/proprietario/motoristas'
       path: '/motoristas'
@@ -648,6 +730,13 @@ declare module '@tanstack/react-router' {
       path: '/financeiro'
       fullPath: '/proprietario/financeiro'
       preLoaderRoute: typeof ProprietarioFinanceiroRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/proprietario/agenda': {
+      id: '/proprietario/agenda'
+      path: '/agenda'
+      fullPath: '/proprietario/agenda'
+      preLoaderRoute: typeof ProprietarioAgendaRouteImport
       parentRoute: typeof ProprietarioRoute
     }
     '/passageiro/perfil': {
@@ -776,6 +865,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFinanceiroRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/proprietario/frota/': {
+      id: '/proprietario/frota/'
+      path: '/frota'
+      fullPath: '/proprietario/frota/'
+      preLoaderRoute: typeof ProprietarioFrotaIndexRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/proprietario/contratos/': {
+      id: '/proprietario/contratos/'
+      path: '/contratos'
+      fullPath: '/proprietario/contratos/'
+      preLoaderRoute: typeof ProprietarioContratosIndexRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
     '/proprietario/frota/novo': {
       id: '/proprietario/frota/novo'
       path: '/frota/novo'
@@ -788,6 +891,20 @@ declare module '@tanstack/react-router' {
       path: '/frota/$carroId'
       fullPath: '/proprietario/frota/$carroId'
       preLoaderRoute: typeof ProprietarioFrotaCarroIdRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/proprietario/contratos/novo': {
+      id: '/proprietario/contratos/novo'
+      path: '/contratos/novo'
+      fullPath: '/proprietario/contratos/novo'
+      preLoaderRoute: typeof ProprietarioContratosNovoRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/proprietario/contratos/$id': {
+      id: '/proprietario/contratos/$id'
+      path: '/contratos/$id'
+      fullPath: '/proprietario/contratos/$id'
+      preLoaderRoute: typeof ProprietarioContratosIdRouteImport
       parentRoute: typeof ProprietarioRoute
     }
     '/motorista/corridas/$id': {
@@ -939,21 +1056,33 @@ const PassageiroRouteWithChildren = PassageiroRoute._addFileChildren(
 )
 
 interface ProprietarioRouteChildren {
+  ProprietarioAgendaRoute: typeof ProprietarioAgendaRoute
   ProprietarioFinanceiroRoute: typeof ProprietarioFinanceiroRoute
   ProprietarioMotoristasRoute: typeof ProprietarioMotoristasRoute
+  ProprietarioNotificacoesRoute: typeof ProprietarioNotificacoesRoute
   ProprietarioPerfilRoute: typeof ProprietarioPerfilRoute
   ProprietarioIndexRoute: typeof ProprietarioIndexRoute
+  ProprietarioContratosIdRoute: typeof ProprietarioContratosIdRoute
+  ProprietarioContratosNovoRoute: typeof ProprietarioContratosNovoRoute
   ProprietarioFrotaCarroIdRoute: typeof ProprietarioFrotaCarroIdRoute
   ProprietarioFrotaNovoRoute: typeof ProprietarioFrotaNovoRoute
+  ProprietarioContratosIndexRoute: typeof ProprietarioContratosIndexRoute
+  ProprietarioFrotaIndexRoute: typeof ProprietarioFrotaIndexRoute
 }
 
 const ProprietarioRouteChildren: ProprietarioRouteChildren = {
+  ProprietarioAgendaRoute: ProprietarioAgendaRoute,
   ProprietarioFinanceiroRoute: ProprietarioFinanceiroRoute,
   ProprietarioMotoristasRoute: ProprietarioMotoristasRoute,
+  ProprietarioNotificacoesRoute: ProprietarioNotificacoesRoute,
   ProprietarioPerfilRoute: ProprietarioPerfilRoute,
   ProprietarioIndexRoute: ProprietarioIndexRoute,
+  ProprietarioContratosIdRoute: ProprietarioContratosIdRoute,
+  ProprietarioContratosNovoRoute: ProprietarioContratosNovoRoute,
   ProprietarioFrotaCarroIdRoute: ProprietarioFrotaCarroIdRoute,
   ProprietarioFrotaNovoRoute: ProprietarioFrotaNovoRoute,
+  ProprietarioContratosIndexRoute: ProprietarioContratosIndexRoute,
+  ProprietarioFrotaIndexRoute: ProprietarioFrotaIndexRoute,
 }
 
 const ProprietarioRouteWithChildren = ProprietarioRoute._addFileChildren(
@@ -974,13 +1103,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
