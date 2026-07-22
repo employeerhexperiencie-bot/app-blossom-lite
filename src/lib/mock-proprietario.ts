@@ -11,7 +11,12 @@ export type EventoTipo =
   | "acidente"
   | "documento"
   | "km"
+  | "custo"
+  | "observacao"
   | "outro";
+
+export type CustoCategoria = "lavagem" | "multa" | "estacionamento" | "ipva" | "combustivel" | "outro";
+
 
 export type EventoVeiculo = {
   id: string;
