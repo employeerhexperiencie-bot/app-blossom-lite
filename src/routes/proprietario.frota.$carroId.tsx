@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Plus, Wrench, Camera, Megaphone, Gauge, Check } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Plus, Wrench, Camera, Megaphone, Gauge, Check, Bell, Receipt, StickyNote, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,16 +11,19 @@ import {
   fmtBRL,
   fmtData,
   eventoIcone,
-  financeiroPorVeiculo,
   type EventoTipo,
   type ItemManutencao,
+  type CustoCategoria,
+  type Lembrete,
 } from "@/lib/mock-proprietario";
 import {
   useProprietario,
   todosEventosDoCarro,
   useCarro,
   useManutencaoDoCarro,
+  useFinanceiroPorVeiculo,
 } from "@/lib/store-proprietario";
+import { FiltroBar } from "@/components/FiltroBar";
 
 export const Route = createFileRoute("/proprietario/frota/$carroId")({
   loader: ({ params }) => ({ carroId: params.carroId }),
@@ -33,12 +36,14 @@ type Aba = "geral" | "timeline" | "documentos" | "manutencao" | "contratos" | "c
 
 const abas: { key: Aba; label: string }[] = [
   { key: "geral", label: "Visão geral" },
-  { key: "timeline", label: "Linha do tempo" },
+  { key: "timeline", label: "Histórico" },
   { key: "documentos", label: "Documentos" },
   { key: "manutencao", label: "Manutenção" },
   { key: "contratos", label: "Contratos" },
   { key: "checklist", label: "Checklist" },
 ];
+
+type AdicionarTipo = null | "manutencao" | "custo" | "observacao" | "lembrete";
 
 function Passaporte() {
   const { carroId } = Route.useLoaderData();
@@ -47,7 +52,10 @@ function Passaporte() {
   const extras = useProprietario((s) => s.eventosExtras);
   const contratos = useProprietario((s) => s.contratos);
   const anuncio = useProprietario((s) => s.anuncios[carroId]);
-  const addEvento = useProprietario((s) => s.addEvento);
+  const lembretesVeiculo = useProprietario((s) => s.lembretesVeiculo);
+  const financeiro = useFinanceiroPorVeiculo();
+
+  const [adicionar, setAdicionar] = useState<AdicionarTipo>(null);
 
   if (!c) throw notFound();
 
@@ -55,7 +63,8 @@ function Passaporte() {
   const docs = documentosMock.filter((d) => d.carroId === c.id);
   const manutencao = useManutencaoDoCarro(c.id);
   const contratosVeiculo = contratos.filter((ct) => ct.carroId === c.id);
-  const fin = financeiroPorVeiculo.find((f) => f.carroId === c.id) ?? { receita: 0, custos: 0 };
+  const fin = financeiro.find((f) => f.carroId === c.id) ?? { receita: 0, custos: 0 };
+  const meusLembretes = lembretesVeiculo.filter((l) => l.carroId === c.id && !l.feito);
 
   return (
     <div className="mx-auto min-h-screen max-w-screen-sm bg-background pb-10">
@@ -82,6 +91,10 @@ function Passaporte() {
           <Kpi label="Lucro" value={fmtBRL(fin.receita - fin.custos)} tone={fin.receita - fin.custos >= 0 ? "success" : "danger"} />
         </div>
 
+        <div className="mt-4">
+          <AdicionarMenu onSelect={setAdicionar} />
+        </div>
+
         <div className="mt-5 -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
           {abas.map((a) => (
             <button
@@ -99,8 +112,10 @@ function Passaporte() {
         <div className="mt-4">
           {aba === "geral" && (
             <div className="flex flex-col gap-3">
+              <ResumoCarro eventos={eventos} contratos={contratosVeiculo.length} custos={fin.custos} />
               <AnuncioBloco carroId={c.id} sugerido={{ diaria: c.diaria, mensal: c.mensal, caucao: c.caucao }} />
               <KmBloco carroId={c.id} kmAtual={c.km} />
+              {meusLembretes.length > 0 && <LembretesBloco lembretes={meusLembretes} />}
               <Info k="Marca / Modelo" v={`${c.marca} ${c.modelo}`} />
               <Info k="Ano" v={String(c.ano)} />
               <Info k="Placa" v={c.placa} />
@@ -111,42 +126,7 @@ function Passaporte() {
             </div>
           )}
 
-          {aba === "timeline" && (
-            <>
-              <Button
-                size="sm"
-                variant="outline"
-                className="mb-3 w-full rounded-xl"
-                onClick={() => {
-                  addEvento({ carroId: c.id, tipo: "outro", titulo: "Anotação manual", data: new Date().toISOString().slice(0, 10) });
-                  toast.success("Evento adicionado à linha do tempo");
-                }}
-              >
-                <Plus className="mr-2 h-4 w-4" /> Adicionar evento
-              </Button>
-              <ol className="relative border-l border-border pl-5">
-                {eventos.map((e) => (
-                  <li key={e.id} className="mb-4">
-                    <span className="absolute -left-3 grid h-6 w-6 place-items-center rounded-full bg-card text-sm shadow-card ring-1 ring-border">
-                      {eventoIcone(e.tipo)}
-                    </span>
-                    <div className="rounded-2xl border border-border bg-card p-3 shadow-card">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="truncate font-semibold">{e.titulo}</div>
-                        <div className="shrink-0 text-[10px] uppercase text-muted-foreground">{fmtData(e.data)}</div>
-                      </div>
-                      <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
-                        {e.km && <span>{e.km.toLocaleString("pt-BR")} km</span>}
-                        {e.valor && <span>{fmtBRL(e.valor)}</span>}
-                        {e.origemKm && <span className="text-[10px] uppercase">via {e.origemKm}</span>}
-                      </div>
-                      {e.descricao && <p className="mt-1 text-xs text-muted-foreground">{e.descricao}</p>}
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </>
-          )}
+          {aba === "timeline" && <TimelinePanel eventos={eventos} />}
 
           {aba === "documentos" && (
             <div className="flex flex-col gap-2">
@@ -169,15 +149,7 @@ function Passaporte() {
             </div>
           )}
 
-          {aba === "manutencao" && (
-            <div className="flex flex-col gap-2">
-              <RegistrarManutencaoBloco carroId={c.id} kmAtual={c.km} />
-              {manutencao.map((m) => (
-                <ItemManutencaoCard key={m.id} m={m} kmAtual={c.km} />
-              ))}
-              {manutencao.length === 0 && <p className="text-sm text-muted-foreground">Plano de manutenção não configurado.</p>}
-            </div>
-          )}
+          {aba === "manutencao" && <ManutencaoPanel carroId={c.id} kmAtual={c.km} itens={manutencao} onNova={() => setAdicionar("manutencao")} />}
 
           {aba === "contratos" && (
             <div className="flex flex-col gap-2">
@@ -215,9 +187,384 @@ function Passaporte() {
           )}
         </div>
       </div>
+
+      {adicionar && (
+        <AdicionarModal
+          tipo={adicionar}
+          carroId={c.id}
+          kmAtual={c.km}
+          onClose={() => setAdicionar(null)}
+        />
+      )}
     </div>
   );
 }
+
+// -------- Novos componentes --------
+
+function AdicionarMenu({ onSelect }: { onSelect: (t: Exclude<AdicionarTipo, null>) => void }) {
+  const items = [
+    { t: "manutencao" as const, label: "Manutenção", icon: <Wrench className="h-4 w-4" /> },
+    { t: "custo" as const, label: "Custo", icon: <Receipt className="h-4 w-4" /> },
+    { t: "observacao" as const, label: "Observação", icon: <StickyNote className="h-4 w-4" /> },
+    { t: "lembrete" as const, label: "Lembrete", icon: <Bell className="h-4 w-4" /> },
+  ];
+  return (
+    <div className="grid grid-cols-4 gap-2">
+      {items.map((i) => (
+        <button
+          key={i.t}
+          onClick={() => onSelect(i.t)}
+          className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-card p-2.5 shadow-card active:scale-95"
+        >
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">{i.icon}</span>
+          <span className="text-[10px] font-semibold uppercase">{i.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ResumoCarro({ eventos, contratos, custos }: { eventos: ReturnType<typeof todosEventosDoCarro>; contratos: number; custos: number }) {
+  const manuts = eventos.filter((e) => e.tipo === "troca-oleo" || e.tipo === "troca-pneu" || e.tipo === "revisao").length;
+  const ultima = eventos.find((e) => e.tipo === "troca-oleo" || e.tipo === "troca-pneu" || e.tipo === "revisao");
+  const motoristas = new Set(
+    eventos.filter((e) => e.tipo === "locacao").map((e) => e.titulo.replace(/^Alugado para\s*/i, ""))
+  );
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+      <div className="font-street text-sm font-black uppercase tracking-wider text-muted-foreground">Resumo do carro</div>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+        <ResumoItem k="Eventos no histórico" v={String(eventos.length)} />
+        <ResumoItem k="Manutenções" v={String(manuts)} />
+        <ResumoItem k="Contratos" v={String(contratos)} />
+        <ResumoItem k="Custos acumulados" v={fmtBRL(custos)} />
+        <ResumoItem k="Última manutenção" v={ultima ? fmtData(ultima.data) : "—"} />
+        <ResumoItem k="Motoristas passados" v={String(motoristas.size)} />
+      </div>
+    </div>
+  );
+}
+
+function ResumoItem({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-background p-2">
+      <div className="text-[10px] uppercase text-muted-foreground">{k}</div>
+      <div className="font-street text-sm font-black">{v}</div>
+    </div>
+  );
+}
+
+function LembretesBloco({ lembretes }: { lembretes: Lembrete[] }) {
+  const concluir = useProprietario((s) => s.concluirLembrete);
+  const remover = useProprietario((s) => s.removerLembrete);
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+      <div className="flex items-center gap-2">
+        <Bell className="h-4 w-4 text-primary" />
+        <div className="font-street text-sm font-black uppercase">Lembretes ativos</div>
+      </div>
+      <div className="mt-3 flex flex-col gap-2">
+        {lembretes.map((l) => (
+          <div key={l.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-xl border border-border bg-background p-2.5">
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold">{l.titulo}</div>
+              <div className="text-[10px] uppercase text-muted-foreground">
+                {fmtData(l.dataAlvo)}
+                {l.recorrencia !== "nenhuma" && ` · ${l.recorrencia}`}
+              </div>
+            </div>
+            <button onClick={() => { concluir(l.id); toast.success("Lembrete concluído"); }} className="grid h-8 w-8 place-items-center rounded-lg bg-success/15 text-success">
+              <Check className="h-4 w-4" />
+            </button>
+            <button onClick={() => remover(l.id)} className="grid h-8 w-8 place-items-center rounded-lg bg-muted text-muted-foreground">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TimelinePanel({ eventos }: { eventos: ReturnType<typeof todosEventosDoCarro> }) {
+  const [tipo, setTipo] = useState<string>("todos");
+  const [periodo, setPeriodo] = useState<string>("tudo");
+  const [busca, setBusca] = useState("");
+
+  const filtrados = useMemo(() => {
+    const hoje = new Date();
+    const cutoff: Record<string, number | null> = { "30d": 30, "90d": 90, ano: 365, tudo: null };
+    const dias = cutoff[periodo];
+    return eventos.filter((e) => {
+      if (tipo !== "todos") {
+        if (tipo === "manutencao" && !["troca-oleo", "troca-pneu", "revisao"].includes(e.tipo)) return false;
+        if (tipo !== "manutencao" && e.tipo !== tipo) return false;
+      }
+      if (dias) {
+        const d = new Date(e.data);
+        const diff = (hoje.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
+        if (diff > dias) return false;
+      }
+      if (busca && !e.titulo.toLowerCase().includes(busca.toLowerCase())) return false;
+      return true;
+    });
+  }, [eventos, tipo, periodo, busca]);
+
+  const ativos = (tipo !== "todos" ? 1 : 0) + (periodo !== "tudo" ? 1 : 0);
+
+  return (
+    <div className="space-y-3">
+      <FiltroBar
+        busca={busca}
+        onBusca={setBusca}
+        buscaPlaceholder="Buscar no histórico..."
+        ativos={ativos}
+        onLimpar={() => { setTipo("todos"); setPeriodo("tudo"); setBusca(""); }}
+        chips={[
+          {
+            key: "tipo", label: "Tipo", value: tipo, onChange: setTipo,
+            options: [
+              { value: "todos", label: "Todos" },
+              { value: "manutencao", label: "Manutenção" },
+              { value: "custo", label: "Custo" },
+              { value: "km", label: "KM" },
+              { value: "locacao", label: "Locação" },
+              { value: "multa", label: "Multa" },
+              { value: "documento", label: "Documento" },
+              { value: "observacao", label: "Observação" },
+            ],
+          },
+          {
+            key: "periodo", label: "Período", value: periodo, onChange: setPeriodo,
+            options: [
+              { value: "30d", label: "30 dias" },
+              { value: "90d", label: "90 dias" },
+              { value: "ano", label: "1 ano" },
+              { value: "tudo", label: "Tudo" },
+            ],
+          },
+        ]}
+      />
+      <ol className="relative border-l border-border pl-5">
+        {filtrados.map((e) => (
+          <li key={e.id} className="mb-4">
+            <span className="absolute -left-3 grid h-6 w-6 place-items-center rounded-full bg-card text-sm shadow-card ring-1 ring-border">
+              {eventoIcone(e.tipo)}
+            </span>
+            <div className="rounded-2xl border border-border bg-card p-3 shadow-card">
+              <div className="flex items-center justify-between gap-2">
+                <div className="truncate font-semibold">{e.titulo}</div>
+                <div className="shrink-0 text-[10px] uppercase text-muted-foreground">{fmtData(e.data)}</div>
+              </div>
+              <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
+                {e.km && <span>{e.km.toLocaleString("pt-BR")} km</span>}
+                {e.valor !== undefined && <span>{fmtBRL(e.valor)}</span>}
+                {e.categoria && <span className="text-[10px] uppercase">{e.categoria}</span>}
+                {e.origemKm && <span className="text-[10px] uppercase">via {e.origemKm}</span>}
+              </div>
+              {e.descricao && <p className="mt-1 text-xs text-muted-foreground">{e.descricao}</p>}
+            </div>
+          </li>
+        ))}
+        {filtrados.length === 0 && (
+          <p className="ml-2 text-sm text-muted-foreground">Nenhum evento encontrado.</p>
+        )}
+      </ol>
+    </div>
+  );
+}
+
+function ManutencaoPanel({ carroId: _cid, kmAtual, itens, onNova }: { carroId: string; kmAtual: number; itens: ItemManutencao[]; onNova: () => void }) {
+  const [status, setStatus] = useState<string>("todos");
+
+  const filtradas = itens.filter((m) => {
+    if (status === "todos") return true;
+    const restante = m.proximoKm ? m.proximoKm - kmAtual : null;
+    if (status === "vencida") return restante !== null && restante < 0;
+    if (status === "proxima") return restante !== null && restante >= 0 && restante < 1000;
+    if (status === "emdia") return restante === null || restante >= 1000;
+    return true;
+  });
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Button size="sm" variant="outline" className="w-full rounded-xl" onClick={onNova}>
+        <Plus className="mr-2 h-4 w-4" /> Registrar manutenção
+      </Button>
+      <FiltroBar
+        ativos={status !== "todos" ? 1 : 0}
+        onLimpar={() => setStatus("todos")}
+        chips={[
+          {
+            key: "status", label: "Status", value: status, onChange: setStatus,
+            options: [
+              { value: "todos", label: "Todos" },
+              { value: "vencida", label: "Vencida" },
+              { value: "proxima", label: "Próxima" },
+              { value: "emdia", label: "Em dia" },
+            ],
+          },
+        ]}
+      />
+      {filtradas.map((m) => (
+        <ItemManutencaoCard key={m.id} m={m} kmAtual={kmAtual} />
+      ))}
+      {filtradas.length === 0 && <p className="text-sm text-muted-foreground">Nenhum item neste filtro.</p>}
+    </div>
+  );
+}
+
+// -------- Modais unificados de adicionar --------
+
+function AdicionarModal({ tipo, carroId, kmAtual, onClose }: { tipo: Exclude<AdicionarTipo, null>; carroId: string; kmAtual: number; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end bg-black/50 sm:items-center sm:justify-center" onClick={onClose}>
+      <div
+        className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-border bg-background p-5 shadow-glow sm:rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-street text-lg font-black uppercase">
+            {tipo === "manutencao" && "Nova manutenção"}
+            {tipo === "custo" && "Novo custo"}
+            {tipo === "observacao" && "Nova observação"}
+            {tipo === "lembrete" && "Novo lembrete"}
+          </h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg bg-muted"><X className="h-4 w-4" /></button>
+        </div>
+        {tipo === "manutencao" && <ManutencaoForm carroId={carroId} kmAtual={kmAtual} onDone={onClose} />}
+        {tipo === "custo" && <CustoForm carroId={carroId} onDone={onClose} />}
+        {tipo === "observacao" && <ObservacaoForm carroId={carroId} onDone={onClose} />}
+        {tipo === "lembrete" && <LembreteForm carroId={carroId} onDone={onClose} />}
+      </div>
+    </div>
+  );
+}
+
+function ManutencaoForm({ carroId, kmAtual, onDone }: { carroId: string; kmAtual: number; onDone: () => void }) {
+  const registrar = useProprietario((s) => s.registrarManutencao);
+  const [item, setItem] = useState<ItemManutencao["item"]>("Óleo");
+  const [km, setKm] = useState(kmAtual);
+  const [data, setData] = useState(new Date().toISOString().slice(0, 10));
+  const [valor, setValor] = useState(180);
+  const [obs, setObs] = useState("");
+  return (
+    <div className="space-y-3">
+      <div>
+        <Label className="text-xs">Item</Label>
+        <select value={item} onChange={(e) => setItem(e.target.value as ItemManutencao["item"])} className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm">
+          {["Óleo", "Filtro de óleo", "Filtro de ar", "Freios", "Pneus", "Alinhamento", "Balanceamento", "Correia", "Fluídos"].map((o) => (
+            <option key={o} value={o}>{o}</option>
+          ))}
+        </select>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <div><Label className="text-xs">KM</Label><Input className="mt-1" type="number" value={km} onChange={(e) => setKm(+e.target.value)} /></div>
+        <div><Label className="text-xs">Data</Label><Input className="mt-1" type="date" value={data} onChange={(e) => setData(e.target.value)} /></div>
+        <div><Label className="text-xs">Valor R$</Label><Input className="mt-1" type="number" value={valor} onChange={(e) => setValor(+e.target.value)} /></div>
+      </div>
+      <div><Label className="text-xs">Observações</Label><Textarea rows={2} className="mt-1" value={obs} onChange={(e) => setObs(e.target.value)} /></div>
+      <Button
+        className="w-full rounded-xl gradient-primary text-primary-foreground"
+        onClick={() => { registrar({ carroId, item, km, data, valor, observacoes: obs }); toast.success("Manutenção registrada"); onDone(); }}
+      >Salvar</Button>
+    </div>
+  );
+}
+
+function CustoForm({ carroId, onDone }: { carroId: string; onDone: () => void }) {
+  const registrar = useProprietario((s) => s.registrarCustoAvulso);
+  const [descricao, setDescricao] = useState("");
+  const [categoria, setCategoria] = useState<CustoCategoria>("outro");
+  const [valor, setValor] = useState(0);
+  const [data, setData] = useState(new Date().toISOString().slice(0, 10));
+  return (
+    <div className="space-y-3">
+      <div><Label className="text-xs">Descrição</Label><Input className="mt-1" value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Lavagem completa..." /></div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label className="text-xs">Categoria</Label>
+          <select value={categoria} onChange={(e) => setCategoria(e.target.value as CustoCategoria)} className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm">
+            <option value="lavagem">Lavagem</option>
+            <option value="multa">Multa</option>
+            <option value="estacionamento">Estacionamento</option>
+            <option value="ipva">IPVA</option>
+            <option value="combustivel">Combustível</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div><Label className="text-xs">Valor R$</Label><Input className="mt-1" type="number" value={valor} onChange={(e) => setValor(+e.target.value)} /></div>
+      </div>
+      <div><Label className="text-xs">Data</Label><Input className="mt-1" type="date" value={data} onChange={(e) => setData(e.target.value)} /></div>
+      <Button
+        className="w-full rounded-xl gradient-primary text-primary-foreground"
+        onClick={() => {
+          if (!descricao || !valor) { toast.error("Preencha descrição e valor"); return; }
+          registrar({ carroId, descricao, categoria, valor, data });
+          toast.success("Custo registrado");
+          onDone();
+        }}
+      >Salvar custo</Button>
+    </div>
+  );
+}
+
+function ObservacaoForm({ carroId, onDone }: { carroId: string; onDone: () => void }) {
+  const registrar = useProprietario((s) => s.registrarObservacao);
+  const [texto, setTexto] = useState("");
+  const [data, setData] = useState(new Date().toISOString().slice(0, 10));
+  return (
+    <div className="space-y-3">
+      <div><Label className="text-xs">Observação</Label><Textarea rows={4} className="mt-1" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Anote qualquer detalhe do carro..." /></div>
+      <div><Label className="text-xs">Data</Label><Input className="mt-1" type="date" value={data} onChange={(e) => setData(e.target.value)} /></div>
+      <Button
+        className="w-full rounded-xl gradient-primary text-primary-foreground"
+        onClick={() => {
+          if (!texto) { toast.error("Escreva uma observação"); return; }
+          registrar({ carroId, texto, data });
+          toast.success("Observação salva");
+          onDone();
+        }}
+      >Salvar</Button>
+    </div>
+  );
+}
+
+function LembreteForm({ carroId, onDone }: { carroId: string; onDone: () => void }) {
+  const criar = useProprietario((s) => s.criarLembrete);
+  const [titulo, setTitulo] = useState("");
+  const [dataAlvo, setDataAlvo] = useState(new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
+  const [recorrencia, setRecorrencia] = useState<Lembrete["recorrencia"]>("nenhuma");
+  return (
+    <div className="space-y-3">
+      <div><Label className="text-xs">Título</Label><Input className="mt-1" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Renovar seguro..." /></div>
+      <div className="grid grid-cols-2 gap-2">
+        <div><Label className="text-xs">Data</Label><Input className="mt-1" type="date" value={dataAlvo} onChange={(e) => setDataAlvo(e.target.value)} /></div>
+        <div>
+          <Label className="text-xs">Recorrência</Label>
+          <select value={recorrencia} onChange={(e) => setRecorrencia(e.target.value as Lembrete["recorrencia"])} className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm">
+            <option value="nenhuma">Nenhuma</option>
+            <option value="mensal">Mensal</option>
+            <option value="anual">Anual</option>
+          </select>
+        </div>
+      </div>
+      <Button
+        className="w-full rounded-xl gradient-primary text-primary-foreground"
+        onClick={() => {
+          if (!titulo) { toast.error("Dê um título"); return; }
+          criar({ carroId, titulo, dataAlvo, recorrencia });
+          toast.success("Lembrete criado");
+          onDone();
+        }}
+      >Criar lembrete</Button>
+    </div>
+  );
+}
+
+// -------- Componentes reutilizados --------
 
 function AnuncioBloco({ carroId, sugerido }: { carroId: string; sugerido: { diaria: number; mensal: number; caucao: number } }) {
   const anuncio = useProprietario((s) => s.anuncios[carroId]);
@@ -375,68 +722,6 @@ function KmBloco({ carroId, kmAtual }: { carroId: string; kmAtual: number }) {
   );
 }
 
-function RegistrarManutencaoBloco({ carroId, kmAtual }: { carroId: string; kmAtual: number }) {
-  const registrar = useProprietario((s) => s.registrarManutencao);
-  const [aberto, setAberto] = useState(false);
-  const [item, setItem] = useState<ItemManutencao["item"]>("Óleo");
-  const [km, setKm] = useState(kmAtual);
-  const [data, setData] = useState(new Date().toISOString().slice(0, 10));
-  const [valor, setValor] = useState(180);
-  const [obs, setObs] = useState("");
-
-  if (!aberto) {
-    return (
-      <Button size="sm" variant="outline" className="w-full rounded-xl" onClick={() => setAberto(true)}>
-        <Plus className="mr-2 h-4 w-4" /> Registrar manutenção
-      </Button>
-    );
-  }
-  return (
-    <div className="space-y-3 rounded-2xl border border-primary/40 bg-primary/5 p-4">
-      <div className="font-street text-sm font-black uppercase">Nova manutenção</div>
-      <div>
-        <Label className="text-xs">Item</Label>
-        <select value={item} onChange={(e) => setItem(e.target.value as ItemManutencao["item"])} className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm">
-          {["Óleo", "Filtro de óleo", "Filtro de ar", "Freios", "Pneus", "Alinhamento", "Balanceamento", "Correia", "Fluídos"].map((o) => (
-            <option key={o} value={o}>{o}</option>
-          ))}
-        </select>
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        <div>
-          <Label className="text-xs">KM</Label>
-          <Input className="mt-1" type="number" value={km} onChange={(e) => setKm(+e.target.value)} />
-        </div>
-        <div>
-          <Label className="text-xs">Data</Label>
-          <Input className="mt-1" type="date" value={data} onChange={(e) => setData(e.target.value)} />
-        </div>
-        <div>
-          <Label className="text-xs">Valor R$</Label>
-          <Input className="mt-1" type="number" value={valor} onChange={(e) => setValor(+e.target.value)} />
-        </div>
-      </div>
-      <div>
-        <Label className="text-xs">Observações</Label>
-        <Textarea rows={2} className="mt-1" value={obs} onChange={(e) => setObs(e.target.value)} />
-      </div>
-      <div className="flex gap-2">
-        <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setAberto(false)}>Cancelar</Button>
-        <Button
-          className="flex-1 rounded-xl gradient-primary text-primary-foreground"
-          onClick={() => {
-            registrar({ carroId, item, km, data, valor, observacoes: obs });
-            toast.success("Manutenção registrada");
-            setAberto(false);
-          }}
-        >
-          Salvar
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 function ItemManutencaoCard({ m, kmAtual }: { m: ItemManutencao; kmAtual: number }) {
   const restante = m.proximoKm ? m.proximoKm - kmAtual : null;
   const alerta = restante !== null && restante < 1000;
@@ -527,5 +812,4 @@ function Field({ k, v }: { k: string; v: string }) {
   );
 }
 
-// silences unused warning for retained type import in older linters
 export type _KeepEventoTipo = EventoTipo;
