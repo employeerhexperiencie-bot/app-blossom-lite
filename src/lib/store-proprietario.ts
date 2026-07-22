@@ -247,6 +247,43 @@ export const useProprietario = create<State>()(
         return id;
       },
 
+      registrarCustoAvulso: ({ carroId, descricao, categoria, valor, data }) => {
+        get().addEvento({
+          carroId,
+          tipo: "custo",
+          titulo: descricao,
+          data,
+          valor,
+          categoria,
+        });
+      },
+      registrarObservacao: ({ carroId, texto, data }) => {
+        get().addEvento({
+          carroId,
+          tipo: "observacao",
+          titulo: texto.slice(0, 60),
+          descricao: texto.length > 60 ? texto : undefined,
+          data,
+        });
+      },
+
+      criarLembrete: (l) => {
+        const id = `lb${Date.now()}`;
+        const novo: Lembrete = { ...l, id, feito: false, criadoEm: new Date().toISOString().slice(0, 10) };
+        set({ lembretesVeiculo: [novo, ...get().lembretesVeiculo] });
+        return id;
+      },
+      concluirLembrete: (id) =>
+        set({
+          lembretesVeiculo: get().lembretesVeiculo.map((l) =>
+            l.id === id ? { ...l, feito: true } : l
+          ),
+        }),
+      removerLembrete: (id) =>
+        set({ lembretesVeiculo: get().lembretesVeiculo.filter((l) => l.id !== id) }),
+
+
+
       criarSolicitacaoMock: (carroId) => {
         const id = `sl${Date.now()}`;
         const candidatos = motoristasCandidatos;
