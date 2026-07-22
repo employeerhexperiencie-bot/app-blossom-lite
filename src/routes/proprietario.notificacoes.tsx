@@ -31,14 +31,10 @@ function Notificacoes() {
       <div className="flex flex-col gap-2">
         {notificacoes.map((n) => {
           const lida = lidas.includes(n.id);
-          const linkTo = n.solicitacaoId
-            ? { to: "/proprietario/solicitacoes/$id", params: { id: n.solicitacaoId } }
-            : n.contratoId
-              ? { to: "/proprietario/contratos/$id", params: { id: n.contratoId } }
-              : n.carroId
-                ? { to: "/proprietario/frota/$carroId", params: { carroId: n.carroId } }
-                : null;
-
+          const className = `grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border p-3 text-left shadow-card ${
+            lida ? "bg-card/60 opacity-70" : "bg-card"
+          }`;
+          const hasLink = !!(n.solicitacaoId || n.contratoId || n.carroId);
           const body = (
             <>
               <span className={`grid h-9 w-9 place-items-center rounded-xl ${toneOf(n.urgencia)}`}>{iconOf(n.tipo)}</span>
@@ -48,23 +44,28 @@ function Notificacoes() {
               </div>
               <div className="flex flex-col items-end gap-1">
                 <span className="text-[10px] uppercase text-muted-foreground">{n.data}</span>
-                {linkTo && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+                {hasLink && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
               </div>
             </>
           );
 
-          const className = `grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border p-3 text-left shadow-card ${
-            lida ? "bg-card/60 opacity-70" : "bg-card"
-          }`;
-
-          if (linkTo) {
+          if (n.solicitacaoId) {
             return (
-              <Link
-                key={n.id}
-                {...(linkTo as never)}
-                onClick={() => marcarLida(n.id)}
-                className={className}
-              >
+              <Link key={n.id} to="/proprietario/solicitacoes/$id" params={{ id: n.solicitacaoId }} onClick={() => marcarLida(n.id)} className={className}>
+                {body}
+              </Link>
+            );
+          }
+          if (n.contratoId) {
+            return (
+              <Link key={n.id} to="/proprietario/contratos/$id" params={{ id: n.contratoId }} onClick={() => marcarLida(n.id)} className={className}>
+                {body}
+              </Link>
+            );
+          }
+          if (n.carroId) {
+            return (
+              <Link key={n.id} to="/proprietario/frota/$carroId" params={{ carroId: n.carroId }} onClick={() => marcarLida(n.id)} className={className}>
                 {body}
               </Link>
             );

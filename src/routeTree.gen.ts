@@ -27,6 +27,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProprietarioPerfilRouteImport } from './routes/proprietario.perfil'
 import { Route as ProprietarioNotificacoesRouteImport } from './routes/proprietario.notificacoes'
 import { Route as ProprietarioMotoristasRouteImport } from './routes/proprietario.motoristas'
+import { Route as ProprietarioMarketplaceRouteImport } from './routes/proprietario.marketplace'
 import { Route as ProprietarioFinanceiroRouteImport } from './routes/proprietario.financeiro'
 import { Route as ProprietarioAgendaRouteImport } from './routes/proprietario.agenda'
 import { Route as PassageiroPerfilRouteImport } from './routes/passageiro.perfil'
@@ -49,6 +50,7 @@ import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as ProprietarioFrotaIndexRouteImport } from './routes/proprietario.frota.index'
 import { Route as ProprietarioContratosIndexRouteImport } from './routes/proprietario.contratos.index'
+import { Route as ProprietarioSolicitacoesIdRouteImport } from './routes/proprietario.solicitacoes.$id'
 import { Route as ProprietarioFrotaNovoRouteImport } from './routes/proprietario.frota.novo'
 import { Route as ProprietarioFrotaCarroIdRouteImport } from './routes/proprietario.frota.$carroId'
 import { Route as ProprietarioContratosNovoRouteImport } from './routes/proprietario.contratos.novo'
@@ -146,6 +148,11 @@ const ProprietarioNotificacoesRoute =
 const ProprietarioMotoristasRoute = ProprietarioMotoristasRouteImport.update({
   id: '/motoristas',
   path: '/motoristas',
+  getParentRoute: () => ProprietarioRoute,
+} as any)
+const ProprietarioMarketplaceRoute = ProprietarioMarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
   getParentRoute: () => ProprietarioRoute,
 } as any)
 const ProprietarioFinanceiroRoute = ProprietarioFinanceiroRouteImport.update({
@@ -259,6 +266,12 @@ const ProprietarioContratosIndexRoute =
     path: '/contratos/',
     getParentRoute: () => ProprietarioRoute,
   } as any)
+const ProprietarioSolicitacoesIdRoute =
+  ProprietarioSolicitacoesIdRouteImport.update({
+    id: '/solicitacoes/$id',
+    path: '/solicitacoes/$id',
+    getParentRoute: () => ProprietarioRoute,
+  } as any)
 const ProprietarioFrotaNovoRoute = ProprietarioFrotaNovoRouteImport.update({
   id: '/frota/novo',
   path: '/frota/novo',
@@ -329,6 +342,7 @@ export interface FileRoutesByFullPath {
   '/passageiro/perfil': typeof PassageiroPerfilRoute
   '/proprietario/agenda': typeof ProprietarioAgendaRoute
   '/proprietario/financeiro': typeof ProprietarioFinanceiroRoute
+  '/proprietario/marketplace': typeof ProprietarioMarketplaceRoute
   '/proprietario/motoristas': typeof ProprietarioMotoristasRoute
   '/proprietario/notificacoes': typeof ProprietarioNotificacoesRoute
   '/proprietario/perfil': typeof ProprietarioPerfilRoute
@@ -345,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
+  '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
 }
@@ -372,6 +387,7 @@ export interface FileRoutesByTo {
   '/passageiro/perfil': typeof PassageiroPerfilRoute
   '/proprietario/agenda': typeof ProprietarioAgendaRoute
   '/proprietario/financeiro': typeof ProprietarioFinanceiroRoute
+  '/proprietario/marketplace': typeof ProprietarioMarketplaceRoute
   '/proprietario/motoristas': typeof ProprietarioMotoristasRoute
   '/proprietario/notificacoes': typeof ProprietarioNotificacoesRoute
   '/proprietario/perfil': typeof ProprietarioPerfilRoute
@@ -388,6 +404,7 @@ export interface FileRoutesByTo {
   '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
+  '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
   '/proprietario/contratos': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota': typeof ProprietarioFrotaIndexRoute
 }
@@ -422,6 +439,7 @@ export interface FileRoutesById {
   '/passageiro/perfil': typeof PassageiroPerfilRoute
   '/proprietario/agenda': typeof ProprietarioAgendaRoute
   '/proprietario/financeiro': typeof ProprietarioFinanceiroRoute
+  '/proprietario/marketplace': typeof ProprietarioMarketplaceRoute
   '/proprietario/motoristas': typeof ProprietarioMotoristasRoute
   '/proprietario/notificacoes': typeof ProprietarioNotificacoesRoute
   '/proprietario/perfil': typeof ProprietarioPerfilRoute
@@ -438,6 +456,7 @@ export interface FileRoutesById {
   '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
+  '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
 }
@@ -473,6 +492,7 @@ export interface FileRouteTypes {
     | '/passageiro/perfil'
     | '/proprietario/agenda'
     | '/proprietario/financeiro'
+    | '/proprietario/marketplace'
     | '/proprietario/motoristas'
     | '/proprietario/notificacoes'
     | '/proprietario/perfil'
@@ -489,6 +509,7 @@ export interface FileRouteTypes {
     | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
+    | '/proprietario/solicitacoes/$id'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
   fileRoutesByTo: FileRoutesByTo
@@ -516,6 +537,7 @@ export interface FileRouteTypes {
     | '/passageiro/perfil'
     | '/proprietario/agenda'
     | '/proprietario/financeiro'
+    | '/proprietario/marketplace'
     | '/proprietario/motoristas'
     | '/proprietario/notificacoes'
     | '/proprietario/perfil'
@@ -532,6 +554,7 @@ export interface FileRouteTypes {
     | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
+    | '/proprietario/solicitacoes/$id'
     | '/proprietario/contratos'
     | '/proprietario/frota'
   id:
@@ -565,6 +588,7 @@ export interface FileRouteTypes {
     | '/passageiro/perfil'
     | '/proprietario/agenda'
     | '/proprietario/financeiro'
+    | '/proprietario/marketplace'
     | '/proprietario/motoristas'
     | '/proprietario/notificacoes'
     | '/proprietario/perfil'
@@ -581,6 +605,7 @@ export interface FileRouteTypes {
     | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
+    | '/proprietario/solicitacoes/$id'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
   fileRoutesById: FileRoutesById
@@ -723,6 +748,13 @@ declare module '@tanstack/react-router' {
       path: '/motoristas'
       fullPath: '/proprietario/motoristas'
       preLoaderRoute: typeof ProprietarioMotoristasRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/proprietario/marketplace': {
+      id: '/proprietario/marketplace'
+      path: '/marketplace'
+      fullPath: '/proprietario/marketplace'
+      preLoaderRoute: typeof ProprietarioMarketplaceRouteImport
       parentRoute: typeof ProprietarioRoute
     }
     '/proprietario/financeiro': {
@@ -877,6 +909,13 @@ declare module '@tanstack/react-router' {
       path: '/contratos'
       fullPath: '/proprietario/contratos/'
       preLoaderRoute: typeof ProprietarioContratosIndexRouteImport
+      parentRoute: typeof ProprietarioRoute
+    }
+    '/proprietario/solicitacoes/$id': {
+      id: '/proprietario/solicitacoes/$id'
+      path: '/solicitacoes/$id'
+      fullPath: '/proprietario/solicitacoes/$id'
+      preLoaderRoute: typeof ProprietarioSolicitacoesIdRouteImport
       parentRoute: typeof ProprietarioRoute
     }
     '/proprietario/frota/novo': {
@@ -1058,6 +1097,7 @@ const PassageiroRouteWithChildren = PassageiroRoute._addFileChildren(
 interface ProprietarioRouteChildren {
   ProprietarioAgendaRoute: typeof ProprietarioAgendaRoute
   ProprietarioFinanceiroRoute: typeof ProprietarioFinanceiroRoute
+  ProprietarioMarketplaceRoute: typeof ProprietarioMarketplaceRoute
   ProprietarioMotoristasRoute: typeof ProprietarioMotoristasRoute
   ProprietarioNotificacoesRoute: typeof ProprietarioNotificacoesRoute
   ProprietarioPerfilRoute: typeof ProprietarioPerfilRoute
@@ -1066,6 +1106,7 @@ interface ProprietarioRouteChildren {
   ProprietarioContratosNovoRoute: typeof ProprietarioContratosNovoRoute
   ProprietarioFrotaCarroIdRoute: typeof ProprietarioFrotaCarroIdRoute
   ProprietarioFrotaNovoRoute: typeof ProprietarioFrotaNovoRoute
+  ProprietarioSolicitacoesIdRoute: typeof ProprietarioSolicitacoesIdRoute
   ProprietarioContratosIndexRoute: typeof ProprietarioContratosIndexRoute
   ProprietarioFrotaIndexRoute: typeof ProprietarioFrotaIndexRoute
 }
@@ -1073,6 +1114,7 @@ interface ProprietarioRouteChildren {
 const ProprietarioRouteChildren: ProprietarioRouteChildren = {
   ProprietarioAgendaRoute: ProprietarioAgendaRoute,
   ProprietarioFinanceiroRoute: ProprietarioFinanceiroRoute,
+  ProprietarioMarketplaceRoute: ProprietarioMarketplaceRoute,
   ProprietarioMotoristasRoute: ProprietarioMotoristasRoute,
   ProprietarioNotificacoesRoute: ProprietarioNotificacoesRoute,
   ProprietarioPerfilRoute: ProprietarioPerfilRoute,
@@ -1081,6 +1123,7 @@ const ProprietarioRouteChildren: ProprietarioRouteChildren = {
   ProprietarioContratosNovoRoute: ProprietarioContratosNovoRoute,
   ProprietarioFrotaCarroIdRoute: ProprietarioFrotaCarroIdRoute,
   ProprietarioFrotaNovoRoute: ProprietarioFrotaNovoRoute,
+  ProprietarioSolicitacoesIdRoute: ProprietarioSolicitacoesIdRoute,
   ProprietarioContratosIndexRoute: ProprietarioContratosIndexRoute,
   ProprietarioFrotaIndexRoute: ProprietarioFrotaIndexRoute,
 }
