@@ -114,7 +114,7 @@ function Financeiro() {
       <PageSection className="pt-0">
         <h2 className="mb-3 font-street text-sm font-black uppercase tracking-wider text-muted-foreground">Por veículo</h2>
         <div className="flex flex-col gap-2">
-          {financeiroPorVeiculo.map((f) => {
+          {finFiltrado.map((f) => {
             const c = carros.find((x) => x.id === f.carroId);
             const lucroV = f.receita - f.custos;
             return (
