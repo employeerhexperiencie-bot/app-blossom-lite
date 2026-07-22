@@ -335,10 +335,13 @@ export function eventoIcone(tipo: EventoTipo): string {
     acidente: "💥",
     documento: "📄",
     km: "📏",
+    custo: "💸",
+    observacao: "📝",
     outro: "•",
   };
   return map[tipo];
 }
+
 
 export function fmtData(iso: string): string {
   try {
