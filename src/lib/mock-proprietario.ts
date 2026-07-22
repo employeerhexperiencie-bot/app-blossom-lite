@@ -28,7 +28,20 @@ export type EventoVeiculo = {
   km?: number;
   valor?: number;
   origemKm?: "manual" | "corrida" | "foto";
+  categoria?: CustoCategoria;
 };
+
+export type Lembrete = {
+  id: string;
+  carroId: string;
+  titulo: string;
+  descricao?: string;
+  dataAlvo: string;
+  recorrencia: "nenhuma" | "mensal" | "anual";
+  feito: boolean;
+  criadoEm: string;
+};
+
 
 export type DocStatus = "ok" | "vencendo" | "vencido";
 export type DocumentoVeiculo = {
