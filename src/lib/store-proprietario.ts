@@ -8,6 +8,7 @@ import {
   manutencaoMock,
   lembretesDefault,
   motoristasCandidatos,
+  financeiroPorVeiculo as financeiroBase,
   type Contrato,
   type Pagamento,
   type Notificacao,
@@ -16,6 +17,8 @@ import {
   type ConfigLembretes,
   type ItemManutencao,
   type SolicitacaoLocacao,
+  type Lembrete,
+  type CustoCategoria,
 } from "./mock-proprietario";
 import type { Carro } from "./mock-data";
 import { carros as carrosBase } from "./mock-data";
@@ -33,6 +36,7 @@ type State = {
   anuncios: Record<string, AnuncioLocacao>;
   lembretes: Record<string, ConfigLembretes>;
   solicitacoes: SolicitacaoLocacao[];
+  lembretesVeiculo: Lembrete[];
 
   registrarPagamento: (id: string) => void;
   registrarPagamentoDetalhado: (contratoId: string, dados: { valor: number; data: string; forma: Pagamento["forma"] }) => void;
@@ -55,13 +59,26 @@ type State = {
     valor: number;
     observacoes?: string;
   }) => void;
+  registrarCustoAvulso: (dados: {
+    carroId: string;
+    descricao: string;
+    categoria: CustoCategoria;
+    valor: number;
+    data: string;
+  }) => void;
+  registrarObservacao: (dados: { carroId: string; texto: string; data: string }) => void;
   salvarLembretes: (contratoId: string, cfg: ConfigLembretes) => void;
   criarVeiculo: (c: Omit<Carro, "id">) => string;
+
+  criarLembrete: (l: Omit<Lembrete, "id" | "feito" | "criadoEm">) => string;
+  concluirLembrete: (id: string) => void;
+  removerLembrete: (id: string) => void;
 
   criarSolicitacaoMock: (carroId: string) => string;
   aceitarSolicitacao: (id: string, valor: number, periodicidade: Contrato["periodicidade"]) => string | undefined;
   recusarSolicitacao: (id: string) => void;
 };
+
 
 export const useProprietario = create<State>()(
   persist(
@@ -78,6 +95,8 @@ export const useProprietario = create<State>()(
       anuncios: {},
       lembretes: {},
       solicitacoes: [],
+      lembretesVeiculo: [],
+
 
       registrarPagamento: (id) =>
         set({
@@ -228,6 +247,43 @@ export const useProprietario = create<State>()(
         return id;
       },
 
+      registrarCustoAvulso: ({ carroId, descricao, categoria, valor, data }) => {
+        get().addEvento({
+          carroId,
+          tipo: "custo",
+          titulo: descricao,
+          data,
+          valor,
+          categoria,
+        });
+      },
+      registrarObservacao: ({ carroId, texto, data }) => {
+        get().addEvento({
+          carroId,
+          tipo: "observacao",
+          titulo: texto.slice(0, 60),
+          descricao: texto.length > 60 ? texto : undefined,
+          data,
+        });
+      },
+
+      criarLembrete: (l) => {
+        const id = `lb${Date.now()}`;
+        const novo: Lembrete = { ...l, id, feito: false, criadoEm: new Date().toISOString().slice(0, 10) };
+        set({ lembretesVeiculo: [novo, ...get().lembretesVeiculo] });
+        return id;
+      },
+      concluirLembrete: (id) =>
+        set({
+          lembretesVeiculo: get().lembretesVeiculo.map((l) =>
+            l.id === id ? { ...l, feito: true } : l
+          ),
+        }),
+      removerLembrete: (id) =>
+        set({ lembretesVeiculo: get().lembretesVeiculo.filter((l) => l.id !== id) }),
+
+
+
       criarSolicitacaoMock: (carroId) => {
         const id = `sl${Date.now()}`;
         const candidatos = motoristasCandidatos;
@@ -284,6 +340,18 @@ export function todosEventosDoCarro(carroId: string, extras: EventoVeiculo[]): E
   const ex = extras.filter((e) => e.carroId === carroId);
   return [...ex, ...base].sort((a, b) => (a.data < b.data ? 1 : -1));
 }
+
+export function useFinanceiroPorVeiculo(): { carroId: string; receita: number; custos: number }[] {
+  const extras = useProprietario((s) => s.eventosExtras);
+  return financeiroBase.map((f) => {
+    const custosExtras = extras
+      .filter((e) => e.carroId === f.carroId && (e.tipo === "custo" || e.tipo === "troca-oleo" || e.tipo === "troca-pneu" || e.tipo === "revisao" || e.tipo === "multa" || e.tipo === "acidente"))
+      .reduce((a, e) => a + (e.valor ?? 0), 0);
+    return { ...f, custos: f.custos + custosExtras };
+  });
+}
+
+
 
 export function useCarros(): Carro[] {
   const overrides = useProprietario((s) => s.carrosOverrides);

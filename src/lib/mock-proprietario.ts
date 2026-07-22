@@ -11,7 +11,12 @@ export type EventoTipo =
   | "acidente"
   | "documento"
   | "km"
+  | "custo"
+  | "observacao"
   | "outro";
+
+export type CustoCategoria = "lavagem" | "multa" | "estacionamento" | "ipva" | "combustivel" | "outro";
+
 
 export type EventoVeiculo = {
   id: string;
@@ -23,7 +28,20 @@ export type EventoVeiculo = {
   km?: number;
   valor?: number;
   origemKm?: "manual" | "corrida" | "foto";
+  categoria?: CustoCategoria;
 };
+
+export type Lembrete = {
+  id: string;
+  carroId: string;
+  titulo: string;
+  descricao?: string;
+  dataAlvo: string;
+  recorrencia: "nenhuma" | "mensal" | "anual";
+  feito: boolean;
+  criadoEm: string;
+};
+
 
 export type DocStatus = "ok" | "vencendo" | "vencido";
 export type DocumentoVeiculo = {
@@ -317,10 +335,13 @@ export function eventoIcone(tipo: EventoTipo): string {
     acidente: "💥",
     documento: "📄",
     km: "📏",
+    custo: "💸",
+    observacao: "📝",
     outro: "•",
   };
   return map[tipo];
 }
+
 
 export function fmtData(iso: string): string {
   try {

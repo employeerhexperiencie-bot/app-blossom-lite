@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus, AlertTriangle, Megaphone } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
+import { FiltroBar } from "@/components/FiltroBar";
 import type { Carro } from "@/lib/mock-data";
 import { documentosMock } from "@/lib/mock-proprietario";
-import { useCarros, useProprietario } from "@/lib/store-proprietario";
+import { useCarros, useProprietario, useFinanceiroPorVeiculo } from "@/lib/store-proprietario";
 
 export const Route = createFileRoute("/proprietario/frota/")({
   head: () => ({ meta: [{ title: "Frota — TCHI LÉVA Proprietário" }] }),
@@ -18,16 +19,42 @@ const statusInfo: Record<Carro["status"], { label: string; cls: string }> = {
   manutencao: { label: "Manutenção", cls: "bg-warning/20 text-warning-foreground" },
 };
 
-type Filtro = "todos" | Carro["status"];
-
 function Frota() {
   const carros = useCarros();
   const anuncios = useProprietario((s) => s.anuncios);
-  const [filtro, setFiltro] = useState<Filtro>("todos");
-  const lista = filtro === "todos" ? carros : carros.filter((c) => c.status === filtro);
+  const financeiro = useFinanceiroPorVeiculo();
+
+  const [status, setStatus] = useState<string>("todos");
+  const [publicacao, setPublicacao] = useState<string>("todos");
+  const [alerta, setAlerta] = useState<string>("todos");
+  const [ordem, setOrdem] = useState<string>("novo");
+  const [busca, setBusca] = useState("");
 
   const alertaCarro = (id: string) =>
     documentosMock.some((d) => d.carroId === id && (d.status === "vencendo" || d.status === "vencido"));
+
+  const lista = useMemo(() => {
+    let l = carros.slice();
+    if (status !== "todos") l = l.filter((c) => c.status === status);
+    if (publicacao === "publicado") l = l.filter((c) => anuncios[c.id]?.publicado);
+    if (publicacao === "nao") l = l.filter((c) => !anuncios[c.id]?.publicado);
+    if (alerta === "sim") l = l.filter((c) => alertaCarro(c.id));
+    if (busca) {
+      const q = busca.toLowerCase();
+      l = l.filter((c) => `${c.marca} ${c.modelo} ${c.placa}`.toLowerCase().includes(q));
+    }
+    if (ordem === "km") l = l.sort((a, b) => b.km - a.km);
+    if (ordem === "receita") {
+      l = l.sort((a, b) => {
+        const ra = financeiro.find((f) => f.carroId === a.id)?.receita ?? 0;
+        const rb = financeiro.find((f) => f.carroId === b.id)?.receita ?? 0;
+        return rb - ra;
+      });
+    }
+    return l;
+  }, [carros, status, publicacao, alerta, busca, ordem, anuncios, financeiro]);
+
+  const ativos = (status !== "todos" ? 1 : 0) + (publicacao !== "todos" ? 1 : 0) + (alerta !== "todos" ? 1 : 0) + (ordem !== "novo" ? 1 : 0);
 
   return (
     <>
@@ -37,18 +64,48 @@ function Frota() {
             <Plus className="mr-2 h-4 w-4" /> Cadastrar carro
           </Button>
         </Link>
-        <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-          {(["todos", "disponivel", "alugado", "manutencao"] as Filtro[]).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFiltro(f)}
-              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${
-                filtro === f ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"
-              }`}
-            >
-              {f === "todos" ? "Todos" : statusInfo[f].label}
-            </button>
-          ))}
+        <div className="mt-4">
+          <FiltroBar
+            busca={busca}
+            onBusca={setBusca}
+            buscaPlaceholder="Buscar por modelo ou placa..."
+            ativos={ativos}
+            onLimpar={() => { setStatus("todos"); setPublicacao("todos"); setAlerta("todos"); setOrdem("novo"); setBusca(""); }}
+            chips={[
+              {
+                key: "status", label: "Status", value: status, onChange: setStatus,
+                options: [
+                  { value: "todos", label: "Todos" },
+                  { value: "disponivel", label: "Disponível" },
+                  { value: "alugado", label: "Alugado" },
+                  { value: "manutencao", label: "Manutenção" },
+                ],
+              },
+              {
+                key: "pub", label: "Publicação", value: publicacao, onChange: setPublicacao,
+                options: [
+                  { value: "todos", label: "Todos" },
+                  { value: "publicado", label: "Publicado" },
+                  { value: "nao", label: "Não publicado" },
+                ],
+              },
+              {
+                key: "alerta", label: "Documentos", value: alerta, onChange: setAlerta,
+                options: [
+                  { value: "todos", label: "Todos" },
+                  { value: "sim", label: "Com alerta" },
+                ],
+              },
+              {
+                key: "ord", label: "Ordenar por", value: ordem, onChange: setOrdem,
+                options: [
+                  { value: "novo", label: "Mais novo" },
+                  { value: "km", label: "Km rodado" },
+                  { value: "receita", label: "Receita" },
+                ],
+              },
+            ]}
+          />
         </div>
       </PageSection>
 
@@ -56,7 +113,7 @@ function Frota() {
         <div className="flex flex-col gap-3">
           {lista.map((c) => {
             const st = statusInfo[c.status];
-            const alerta = alertaCarro(c.id);
+            const alertaC = alertaCarro(c.id);
             const publicado = anuncios[c.id]?.publicado;
             return (
               <Link
@@ -69,10 +126,10 @@ function Frota() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate font-semibold">{c.marca} {c.modelo}</span>
-                    {alerta && <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-warning-foreground" />}
+                    {alertaC && <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-warning-foreground" />}
                     {publicado && <Megaphone className="h-3.5 w-3.5 shrink-0 text-primary" />}
                   </div>
-                  <div className="truncate text-xs text-muted-foreground">{c.placa} · R$ {c.diaria}/dia</div>
+                  <div className="truncate text-xs text-muted-foreground">{c.placa} · R$ {c.diaria}/dia · {c.km.toLocaleString("pt-BR")} km</div>
                 </div>
                 <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${st.cls}`}>{st.label}</span>
               </Link>

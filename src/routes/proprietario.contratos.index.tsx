@@ -1,23 +1,38 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { carros } from "@/lib/mock-data";
-import { fmtBRL, fmtData, type Contrato } from "@/lib/mock-proprietario";
-import { useProprietario } from "@/lib/store-proprietario";
+import { FiltroBar } from "@/components/FiltroBar";
+import { fmtBRL, fmtData } from "@/lib/mock-proprietario";
+import { useProprietario, useCarros } from "@/lib/store-proprietario";
 
 export const Route = createFileRoute("/proprietario/contratos/")({
   head: () => ({ meta: [{ title: "Contratos — TCHI LÉVA" }] }),
   component: Contratos,
 });
 
-type Filtro = "todos" | Contrato["status"];
-
 function Contratos() {
   const contratos = useProprietario((s) => s.contratos);
-  const [filtro, setFiltro] = useState<Filtro>("todos");
-  const lista = filtro === "todos" ? contratos : contratos.filter((c) => c.status === filtro);
+  const carros = useCarros();
+  const [status, setStatus] = useState<string>("todos");
+  const [carroId, setCarroId] = useState<string>("todos");
+  const [busca, setBusca] = useState("");
+  const [faixa, setFaixa] = useState<string>("todos");
+
+  const lista = useMemo(() => {
+    return contratos.filter((c) => {
+      if (status !== "todos" && c.status !== status) return false;
+      if (carroId !== "todos" && c.carroId !== carroId) return false;
+      if (busca && !c.motoristaNome.toLowerCase().includes(busca.toLowerCase())) return false;
+      if (faixa === "ate100" && c.valor > 100) return false;
+      if (faixa === "100a200" && (c.valor < 100 || c.valor > 200)) return false;
+      if (faixa === "acima200" && c.valor <= 200) return false;
+      return true;
+    });
+  }, [contratos, status, carroId, busca, faixa]);
+
+  const ativos = (status !== "todos" ? 1 : 0) + (carroId !== "todos" ? 1 : 0) + (faixa !== "todos" ? 1 : 0);
 
   return (
     <>
@@ -27,18 +42,41 @@ function Contratos() {
             <Plus className="mr-2 h-4 w-4" /> Novo contrato
           </Button>
         </Link>
-        <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-          {(["todos", "ativo", "suspenso", "encerrado"] as Filtro[]).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFiltro(f)}
-              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold capitalize ${
-                filtro === f ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
+        <div className="mt-4">
+          <FiltroBar
+            busca={busca}
+            onBusca={setBusca}
+            buscaPlaceholder="Buscar motorista..."
+            ativos={ativos}
+            onLimpar={() => { setStatus("todos"); setCarroId("todos"); setBusca(""); setFaixa("todos"); }}
+            chips={[
+              {
+                key: "st", label: "Status", value: status, onChange: setStatus,
+                options: [
+                  { value: "todos", label: "Todos" },
+                  { value: "ativo", label: "Ativo" },
+                  { value: "suspenso", label: "Suspenso" },
+                  { value: "encerrado", label: "Encerrado" },
+                ],
+              },
+              {
+                key: "car", label: "Veículo", value: carroId, onChange: setCarroId,
+                options: [
+                  { value: "todos", label: "Todos" },
+                  ...carros.map((c) => ({ value: c.id, label: `${c.marca} ${c.modelo}` })),
+                ],
+              },
+              {
+                key: "fx", label: "Valor", value: faixa, onChange: setFaixa,
+                options: [
+                  { value: "todos", label: "Todos" },
+                  { value: "ate100", label: "Até R$100" },
+                  { value: "100a200", label: "R$100–200" },
+                  { value: "acima200", label: "Acima R$200" },
+                ],
+              },
+            ]}
+          />
         </div>
       </PageSection>
 

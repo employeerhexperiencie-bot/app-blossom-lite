@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
+import { FiltroBar } from "@/components/FiltroBar";
 import { recebimentosMensais } from "@/lib/mock-data";
-import { custosMensais, financeiroPorVeiculo, fmtBRL } from "@/lib/mock-proprietario";
-import { useCarros } from "@/lib/store-proprietario";
+import { custosMensais, fmtBRL } from "@/lib/mock-proprietario";
+import { useCarros, useFinanceiroPorVeiculo } from "@/lib/store-proprietario";
 import { Line, LineChart, Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 
 export const Route = createFileRoute("/proprietario/financeiro")({
@@ -12,28 +14,66 @@ export const Route = createFileRoute("/proprietario/financeiro")({
 
 function Financeiro() {
   const carros = useCarros();
-  const receita = recebimentosMensais.reduce((a, b) => a + b.valor, 0);
-  const custos = custosMensais.reduce((a, b) => a + b.valor, 0);
+  const financeiro = useFinanceiroPorVeiculo();
+  const [periodo, setPeriodo] = useState<string>("6m");
+  const [carroFiltro, setCarroFiltro] = useState<string>("todos");
+
+  const meses = periodo === "3m" ? 3 : periodo === "12m" ? 12 : 6;
+  const recFilt = recebimentosMensais.slice(-meses);
+  const custosFilt = custosMensais.slice(-meses);
+  const receita = recFilt.reduce((a, b) => a + b.valor, 0);
+  const custos = custosFilt.reduce((a, b) => a + b.valor, 0);
   const lucro = receita - custos;
 
-  const combinado = recebimentosMensais.map((r, i) => ({
+  const finFiltrado = useMemo(() =>
+    carroFiltro === "todos" ? financeiro : financeiro.filter((f) => f.carroId === carroFiltro),
+    [financeiro, carroFiltro]
+  );
+  const ativos = (periodo !== "6m" ? 1 : 0) + (carroFiltro !== "todos" ? 1 : 0);
+
+
+  const combinado = recFilt.map((r, i) => ({
     mes: r.mes,
     receita: r.valor,
-    custos: custosMensais[i]?.valor ?? 0,
+    custos: custosFilt[i]?.valor ?? 0,
   }));
 
   return (
     <>
       <PageSection>
         <div className="gradient-primary rounded-3xl p-5 text-primary-foreground shadow-glow">
-          <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">Lucro em 6 meses</div>
+          <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">Lucro em {meses} meses</div>
           <div className="font-street text-4xl font-black">{fmtBRL(lucro)}</div>
           <div className="mt-2 flex gap-4 text-xs opacity-90">
             <span>Receita {fmtBRL(receita)}</span>
             <span>Custos {fmtBRL(custos)}</span>
           </div>
         </div>
+        <div className="mt-4">
+          <FiltroBar
+            ativos={ativos}
+            onLimpar={() => { setPeriodo("6m"); setCarroFiltro("todos"); }}
+            chips={[
+              {
+                key: "pd", label: "Período", value: periodo, onChange: setPeriodo,
+                options: [
+                  { value: "3m", label: "3 meses" },
+                  { value: "6m", label: "6 meses" },
+                  { value: "12m", label: "12 meses" },
+                ],
+              },
+              {
+                key: "car", label: "Veículo", value: carroFiltro, onChange: setCarroFiltro,
+                options: [
+                  { value: "todos", label: "Todos" },
+                  ...carros.map((c) => ({ value: c.id, label: `${c.marca} ${c.modelo}` })),
+                ],
+              },
+            ]}
+          />
+        </div>
       </PageSection>
+
 
       <PageSection className="pt-0">
         <h2 className="mb-3 font-street text-sm font-black uppercase tracking-wider text-muted-foreground">Receita vs custos</h2>
@@ -74,7 +114,7 @@ function Financeiro() {
       <PageSection className="pt-0">
         <h2 className="mb-3 font-street text-sm font-black uppercase tracking-wider text-muted-foreground">Por veículo</h2>
         <div className="flex flex-col gap-2">
-          {financeiroPorVeiculo.map((f) => {
+          {finFiltrado.map((f) => {
             const c = carros.find((x) => x.id === f.carroId);
             const lucroV = f.receita - f.custos;
             return (
