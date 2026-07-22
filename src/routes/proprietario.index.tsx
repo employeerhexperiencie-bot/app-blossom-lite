@@ -1,10 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Car, FileText, Banknote, Users, AlertTriangle, TrendingUp, Wrench, FileWarning } from "lucide-react";
+import { Plus, Car, FileText, Banknote, Users, AlertTriangle, TrendingUp, Wrench, FileWarning, Store, Gauge } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { carros } from "@/lib/mock-data";
 import { financeiroPorVeiculo, fmtBRL } from "@/lib/mock-proprietario";
-import { useProprietario } from "@/lib/store-proprietario";
+import { useProprietario, useCarros } from "@/lib/store-proprietario";
 
 export const Route = createFileRoute("/proprietario/")({
   head: () => ({ meta: [{ title: "Dashboard — Proprietário TCHI LÉVA" }] }),
@@ -12,6 +11,7 @@ export const Route = createFileRoute("/proprietario/")({
 });
 
 function Dashboard() {
+  const carros = useCarros();
   const notificacoes = useProprietario((s) => s.notificacoes);
   const lidas = useProprietario((s) => s.notificacoesLidas);
   const alertas = notificacoes.filter((n) => !lidas.includes(n.id));
@@ -30,20 +30,20 @@ function Dashboard() {
   return (
     <>
       <PageSection>
-        <div className="gradient-primary rounded-3xl p-5 text-primary-foreground shadow-glow">
+        <div className="mt-1 grid grid-cols-4 gap-2">
+          <Kpi label="Total" value={totais.total} />
+          <Kpi label="Alugados" value={totais.alugados} tone="primary" />
+          <Kpi label="Livres" value={totais.disponiveis} tone="success" />
+          <Kpi label="Manut." value={totais.manutencao} tone="warning" />
+        </div>
+
+        <div className="gradient-primary mt-4 rounded-3xl p-5 text-primary-foreground shadow-glow">
           <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">Lucro estimado do mês</div>
           <div className="font-street text-4xl font-black">{fmtBRL(lucro)}</div>
           <div className="mt-2 flex gap-4 text-xs opacity-90">
             <span>Receita {fmtBRL(receita)}</span>
             <span>Custos {fmtBRL(custos)}</span>
           </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-4 gap-2">
-          <Kpi label="Total" value={totais.total} />
-          <Kpi label="Alugados" value={totais.alugados} tone="primary" />
-          <Kpi label="Livres" value={totais.disponiveis} tone="success" />
-          <Kpi label="Manut." value={totais.manutencao} tone="warning" />
         </div>
       </PageSection>
 
@@ -65,6 +65,8 @@ function Dashboard() {
                   {a.tipo === "pagamento" ? <Banknote className="h-4 w-4" /> :
                    a.tipo === "manutencao" ? <Wrench className="h-4 w-4" /> :
                    a.tipo === "documento" ? <FileWarning className="h-4 w-4" /> :
+                   a.tipo === "km" ? <Gauge className="h-4 w-4" /> :
+                   a.tipo === "solicitacao" ? <FileText className="h-4 w-4" /> :
                    <AlertTriangle className="h-4 w-4" />}
                 </span>
                 <div className="min-w-0">
@@ -84,12 +86,14 @@ function Dashboard() {
       </PageSection>
 
       <PageSection className="pt-0">
-        <h2 className="mb-3 font-street text-sm font-black uppercase tracking-wider text-muted-foreground">Atalhos</h2>
+        <h2 className="mb-3 font-street text-sm font-black uppercase tracking-wider text-muted-foreground">Ecossistema</h2>
         <div className="grid grid-cols-2 gap-2">
           <Shortcut to="/proprietario/frota/novo" icon={Plus} label="Cadastrar carro" />
           <Shortcut to="/proprietario/contratos/novo" icon={FileText} label="Novo contrato" />
+          <Shortcut to="/proprietario/marketplace" icon={Store} label="Marketplace" />
           <Shortcut to="/proprietario/frota" icon={Car} label="Ver frota" />
           <Shortcut to="/proprietario/motoristas" icon={Users} label="Motoristas" />
+          <Shortcut to="/proprietario/agenda" icon={AlertTriangle} label="Agenda" />
         </div>
         <Link to="/proprietario/financeiro">
           <Button variant="outline" className="mt-3 w-full rounded-xl">

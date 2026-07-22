@@ -1,130 +1,66 @@
-# Módulo Proprietário — Expansão TCHI LÉVA
+# Refino do Módulo Proprietário — cobrir as 13 jornadas do brief
 
-Front-end apenas. Sem conectar banco. Reutilizamos `AppShell`, design system atual e tipografia street. Mocks em `src/lib/mock-data.ts` (extensão) + `src/lib/mock-proprietario.ts` novo. Estado local com Zustand quando fizer sentido.
+O módulo Proprietário já tem a maior parte da estrutura (Dashboard, Frota, Passaporte com 6 abas, Contratos, Agenda, Notificações, Financeiro, Perfil). O brief pede refinos + algumas jornadas novas. Tudo em mock, sem tocar em outros perfis nem no design system.
 
-## Arquitetura de rotas (todas dentro de `/proprietario`)
+## O que já está OK (só polir visual)
 
-Mantemos o layout atual (`proprietario.tsx` com tab bar). Ampliamos a tab bar para 5 abas + rotas internas:
+- J1 Dashboard — KPIs, alertas, atalhos, lucro do mês
+- J6 Contrato — detalhe, suspender, encerrar
+- J7 Passaporte — 6 abas
+- J8 Pagamentos — lista com status
+- J11 Manutenção — plano com próximos
+- J13 Financeiro — receita × custos, breakdown
 
-```text
-/proprietario                    → Dashboard (renomeia o atual "Frota")
-/proprietario/frota              → Lista da frota (era o index atual)
-/proprietario/frota/novo         → Cadastro veículo (já existe, ampliar campos)
-/proprietario/frota/$carroId     → Passaporte Digital do Veículo (expande atual)
-   ├─ aba: Visão geral
-   ├─ aba: Linha do tempo
-   ├─ aba: Documentos
-   ├─ aba: Manutenção
-   ├─ aba: Contratos
-   └─ aba: Checklist
-/proprietario/motoristas         → já existe, adicionar link para contrato
-/proprietario/contratos          → NOVO: lista de contratos
-/proprietario/contratos/$id      → NOVO: detalhe + pagamentos
-/proprietario/contratos/novo     → NOVO: criar contrato
-/proprietario/agenda             → NOVO: calendário de lembretes
-/proprietario/notificacoes       → NOVO: central de notificações
-/proprietario/financeiro         → já existe, enriquecer com custos/lucro
-/proprietario/perfil             → já existe
-```
+## O que falta implementar
 
-Tab bar final (5 itens): **Início · Frota · Contratos · Agenda · Perfil**. Financeiro, Motoristas e Notificações viram cards/atalhos no Dashboard e ícone de sino no header.
+### 1. Cadastro do veículo em etapas (J2)
+`proprietario.frota.novo.tsx` vira wizard de 4 passos com stepper: Básico → Documentação → Fotos → Revisão. Uploads mock (só preview local). No submit, cria veículo no store e navega para o Passaporte com toast "Passaporte digital criado".
 
-## Telas — o que cada uma mostra
+### 2. Publicar veículo para locação (J3)
+No Passaporte, aba Visão Geral, novo bloco "Anúncio no Marketplace" com botão **Disponibilizar para locação**. Abre sheet/modal com: valor (diária/mensal), periodicidade, caução, requisitos (habilitação mínima, idade), observações. Ao publicar, seta `publicado: true` + `anuncio` no store e mostra badge "Publicado" no card da frota.
 
-**Dashboard (`/proprietario`)**
-- KPIs: total de veículos, alugados, disponíveis, em manutenção
-- Cards: Receita do mês, Custos do mês, Lucro estimado (mocks)
-- Bloco "Alertas": pagamentos pendentes, contratos vencendo, manutenções, documentos
-- Atalhos: Cadastrar veículo, Novo contrato, Ver frota, Financeiro
+### 3. Marketplace simulado + solicitação de locação (J4)
+Nova rota `proprietario.marketplace.tsx` (atalho no Dashboard, não vira aba) mostrando cards de veículos publicados de "outros proprietários" (mock). Botão "Simular solicitação recebida" gera uma `SolicitacaoLocacao` no store e uma notificação no sino. Serve para o proprietário testar a Jornada 5.
 
-**Frota (`/proprietario/frota`)**
-- Grid de cards existente + filtro por status (Todos/Disponível/Alugado/Manutenção/Inativo)
-- Badge de alerta (doc vencendo / manutenção) no card
+### 4. Avaliar motorista + Aceitar/Recusar (J5)
+Nova rota `proprietario.solicitacoes.$id.tsx`. Mostra perfil do motorista mock (nome, nota, tempo na plataforma, corridas, pontualidade, histórico, observações). Ações **Aceitar** (cria contrato ativo, veículo vira `alugado`, gera pagamentos futuros mock) e **Recusar** (fecha solicitação, notifica). Entrada pelo card de notificação "Nova solicitação".
 
-**Cadastro veículo (`/proprietario/frota/novo`)**
-- Ampliar campos: cor, chassi, renavam, combustível, km
-- Uploads mock (Fotos: frente/traseira/laterais/interior; Docs: CRLV, seguro, licenciamento, IPVA, manual, NF) — só preview local, sem storage
+### 5. Registrar pagamento com forma/data (J8 refino)
+Na tela de contrato, o botão "Registrar pagamento" abre modal com valor, data, forma (Pix/Dinheiro/Cartão/Transf.). Toggle "Ativar lembretes automáticos" no cabeçalho do contrato (só UI + persistência local).
 
-**Passaporte Digital (`/proprietario/frota/$carroId`)**
-Cabeçalho: foto + marca/modelo/placa + status + KPIs (Receita/Custos/Lucro/Km/Dias alugado/Dias parado). Abas internas:
-- **Visão geral**: dados, motorista ativo, contrato ativo, próximos alertas
-- **Linha do tempo**: eventos append-only (cadastro, locações, revisões, trocas de pneu/óleo, multas, acidentes). UI só permite "adicionar evento", nunca apagar
-- **Documentos**: lista com data de vencimento + status (ok/vencendo/vencido)
-- **Manutenção**: plano configurável (óleo, filtro, freios, pneus, alinhamento, balanceamento, correias, fluídos) com intervalo por km OU data + próxima previsão
-- **Contratos**: histórico de contratos deste veículo
-- **Checklist**: entrada e devolução (fotos mock, km, combustível, pneus, avarias, observações)
+### 6. Configurar lembretes ao locatário (J9)
+Aba nova no contrato: **Lembretes**. Checkboxes: vencimento de aluguel (3/1/0 dias antes), pedido de foto do painel (mensal), lembrete de documentação. Salva no store, sem envio real.
 
-**Contratos (`/proprietario/contratos`)**
-- Lista com motorista, veículo, valor, periodicidade, status (ativo/encerrado/suspenso)
-- Filtro por status
+### 7. Atualização de KM via foto do painel (J10)
+No Passaporte, aba Visão Geral, card "Quilometragem". Botão **Solicitar foto do painel** (gera notificação mock "Foto recebida" após 2s). Ao clicar na notificação, abre modal com foto mock + campo KM + botões Conferir/Confirmar. Ao confirmar: atualiza `km` do veículo, recalcula `proximoKm` de cada item de manutenção, cria evento na linha do tempo com `origemKm: "manual"`.
 
-**Detalhe do contrato (`/proprietario/contratos/$id`)**
-- Dados do contrato + motorista vinculado (link p/ perfil)
-- Tabela de pagamentos (valor, data, forma, status pago/pendente/atrasado)
-- Ações mock: registrar pagamento, encerrar contrato, suspender
+### 8. Registrar manutenção (J12)
+Na aba Manutenção do Passaporte, botão **Registrar manutenção**. Modal com item, valor, data, KM, observações. Ao salvar: cria evento na timeline (`troca-oleo`/`revisao`/etc.), atualiza `ultimoKm`/`ultimaData`/`proximoKm` do item, soma no custo do veículo (mock financeiro).
 
-**Novo contrato (`/proprietario/contratos/novo`)**
-- Seleciona motorista (da lista mock — reaproveita `motoristas`), seleciona veículo disponível, define valor/periodicidade/datas/caução/observações
-- Ao criar (mock): veículo vira `alugado`, motorista vinculado
+### 9. Ajustes finos de UI
+- Dashboard: reordenar blocos na ordem "Frota → Financeiro → Alertas → Ecossistema (atalhos p/ Marketplace, Motoristas, Financeiro)"
+- Frota: badge "Publicado" e "Alugado" nos cards
+- Financeiro: tornar breakdown por veículo clicável (abre Passaporte)
 
-**Agenda (`/proprietario/agenda`)**
-- Lista cronológica de lembretes (óleo, revisão, seguro, licenciamento, IPVA, fim de contrato)
-- Chips de urgência: hoje / esta semana / este mês / futuro
+## Extensões em `mock-proprietario.ts` e `store-proprietario.ts`
 
-**Notificações (`/proprietario/notificacoes`)**
-- Feed unificado dos mesmos alertas, marcáveis como lidos (estado local)
-- Ícone de sino no header do layout com contador
+Novos tipos: `AnuncioLocacao`, `SolicitacaoLocacao`, `MotoristaCandidato`, `ConfigLembretes`.
+Novas ações no store: `publicarVeiculo`, `despublicar`, `criarSolicitacaoMock`, `aceitarSolicitacao`, `recusarSolicitacao`, `atualizarKm`, `registrarManutencao`, `salvarLembretes`, `registrarPagamentoDetalhado`.
+Seeds: 3 veículos publicados de "outros proprietários" p/ Marketplace, 3 motoristas candidatos com histórico rico.
 
-**Financeiro (`/proprietario/financeiro`)**
-- Mantém gráfico atual, adiciona linha de custos e cálculo de lucro
-- Breakdown por veículo (tabela)
+## Fora do escopo
 
-**Motoristas (`/proprietario/motoristas`)**
-- Mantém, adiciona badge "Contrato ativo" e link para o contrato
+- Backend / Supabase / uploads reais
+- Envio real de notificações push/SMS
+- Busca e filtros complexos no Marketplace (só listagem)
+- Mudanças em outros perfis (Motorista, Passageiro, Oficina, Loja, Admin)
+- Alterações no design system global
 
-## Design / identidade
+## Ordem de implementação
 
-- Zero mudança no design system global — só aplicar tokens já existentes (grafite + amarelo/laranja/neon), tipografia street (`font-street`, `font-display`), `shadow-card`, `gradient-primary`
-- Padrão visual das novas telas: mesmo do Motorista/Jornada (hero card com gradiente + cards com borda `border-border`)
-- Ícones: `lucide-react` (Car, FileText, Wrench, CalendarClock, Bell, Receipt, ClipboardCheck, TimelineIcon → History)
-- Avatar do proprietário no header segue o padrão do motorista (círculo com inicial)
-
-## Dados mockados (novo arquivo `src/lib/mock-proprietario.ts`)
-
-- `type Contrato`, `type Pagamento`, `type EventoVeiculo`, `type PlanoManutencao`, `type DocumentoVeiculo`, `type Checklist`, `type Notificacao`
-- Sementes para 3–4 veículos existentes: linha do tempo com 5–8 eventos cada, 2 contratos ativos + 1 encerrado, pagamentos dos últimos 3 meses, 3 documentos por veículo com vencimentos variados, plano de manutenção default, notificações mistas
-
-## Estado (Zustand — extensão de `useConect` ou novo `useProprietario`)
-
-- `notificacoesLidas: string[]`
-- `eventosAdicionados: Record<carroId, EventoVeiculo[]>` (append-only na UI)
-- `contratosMock`, `pagamentosMock` como estado inicial derivado do mock, com ações `registrarPagamento`, `encerrarContrato`, `criarContrato` (mutando estado local)
-
-## Integrações preparadas (só estrutura, sem lógica)
-
-- Campo `origemKm: "manual" | "corrida"` no evento de km — placeholder para telemetria futura
-- Botão "Enviar para oficina parceira" no card de manutenção → navega para `/proprietario/frota/$carroId` com toast "Em breve"
-- Tipos exportados prontos para migração futura ao banco
-
-## Fora do escopo desta rodada
-
-- Persistência real / Supabase
-- IA de recomendações
-- Telemetria real de corridas
-- Upload de arquivo real (fica preview local)
-
-## O que NÃO muda
-
-- Nenhuma rota existente é removida
-- Fluxos de Motorista, Passageiro, Oficina, Loja, Admin ficam idênticos
-- Design system global e assets de marca permanecem
-
-## Ordem de implementação (após aprovação)
-
-1. Tipos + mock-proprietario.ts + store
-2. Dashboard novo (reutilizando o atual como base) + Frota separada
-3. Passaporte Digital com abas
-4. Contratos (lista, detalhe, novo)
-5. Agenda + Notificações + sino no header
-6. Financeiro enriquecido
-7. Ampliação do cadastro de veículo
+1. Extensão de tipos + store + seeds
+2. Wizard de cadastro (J2)
+3. Publicar veículo + Marketplace + Solicitação/Avaliação (J3-J5)
+4. Atualização de KM + Registrar manutenção (J10, J12)
+5. Lembretes + pagamento detalhado (J8, J9)
+6. Polimentos de UI no Dashboard/Frota/Financeiro

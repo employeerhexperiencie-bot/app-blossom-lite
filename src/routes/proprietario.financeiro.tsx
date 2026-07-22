@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageSection } from "@/components/AppShell";
-import { recebimentosMensais, carros } from "@/lib/mock-data";
+import { recebimentosMensais } from "@/lib/mock-data";
 import { custosMensais, financeiroPorVeiculo, fmtBRL } from "@/lib/mock-proprietario";
+import { useCarros } from "@/lib/store-proprietario";
 import { Line, LineChart, Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 
 export const Route = createFileRoute("/proprietario/financeiro")({
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/proprietario/financeiro")({
 });
 
 function Financeiro() {
+  const carros = useCarros();
   const receita = recebimentosMensais.reduce((a, b) => a + b.valor, 0);
   const custos = custosMensais.reduce((a, b) => a + b.valor, 0);
   const lucro = receita - custos;
@@ -76,7 +78,12 @@ function Financeiro() {
             const c = carros.find((x) => x.id === f.carroId);
             const lucroV = f.receita - f.custos;
             return (
-              <div key={f.carroId} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card">
+              <Link
+                to="/proprietario/frota/$carroId"
+                params={{ carroId: f.carroId }}
+                key={f.carroId}
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card hover:border-primary/40"
+              >
                 <div className="min-w-0">
                   <div className="truncate font-semibold">{c ? `${c.marca} ${c.modelo}` : f.carroId}</div>
                   <div className="text-xs text-muted-foreground">
@@ -86,7 +93,7 @@ function Financeiro() {
                 <div className={`font-street text-base font-black ${lucroV >= 0 ? "text-success" : "text-destructive"}`}>
                   {fmtBRL(lucroV)}
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
