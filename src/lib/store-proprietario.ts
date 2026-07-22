@@ -95,6 +95,8 @@ export const useProprietario = create<State>()(
       anuncios: {},
       lembretes: {},
       solicitacoes: [],
+      lembretesVeiculo: [],
+
 
       registrarPagamento: (id) =>
         set({
