@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bell, Check, Banknote, Wrench, FileWarning, AlertTriangle, FileText, Gauge, ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
+import { FiltroBar } from "@/components/FiltroBar";
 import { useProprietario } from "@/lib/store-proprietario";
 import type { Notificacao } from "@/lib/mock-proprietario";
 
@@ -16,6 +18,21 @@ function Notificacoes() {
   const marcarLida = useProprietario((s) => s.marcarLida);
   const marcarTodas = useProprietario((s) => s.marcarTodasLidas);
 
+  const [tipo, setTipo] = useState<string>("todos");
+  const [urgencia, setUrgencia] = useState<string>("todos");
+  const [leitura, setLeitura] = useState<string>("todos");
+
+  const filtradas = useMemo(() => notificacoes.filter((n) => {
+    if (tipo !== "todos" && n.tipo !== tipo) return false;
+    if (urgencia !== "todos" && n.urgencia !== urgencia) return false;
+    const lida = lidas.includes(n.id);
+    if (leitura === "lidas" && !lida) return false;
+    if (leitura === "naolidas" && lida) return false;
+    return true;
+  }), [notificacoes, tipo, urgencia, leitura, lidas]);
+
+  const ativos = (tipo !== "todos" ? 1 : 0) + (urgencia !== "todos" ? 1 : 0) + (leitura !== "todos" ? 1 : 0);
+
   return (
     <PageSection>
       <div className="mb-4 flex items-center justify-between">
@@ -28,8 +45,47 @@ function Notificacoes() {
         </Button>
       </div>
 
+      <div className="mb-3">
+        <FiltroBar
+          ativos={ativos}
+          onLimpar={() => { setTipo("todos"); setUrgencia("todos"); setLeitura("todos"); }}
+          chips={[
+            {
+              key: "tp", label: "Tipo", value: tipo, onChange: setTipo,
+              options: [
+                { value: "todos", label: "Todos" },
+                { value: "pagamento", label: "Pagamento" },
+                { value: "documento", label: "Documento" },
+                { value: "manutencao", label: "Manutenção" },
+                { value: "contrato", label: "Contrato" },
+                { value: "solicitacao", label: "Solicitação" },
+                { value: "km", label: "KM" },
+                { value: "info", label: "Info" },
+              ],
+            },
+            {
+              key: "ur", label: "Urgência", value: urgencia, onChange: setUrgencia,
+              options: [
+                { value: "todos", label: "Todas" },
+                { value: "alta", label: "Alta" },
+                { value: "media", label: "Média" },
+                { value: "baixa", label: "Baixa" },
+              ],
+            },
+            {
+              key: "lt", label: "Leitura", value: leitura, onChange: setLeitura,
+              options: [
+                { value: "todos", label: "Todas" },
+                { value: "naolidas", label: "Não lidas" },
+                { value: "lidas", label: "Lidas" },
+              ],
+            },
+          ]}
+        />
+      </div>
+
       <div className="flex flex-col gap-2">
-        {notificacoes.map((n) => {
+        {filtradas.map((n) => {
           const lida = lidas.includes(n.id);
           const className = `grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border p-3 text-left shadow-card ${
             lida ? "bg-card/60 opacity-70" : "bg-card"
@@ -76,6 +132,7 @@ function Notificacoes() {
             </button>
           );
         })}
+        {filtradas.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma notificação nesta seleção.</p>}
       </div>
     </PageSection>
   );

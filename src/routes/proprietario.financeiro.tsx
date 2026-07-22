@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
+import { FiltroBar } from "@/components/FiltroBar";
 import { recebimentosMensais } from "@/lib/mock-data";
-import { custosMensais, financeiroPorVeiculo, fmtBRL } from "@/lib/mock-proprietario";
-import { useCarros } from "@/lib/store-proprietario";
+import { custosMensais, fmtBRL } from "@/lib/mock-proprietario";
+import { useCarros, useFinanceiroPorVeiculo } from "@/lib/store-proprietario";
 import { Line, LineChart, Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 
 export const Route = createFileRoute("/proprietario/financeiro")({
@@ -12,9 +14,23 @@ export const Route = createFileRoute("/proprietario/financeiro")({
 
 function Financeiro() {
   const carros = useCarros();
-  const receita = recebimentosMensais.reduce((a, b) => a + b.valor, 0);
-  const custos = custosMensais.reduce((a, b) => a + b.valor, 0);
+  const financeiro = useFinanceiroPorVeiculo();
+  const [periodo, setPeriodo] = useState<string>("6m");
+  const [carroFiltro, setCarroFiltro] = useState<string>("todos");
+
+  const meses = periodo === "3m" ? 3 : periodo === "12m" ? 12 : 6;
+  const recFilt = recebimentosMensais.slice(-meses);
+  const custosFilt = custosMensais.slice(-meses);
+  const receita = recFilt.reduce((a, b) => a + b.valor, 0);
+  const custos = custosFilt.reduce((a, b) => a + b.valor, 0);
   const lucro = receita - custos;
+
+  const finFiltrado = useMemo(() =>
+    carroFiltro === "todos" ? financeiro : financeiro.filter((f) => f.carroId === carroFiltro),
+    [financeiro, carroFiltro]
+  );
+  const ativos = (periodo !== "6m" ? 1 : 0) + (carroFiltro !== "todos" ? 1 : 0);
+
 
   const combinado = recebimentosMensais.map((r, i) => ({
     mes: r.mes,
