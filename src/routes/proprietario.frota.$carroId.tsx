@@ -1,29 +1,30 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Plus, Wrench } from "lucide-react";
+import { ArrowLeft, Plus, Wrench, Camera, Megaphone, Gauge, Check } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { carros } from "@/lib/mock-data";
 import {
   documentosMock,
-  manutencaoMock,
   fmtBRL,
   fmtData,
   eventoIcone,
   financeiroPorVeiculo,
   type EventoTipo,
+  type ItemManutencao,
 } from "@/lib/mock-proprietario";
-import { useProprietario, todosEventosDoCarro } from "@/lib/store-proprietario";
+import {
+  useProprietario,
+  todosEventosDoCarro,
+  useCarro,
+  useManutencaoDoCarro,
+} from "@/lib/store-proprietario";
 
 export const Route = createFileRoute("/proprietario/frota/$carroId")({
-  loader: ({ params }) => {
-    const c = carros.find((x) => x.id === params.carroId);
-    if (!c) throw notFound();
-    return c;
-  },
-  head: ({ loaderData }) => ({
-    meta: [{ title: loaderData ? `${loaderData.modelo} — TCHI LÉVA` : "Carro" }],
-  }),
+  loader: ({ params }) => ({ carroId: params.carroId }),
+  head: () => ({ meta: [{ title: "Passaporte do veículo — TCHI LÉVA" }] }),
   component: Passaporte,
   notFoundComponent: () => <div className="p-10 text-center text-muted-foreground">Carro não encontrado.</div>,
 });
@@ -40,15 +41,19 @@ const abas: { key: Aba; label: string }[] = [
 ];
 
 function Passaporte() {
-  const c = Route.useLoaderData();
+  const { carroId } = Route.useLoaderData();
+  const c = useCarro(carroId);
   const [aba, setAba] = useState<Aba>("geral");
   const extras = useProprietario((s) => s.eventosExtras);
   const contratos = useProprietario((s) => s.contratos);
+  const anuncio = useProprietario((s) => s.anuncios[carroId]);
   const addEvento = useProprietario((s) => s.addEvento);
+
+  if (!c) throw notFound();
 
   const eventos = todosEventosDoCarro(c.id, extras);
   const docs = documentosMock.filter((d) => d.carroId === c.id);
-  const manutencao = manutencaoMock.filter((m) => m.carroId === c.id);
+  const manutencao = useManutencaoDoCarro(c.id);
   const contratosVeiculo = contratos.filter((ct) => ct.carroId === c.id);
   const fin = financeiroPorVeiculo.find((f) => f.carroId === c.id) ?? { receita: 0, custos: 0 };
 
@@ -60,6 +65,11 @@ function Passaporte() {
         <Link to="/proprietario/frota" className="absolute left-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-card/90 shadow-soft backdrop-blur">
           <ArrowLeft className="h-5 w-5" />
         </Link>
+        {anuncio?.publicado && (
+          <span className="absolute right-4 top-4 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase text-primary-foreground shadow-glow">
+            Publicado
+          </span>
+        )}
       </div>
 
       <div className="px-5">
@@ -89,10 +99,11 @@ function Passaporte() {
         <div className="mt-4">
           {aba === "geral" && (
             <div className="flex flex-col gap-3">
+              <AnuncioBloco carroId={c.id} sugerido={{ diaria: c.diaria, mensal: c.mensal, caucao: c.caucao }} />
+              <KmBloco carroId={c.id} kmAtual={c.km} />
               <Info k="Marca / Modelo" v={`${c.marca} ${c.modelo}`} />
               <Info k="Ano" v={String(c.ano)} />
               <Info k="Placa" v={c.placa} />
-              <Info k="KM" v={c.km.toLocaleString("pt-BR")} />
               <Info k="Cidade" v={c.cidade} />
               <Info k="Seguro" v={c.seguro ? "Ativo" : "Sem seguro"} />
               <Info k="Diária / Mensal / Caução" v={`R$ ${c.diaria} · R$ ${c.mensal} · R$ ${c.caucao}`} />
@@ -107,9 +118,7 @@ function Passaporte() {
                 variant="outline"
                 className="mb-3 w-full rounded-xl"
                 onClick={() => {
-                  const tipos: EventoTipo[] = ["outro", "revisao", "troca-oleo"];
-                  const tipo = tipos[0];
-                  addEvento({ carroId: c.id, tipo, titulo: "Anotação manual", data: new Date().toISOString().slice(0, 10) });
+                  addEvento({ carroId: c.id, tipo: "outro", titulo: "Anotação manual", data: new Date().toISOString().slice(0, 10) });
                   toast.success("Evento adicionado à linha do tempo");
                 }}
               >
@@ -129,6 +138,7 @@ function Passaporte() {
                       <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
                         {e.km && <span>{e.km.toLocaleString("pt-BR")} km</span>}
                         {e.valor && <span>{fmtBRL(e.valor)}</span>}
+                        {e.origemKm && <span className="text-[10px] uppercase">via {e.origemKm}</span>}
                       </div>
                       {e.descricao && <p className="mt-1 text-xs text-muted-foreground">{e.descricao}</p>}
                     </div>
@@ -161,28 +171,9 @@ function Passaporte() {
 
           {aba === "manutencao" && (
             <div className="flex flex-col gap-2">
+              <RegistrarManutencaoBloco carroId={c.id} kmAtual={c.km} />
               {manutencao.map((m) => (
-                <div key={m.id} className="rounded-2xl border border-border bg-card p-3 shadow-card">
-                  <div className="flex items-center justify-between">
-                    <div className="font-semibold">{m.item}</div>
-                    <span className="text-[10px] uppercase text-muted-foreground">
-                      {m.intervaloKm ? `${m.intervaloKm.toLocaleString("pt-BR")} km` : ""}
-                      {m.intervaloMeses ? ` · ${m.intervaloMeses}m` : ""}
-                    </span>
-                  </div>
-                  <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                    <span>Última: {fmtData(m.ultimaData)} · {m.ultimoKm.toLocaleString("pt-BR")} km</span>
-                    {m.proximoKm && <span>Próxima: {m.proximoKm.toLocaleString("pt-BR")} km</span>}
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="mt-2 w-full rounded-xl"
-                    onClick={() => toast("Integração com oficinas em breve")}
-                  >
-                    <Wrench className="mr-2 h-4 w-4" /> Enviar para oficina parceira
-                  </Button>
-                </div>
+                <ItemManutencaoCard key={m.id} m={m} kmAtual={c.km} />
               ))}
               {manutencao.length === 0 && <p className="text-sm text-muted-foreground">Plano de manutenção não configurado.</p>}
             </div>
@@ -224,6 +215,257 @@ function Passaporte() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function AnuncioBloco({ carroId, sugerido }: { carroId: string; sugerido: { diaria: number; mensal: number; caucao: number } }) {
+  const anuncio = useProprietario((s) => s.anuncios[carroId]);
+  const publicar = useProprietario((s) => s.publicarVeiculo);
+  const despublicar = useProprietario((s) => s.despublicarVeiculo);
+  const [aberto, setAberto] = useState(false);
+  const [periodicidade, setPeriodicidade] = useState<"diaria" | "mensal">("diaria");
+  const [valor, setValor] = useState(sugerido.diaria);
+  const [caucao, setCaucao] = useState(sugerido.caucao);
+  const [requisitos, setRequisitos] = useState("CNH B há mais de 2 anos, sem multas graves.");
+  const [obs, setObs] = useState("");
+
+  if (anuncio?.publicado) {
+    return (
+      <div className="rounded-2xl border border-primary/40 bg-primary/5 p-4 shadow-card">
+        <div className="flex items-center gap-2">
+          <Megaphone className="h-4 w-4 text-primary" />
+          <div className="font-street text-sm font-black uppercase">Anunciado no marketplace</div>
+        </div>
+        <div className="mt-1 text-xs text-muted-foreground">
+          {fmtBRL(anuncio.valor)} · {anuncio.periodicidade} · caução {fmtBRL(anuncio.caucao)}
+        </div>
+        <div className="mt-3 flex gap-2">
+          <Button size="sm" variant="outline" className="flex-1 rounded-xl" onClick={() => { despublicar(carroId); toast("Anúncio pausado"); }}>
+            Pausar anúncio
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Megaphone className="h-4 w-4 text-primary" />
+          <div className="font-street text-sm font-black uppercase">Marketplace</div>
+        </div>
+        {!aberto && (
+          <Button size="sm" className="rounded-xl gradient-primary text-primary-foreground" onClick={() => setAberto(true)}>
+            Disponibilizar
+          </Button>
+        )}
+      </div>
+      {!aberto ? (
+        <p className="mt-2 text-xs text-muted-foreground">Publique para motoristas verem seu veículo e enviarem solicitações.</p>
+      ) : (
+        <div className="mt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-xs">Periodicidade</Label>
+              <select value={periodicidade} onChange={(e) => setPeriodicidade(e.target.value as "diaria" | "mensal")} className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm">
+                <option value="diaria">Diária</option>
+                <option value="mensal">Mensal</option>
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs">Valor (R$)</Label>
+              <Input className="mt-1" type="number" value={valor} onChange={(e) => setValor(+e.target.value)} />
+            </div>
+            <div>
+              <Label className="text-xs">Caução (R$)</Label>
+              <Input className="mt-1" type="number" value={caucao} onChange={(e) => setCaucao(+e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs">Requisitos</Label>
+            <Textarea rows={2} className="mt-1" value={requisitos} onChange={(e) => setRequisitos(e.target.value)} />
+          </div>
+          <div>
+            <Label className="text-xs">Observações</Label>
+            <Textarea rows={2} className="mt-1" value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Regras, restrições..." />
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setAberto(false)}>Cancelar</Button>
+            <Button
+              className="flex-1 rounded-xl gradient-primary text-primary-foreground"
+              onClick={() => {
+                publicar(carroId, { publicado: true, periodicidade, valor, caucao, requisitos, observacoes: obs });
+                toast.success("Veículo publicado no marketplace 🚀");
+                setAberto(false);
+              }}
+            >
+              Publicar
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function KmBloco({ carroId, kmAtual }: { carroId: string; kmAtual: number }) {
+  const atualizarKm = useProprietario((s) => s.atualizarKm);
+  const addNotificacao = useProprietario((s) => s.addNotificacao);
+  const [pediu, setPediu] = useState(false);
+  const [foto, setFoto] = useState(false);
+  const [novoKm, setNovoKm] = useState(kmAtual + 500);
+
+  function pedirFoto() {
+    setPediu(true);
+    toast("Solicitação enviada ao motorista");
+    setTimeout(() => {
+      setFoto(true);
+      addNotificacao({
+        tipo: "km",
+        titulo: "Foto do painel recebida",
+        descricao: `Veículo com KM atualizado disponível para conferência`,
+        data: "Agora",
+        urgencia: "media",
+        carroId,
+      });
+    }, 1500);
+  }
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Gauge className="h-4 w-4 text-primary" />
+          <div className="font-street text-sm font-black uppercase">Quilometragem</div>
+        </div>
+        <div className="text-lg font-black">{kmAtual.toLocaleString("pt-BR")} km</div>
+      </div>
+      {!foto && !pediu && (
+        <Button size="sm" variant="outline" className="mt-3 w-full rounded-xl" onClick={pedirFoto}>
+          <Camera className="mr-2 h-4 w-4" /> Solicitar foto do painel
+        </Button>
+      )}
+      {pediu && !foto && (
+        <p className="mt-3 text-xs text-muted-foreground">Aguardando envio do motorista...</p>
+      )}
+      {foto && (
+        <div className="mt-3 space-y-2">
+          <div className="grid aspect-[16/9] place-items-center rounded-xl border border-dashed border-border bg-background text-xs text-muted-foreground">
+            📷 Foto do painel (mock)
+          </div>
+          <div className="grid grid-cols-[1fr_auto] gap-2">
+            <Input type="number" value={novoKm} onChange={(e) => setNovoKm(+e.target.value)} />
+            <Button
+              className="rounded-xl gradient-primary text-primary-foreground"
+              onClick={() => {
+                atualizarKm(carroId, novoKm, "foto");
+                toast.success("Quilometragem atualizada");
+                setPediu(false);
+                setFoto(false);
+              }}
+            >
+              <Check className="mr-1 h-4 w-4" /> Confirmar
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RegistrarManutencaoBloco({ carroId, kmAtual }: { carroId: string; kmAtual: number }) {
+  const registrar = useProprietario((s) => s.registrarManutencao);
+  const [aberto, setAberto] = useState(false);
+  const [item, setItem] = useState<ItemManutencao["item"]>("Óleo");
+  const [km, setKm] = useState(kmAtual);
+  const [data, setData] = useState(new Date().toISOString().slice(0, 10));
+  const [valor, setValor] = useState(180);
+  const [obs, setObs] = useState("");
+
+  if (!aberto) {
+    return (
+      <Button size="sm" variant="outline" className="w-full rounded-xl" onClick={() => setAberto(true)}>
+        <Plus className="mr-2 h-4 w-4" /> Registrar manutenção
+      </Button>
+    );
+  }
+  return (
+    <div className="space-y-3 rounded-2xl border border-primary/40 bg-primary/5 p-4">
+      <div className="font-street text-sm font-black uppercase">Nova manutenção</div>
+      <div>
+        <Label className="text-xs">Item</Label>
+        <select value={item} onChange={(e) => setItem(e.target.value as ItemManutencao["item"])} className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm">
+          {["Óleo", "Filtro de óleo", "Filtro de ar", "Freios", "Pneus", "Alinhamento", "Balanceamento", "Correia", "Fluídos"].map((o) => (
+            <option key={o} value={o}>{o}</option>
+          ))}
+        </select>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <div>
+          <Label className="text-xs">KM</Label>
+          <Input className="mt-1" type="number" value={km} onChange={(e) => setKm(+e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Data</Label>
+          <Input className="mt-1" type="date" value={data} onChange={(e) => setData(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Valor R$</Label>
+          <Input className="mt-1" type="number" value={valor} onChange={(e) => setValor(+e.target.value)} />
+        </div>
+      </div>
+      <div>
+        <Label className="text-xs">Observações</Label>
+        <Textarea rows={2} className="mt-1" value={obs} onChange={(e) => setObs(e.target.value)} />
+      </div>
+      <div className="flex gap-2">
+        <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setAberto(false)}>Cancelar</Button>
+        <Button
+          className="flex-1 rounded-xl gradient-primary text-primary-foreground"
+          onClick={() => {
+            registrar({ carroId, item, km, data, valor, observacoes: obs });
+            toast.success("Manutenção registrada");
+            setAberto(false);
+          }}
+        >
+          Salvar
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ItemManutencaoCard({ m, kmAtual }: { m: ItemManutencao; kmAtual: number }) {
+  const restante = m.proximoKm ? m.proximoKm - kmAtual : null;
+  const alerta = restante !== null && restante < 1000;
+  return (
+    <div className={`rounded-2xl border p-3 shadow-card ${alerta ? "border-warning/60 bg-warning/5" : "border-border bg-card"}`}>
+      <div className="flex items-center justify-between">
+        <div className="font-semibold">{m.item}</div>
+        <span className="text-[10px] uppercase text-muted-foreground">
+          {m.intervaloKm ? `${m.intervaloKm.toLocaleString("pt-BR")} km` : ""}
+          {m.intervaloMeses ? ` · ${m.intervaloMeses}m` : ""}
+        </span>
+      </div>
+      <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+        <span>Última: {fmtData(m.ultimaData)} · {m.ultimoKm.toLocaleString("pt-BR")} km</span>
+        {m.proximoKm && (
+          <span className={alerta ? "font-semibold text-warning-foreground" : ""}>
+            Próxima: {m.proximoKm.toLocaleString("pt-BR")} km
+            {restante !== null && restante > 0 && ` (faltam ${restante.toLocaleString("pt-BR")})`}
+          </span>
+        )}
+      </div>
+      <Button
+        size="sm"
+        variant="outline"
+        className="mt-2 w-full rounded-xl"
+        onClick={() => toast("Integração com oficinas em breve")}
+      >
+        <Wrench className="mr-2 h-4 w-4" /> Enviar para oficina parceira
+      </Button>
     </div>
   );
 }
@@ -284,3 +526,6 @@ function Field({ k, v }: { k: string; v: string }) {
     </div>
   );
 }
+
+// silences unused warning for retained type import in older linters
+export type _KeepEventoTipo = EventoTipo;

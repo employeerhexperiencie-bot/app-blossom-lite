@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, AlertTriangle } from "lucide-react";
+import { Plus, AlertTriangle, Megaphone } from "lucide-react";
 import { useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { carros, type Carro } from "@/lib/mock-data";
+import type { Carro } from "@/lib/mock-data";
 import { documentosMock } from "@/lib/mock-proprietario";
+import { useCarros, useProprietario } from "@/lib/store-proprietario";
 
 export const Route = createFileRoute("/proprietario/frota/")({
   head: () => ({ meta: [{ title: "Frota — TCHI LÉVA Proprietário" }] }),
@@ -20,6 +21,8 @@ const statusInfo: Record<Carro["status"], { label: string; cls: string }> = {
 type Filtro = "todos" | Carro["status"];
 
 function Frota() {
+  const carros = useCarros();
+  const anuncios = useProprietario((s) => s.anuncios);
   const [filtro, setFiltro] = useState<Filtro>("todos");
   const lista = filtro === "todos" ? carros : carros.filter((c) => c.status === filtro);
 
@@ -54,6 +57,7 @@ function Frota() {
           {lista.map((c) => {
             const st = statusInfo[c.status];
             const alerta = alertaCarro(c.id);
+            const publicado = anuncios[c.id]?.publicado;
             return (
               <Link
                 key={c.id}
@@ -66,6 +70,7 @@ function Frota() {
                   <div className="flex items-center gap-1.5">
                     <span className="truncate font-semibold">{c.marca} {c.modelo}</span>
                     {alerta && <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-warning-foreground" />}
+                    {publicado && <Megaphone className="h-3.5 w-3.5 shrink-0 text-primary" />}
                   </div>
                   <div className="truncate text-xs text-muted-foreground">{c.placa} · R$ {c.diaria}/dia</div>
                 </div>

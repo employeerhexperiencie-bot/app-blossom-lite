@@ -10,6 +10,7 @@ export type EventoTipo =
   | "multa"
   | "acidente"
   | "documento"
+  | "km"
   | "outro";
 
 export type EventoVeiculo = {
@@ -21,7 +22,7 @@ export type EventoVeiculo = {
   data: string; // ISO
   km?: number;
   valor?: number;
-  origemKm?: "manual" | "corrida";
+  origemKm?: "manual" | "corrida" | "foto";
 };
 
 export type DocStatus = "ok" | "vencendo" | "vencido";
@@ -97,13 +98,65 @@ export type Checklist = {
 
 export type Notificacao = {
   id: string;
-  tipo: "pagamento" | "documento" | "manutencao" | "contrato" | "info";
+  tipo: "pagamento" | "documento" | "manutencao" | "contrato" | "solicitacao" | "km" | "info";
   titulo: string;
   descricao: string;
   data: string;
   urgencia: "alta" | "media" | "baixa";
   carroId?: string;
   contratoId?: string;
+  solicitacaoId?: string;
+};
+
+export type AnuncioLocacao = {
+  publicado: boolean;
+  periodicidade: "diaria" | "mensal";
+  valor: number;
+  caucao: number;
+  requisitos: string;
+  observacoes?: string;
+  publicadoEm?: string;
+};
+
+export type MotoristaCandidato = {
+  id: string;
+  nome: string;
+  avaliacao: number;
+  tempoPlataforma: string;
+  corridas: number;
+  pontualidade: number; // 0-100
+  historico: string;
+  observacoes?: string;
+  foto?: string;
+};
+
+export type SolicitacaoLocacao = {
+  id: string;
+  carroId: string;
+  motoristaId: string;
+  data: string;
+  status: "pendente" | "aceita" | "recusada";
+  mensagem?: string;
+};
+
+export type ConfigLembretes = {
+  vencimentoAluguel: boolean;
+  antecedenciaDias: number; // 0/1/3
+  fotoPainelMensal: boolean;
+  documentacao: boolean;
+};
+
+export type AnuncioMarketplace = {
+  id: string;
+  proprietario: string;
+  marca: string;
+  modelo: string;
+  ano: number;
+  cidade: string;
+  valor: number;
+  periodicidade: "diaria" | "mensal";
+  foto: string;
+  regras: string;
 };
 
 // -------- Seeds ----------
@@ -189,6 +242,47 @@ export const notificacoesMock: Notificacao[] = [
   { id: "n6", tipo: "info", titulo: "Corolla disponível para nova locação", descricao: "Sem contrato ativo há 5 dias", data: "3 dias", urgencia: "baixa", carroId: "c3" },
 ];
 
+export const motoristasCandidatos: MotoristaCandidato[] = [
+  {
+    id: "mc1", nome: "Fernanda Rocha", avaliacao: 4.9, tempoPlataforma: "1 ano e 4 meses",
+    corridas: 2130, pontualidade: 98,
+    historico: "3 aluguéis anteriores concluídos. Sem multas graves. Sempre devolveu limpo.",
+    observacoes: "Prefere carros automáticos.",
+  },
+  {
+    id: "mc2", nome: "Diego Nunes", avaliacao: 4.7, tempoPlataforma: "8 meses",
+    corridas: 940, pontualidade: 91,
+    historico: "1 aluguel anterior, contrato encerrado no prazo. 1 multa leve.",
+  },
+  {
+    id: "mc3", nome: "Alan Ribeiro", avaliacao: 4.4, tempoPlataforma: "3 meses",
+    corridas: 210, pontualidade: 82,
+    historico: "Motorista novo. Ainda sem histórico de aluguel na plataforma.",
+    observacoes: "Solicitou parcelar caução em 2x.",
+  },
+];
+
+export const marketplaceMock: AnuncioMarketplace[] = [
+  {
+    id: "mk1", proprietario: "Rafael T.", marca: "Volkswagen", modelo: "Polo", ano: 2023,
+    cidade: "São Paulo", valor: 125, periodicidade: "diaria",
+    foto: "https://images.unsplash.com/photo-1600661653561-629509216228?w=600&h=400&fit=crop",
+    regras: "Sem app de entrega. CNH B há +2 anos.",
+  },
+  {
+    id: "mk2", proprietario: "Marina S.", marca: "Fiat", modelo: "Mobi", ano: 2022,
+    cidade: "Guarulhos", valor: 85, periodicidade: "diaria",
+    foto: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=400&fit=crop",
+    regras: "Caução R$ 1.000. Rodagem livre.",
+  },
+  {
+    id: "mk3", proprietario: "Bruno L.", marca: "Nissan", modelo: "Versa", ano: 2024,
+    cidade: "São Paulo", valor: 2900, periodicidade: "mensal",
+    foto: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=600&h=400&fit=crop",
+    regras: "Motorista com 4.8+ e 6 meses de plataforma.",
+  },
+];
+
 // Financeiro por veículo (mock)
 export const financeiroPorVeiculo: { carroId: string; receita: number; custos: number }[] = [
   { carroId: "c1", receita: 3300, custos: 730 },
@@ -203,6 +297,13 @@ export const custosMensais = [
   { mes: "Abr", valor: 800 }, { mes: "Mai", valor: 1100 }, { mes: "Jun", valor: 2200 },
 ];
 
+export const lembretesDefault: ConfigLembretes = {
+  vencimentoAluguel: true,
+  antecedenciaDias: 1,
+  fotoPainelMensal: true,
+  documentacao: true,
+};
+
 // Helpers
 export function eventoIcone(tipo: EventoTipo): string {
   const map: Record<EventoTipo, string> = {
@@ -215,6 +316,7 @@ export function eventoIcone(tipo: EventoTipo): string {
     multa: "🚨",
     acidente: "💥",
     documento: "📄",
+    km: "📏",
     outro: "•",
   };
   return map[tipo];

@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Bell, Check, Banknote, Wrench, FileWarning, AlertTriangle, FileText } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Bell, Check, Banknote, Wrench, FileWarning, AlertTriangle, FileText, Gauge, ChevronRight } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { useProprietario } from "@/lib/store-proprietario";
@@ -31,20 +31,47 @@ function Notificacoes() {
       <div className="flex flex-col gap-2">
         {notificacoes.map((n) => {
           const lida = lidas.includes(n.id);
-          return (
-            <button
-              key={n.id}
-              onClick={() => marcarLida(n.id)}
-              className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border p-3 text-left shadow-card ${
-                lida ? "bg-card/60 opacity-70" : "bg-card"
-              }`}
-            >
+          const linkTo = n.solicitacaoId
+            ? { to: "/proprietario/solicitacoes/$id", params: { id: n.solicitacaoId } }
+            : n.contratoId
+              ? { to: "/proprietario/contratos/$id", params: { id: n.contratoId } }
+              : n.carroId
+                ? { to: "/proprietario/frota/$carroId", params: { carroId: n.carroId } }
+                : null;
+
+          const body = (
+            <>
               <span className={`grid h-9 w-9 place-items-center rounded-xl ${toneOf(n.urgencia)}`}>{iconOf(n.tipo)}</span>
               <div className="min-w-0">
                 <div className="truncate font-semibold">{n.titulo}</div>
                 <div className="truncate text-xs text-muted-foreground">{n.descricao}</div>
               </div>
-              <span className="text-[10px] uppercase text-muted-foreground">{n.data}</span>
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-[10px] uppercase text-muted-foreground">{n.data}</span>
+                {linkTo && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+              </div>
+            </>
+          );
+
+          const className = `grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border p-3 text-left shadow-card ${
+            lida ? "bg-card/60 opacity-70" : "bg-card"
+          }`;
+
+          if (linkTo) {
+            return (
+              <Link
+                key={n.id}
+                {...(linkTo as never)}
+                onClick={() => marcarLida(n.id)}
+                className={className}
+              >
+                {body}
+              </Link>
+            );
+          }
+          return (
+            <button key={n.id} onClick={() => marcarLida(n.id)} className={className}>
+              {body}
             </button>
           );
         })}
@@ -58,6 +85,8 @@ function iconOf(t: Notificacao["tipo"]) {
   if (t === "manutencao") return <Wrench className="h-4 w-4" />;
   if (t === "documento") return <FileWarning className="h-4 w-4" />;
   if (t === "contrato") return <FileText className="h-4 w-4" />;
+  if (t === "solicitacao") return <FileText className="h-4 w-4" />;
+  if (t === "km") return <Gauge className="h-4 w-4" />;
   return <AlertTriangle className="h-4 w-4" />;
 }
 
