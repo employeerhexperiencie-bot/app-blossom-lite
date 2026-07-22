@@ -32,24 +32,48 @@ function Financeiro() {
   const ativos = (periodo !== "6m" ? 1 : 0) + (carroFiltro !== "todos" ? 1 : 0);
 
 
-  const combinado = recebimentosMensais.map((r, i) => ({
+  const combinado = recFilt.map((r, i) => ({
     mes: r.mes,
     receita: r.valor,
-    custos: custosMensais[i]?.valor ?? 0,
+    custos: custosFilt[i]?.valor ?? 0,
   }));
 
   return (
     <>
       <PageSection>
         <div className="gradient-primary rounded-3xl p-5 text-primary-foreground shadow-glow">
-          <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">Lucro em 6 meses</div>
+          <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">Lucro em {meses} meses</div>
           <div className="font-street text-4xl font-black">{fmtBRL(lucro)}</div>
           <div className="mt-2 flex gap-4 text-xs opacity-90">
             <span>Receita {fmtBRL(receita)}</span>
             <span>Custos {fmtBRL(custos)}</span>
           </div>
         </div>
+        <div className="mt-4">
+          <FiltroBar
+            ativos={ativos}
+            onLimpar={() => { setPeriodo("6m"); setCarroFiltro("todos"); }}
+            chips={[
+              {
+                key: "pd", label: "Período", value: periodo, onChange: setPeriodo,
+                options: [
+                  { value: "3m", label: "3 meses" },
+                  { value: "6m", label: "6 meses" },
+                  { value: "12m", label: "12 meses" },
+                ],
+              },
+              {
+                key: "car", label: "Veículo", value: carroFiltro, onChange: setCarroFiltro,
+                options: [
+                  { value: "todos", label: "Todos" },
+                  ...carros.map((c) => ({ value: c.id, label: `${c.marca} ${c.modelo}` })),
+                ],
+              },
+            ]}
+          />
+        </div>
       </PageSection>
+
 
       <PageSection className="pt-0">
         <h2 className="mb-3 font-street text-sm font-black uppercase tracking-wider text-muted-foreground">Receita vs custos</h2>
