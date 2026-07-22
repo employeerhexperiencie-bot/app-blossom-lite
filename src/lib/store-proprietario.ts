@@ -8,6 +8,7 @@ import {
   manutencaoMock,
   lembretesDefault,
   motoristasCandidatos,
+  financeiroPorVeiculo as financeiroBase,
   type Contrato,
   type Pagamento,
   type Notificacao,
@@ -16,6 +17,8 @@ import {
   type ConfigLembretes,
   type ItemManutencao,
   type SolicitacaoLocacao,
+  type Lembrete,
+  type CustoCategoria,
 } from "./mock-proprietario";
 import type { Carro } from "./mock-data";
 import { carros as carrosBase } from "./mock-data";
@@ -33,6 +36,7 @@ type State = {
   anuncios: Record<string, AnuncioLocacao>;
   lembretes: Record<string, ConfigLembretes>;
   solicitacoes: SolicitacaoLocacao[];
+  lembretesVeiculo: Lembrete[];
 
   registrarPagamento: (id: string) => void;
   registrarPagamentoDetalhado: (contratoId: string, dados: { valor: number; data: string; forma: Pagamento["forma"] }) => void;
@@ -55,13 +59,26 @@ type State = {
     valor: number;
     observacoes?: string;
   }) => void;
+  registrarCustoAvulso: (dados: {
+    carroId: string;
+    descricao: string;
+    categoria: CustoCategoria;
+    valor: number;
+    data: string;
+  }) => void;
+  registrarObservacao: (dados: { carroId: string; texto: string; data: string }) => void;
   salvarLembretes: (contratoId: string, cfg: ConfigLembretes) => void;
   criarVeiculo: (c: Omit<Carro, "id">) => string;
+
+  criarLembrete: (l: Omit<Lembrete, "id" | "feito" | "criadoEm">) => string;
+  concluirLembrete: (id: string) => void;
+  removerLembrete: (id: string) => void;
 
   criarSolicitacaoMock: (carroId: string) => string;
   aceitarSolicitacao: (id: string, valor: number, periodicidade: Contrato["periodicidade"]) => string | undefined;
   recusarSolicitacao: (id: string) => void;
 };
+
 
 export const useProprietario = create<State>()(
   persist(
