@@ -341,6 +341,18 @@ export function todosEventosDoCarro(carroId: string, extras: EventoVeiculo[]): E
   return [...ex, ...base].sort((a, b) => (a.data < b.data ? 1 : -1));
 }
 
+export function useFinanceiroPorVeiculo(): { carroId: string; receita: number; custos: number }[] {
+  const extras = useProprietario((s) => s.eventosExtras);
+  return financeiroBase.map((f) => {
+    const custosExtras = extras
+      .filter((e) => e.carroId === f.carroId && (e.tipo === "custo" || e.tipo === "troca-oleo" || e.tipo === "troca-pneu" || e.tipo === "revisao" || e.tipo === "multa" || e.tipo === "acidente"))
+      .reduce((a, e) => a + (e.valor ?? 0), 0);
+    return { ...f, custos: f.custos + custosExtras };
+  });
+}
+
+
+
 export function useCarros(): Carro[] {
   const overrides = useProprietario((s) => s.carrosOverrides);
   const novos = useProprietario((s) => s.carrosNovos);
