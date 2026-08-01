@@ -53,6 +53,7 @@ import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as ProprietarioFrotaIndexRouteImport } from './routes/proprietario.frota.index'
 import { Route as ProprietarioContratosIndexRouteImport } from './routes/proprietario.contratos.index'
 import { Route as OficinaServicosIndexRouteImport } from './routes/oficina.servicos.index'
+import { Route as LojaPedidosIndexRouteImport } from './routes/loja.pedidos.index'
 import { Route as LojaCatalogoIndexRouteImport } from './routes/loja.catalogo.index'
 import { Route as ProprietarioSolicitacoesIdRouteImport } from './routes/proprietario.solicitacoes.$id'
 import { Route as ProprietarioFrotaNovoRouteImport } from './routes/proprietario.frota.novo'
@@ -288,6 +289,11 @@ const OficinaServicosIndexRoute = OficinaServicosIndexRouteImport.update({
   path: '/servicos/',
   getParentRoute: () => OficinaRoute,
 } as any)
+const LojaPedidosIndexRoute = LojaPedidosIndexRouteImport.update({
+  id: '/pedidos/',
+  path: '/pedidos/',
+  getParentRoute: () => LojaRoute,
+} as any)
 const LojaCatalogoIndexRoute = LojaCatalogoIndexRouteImport.update({
   id: '/catalogo/',
   path: '/catalogo/',
@@ -408,6 +414,7 @@ export interface FileRoutesByFullPath {
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
   '/loja/catalogo/': typeof LojaCatalogoIndexRoute
+  '/loja/pedidos/': typeof LojaPedidosIndexRoute
   '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
@@ -460,6 +467,7 @@ export interface FileRoutesByTo {
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
   '/loja/catalogo': typeof LojaCatalogoIndexRoute
+  '/loja/pedidos': typeof LojaPedidosIndexRoute
   '/oficina/servicos': typeof OficinaServicosIndexRoute
   '/proprietario/contratos': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota': typeof ProprietarioFrotaIndexRoute
@@ -519,6 +527,7 @@ export interface FileRoutesById {
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
   '/loja/catalogo/': typeof LojaCatalogoIndexRoute
+  '/loja/pedidos/': typeof LojaPedidosIndexRoute
   '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
@@ -579,6 +588,7 @@ export interface FileRouteTypes {
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
     | '/loja/catalogo/'
+    | '/loja/pedidos/'
     | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
@@ -631,6 +641,7 @@ export interface FileRouteTypes {
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
     | '/loja/catalogo'
+    | '/loja/pedidos'
     | '/oficina/servicos'
     | '/proprietario/contratos'
     | '/proprietario/frota'
@@ -689,6 +700,7 @@ export interface FileRouteTypes {
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
     | '/loja/catalogo/'
+    | '/loja/pedidos/'
     | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
@@ -1016,6 +1028,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OficinaServicosIndexRouteImport
       parentRoute: typeof OficinaRoute
     }
+    '/loja/pedidos/': {
+      id: '/loja/pedidos/'
+      path: '/pedidos'
+      fullPath: '/loja/pedidos/'
+      preLoaderRoute: typeof LojaPedidosIndexRouteImport
+      parentRoute: typeof LojaRoute
+    }
     '/loja/catalogo/': {
       id: '/loja/catalogo/'
       path: '/catalogo'
@@ -1128,6 +1147,7 @@ interface LojaRouteChildren {
   LojaCatalogoItemIdRoute: typeof LojaCatalogoItemIdRoute
   LojaCatalogoNovoRoute: typeof LojaCatalogoNovoRoute
   LojaCatalogoIndexRoute: typeof LojaCatalogoIndexRoute
+  LojaPedidosIndexRoute: typeof LojaPedidosIndexRoute
 }
 
 const LojaRouteChildren: LojaRouteChildren = {
@@ -1139,6 +1159,7 @@ const LojaRouteChildren: LojaRouteChildren = {
   LojaCatalogoItemIdRoute: LojaCatalogoItemIdRoute,
   LojaCatalogoNovoRoute: LojaCatalogoNovoRoute,
   LojaCatalogoIndexRoute: LojaCatalogoIndexRoute,
+  LojaPedidosIndexRoute: LojaPedidosIndexRoute,
 }
 
 const LojaRouteWithChildren = LojaRoute._addFileChildren(LojaRouteChildren)
