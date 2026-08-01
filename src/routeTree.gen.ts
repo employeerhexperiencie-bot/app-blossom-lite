@@ -45,6 +45,7 @@ import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.bene
 import { Route as MotoristaAlugueisRouteImport } from './routes/motorista.alugueis'
 import { Route as LojaPerfilRouteImport } from './routes/loja.perfil'
 import { Route as LojaNegocioRouteImport } from './routes/loja.negocio'
+import { Route as LojaEstoqueRouteImport } from './routes/loja.estoque'
 import { Route as LojaCampanhasRouteImport } from './routes/loja.campanhas'
 import { Route as AdminParceirosRouteImport } from './routes/admin.parceiros'
 import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
@@ -246,6 +247,11 @@ const LojaNegocioRoute = LojaNegocioRouteImport.update({
   path: '/negocio',
   getParentRoute: () => LojaRoute,
 } as any)
+const LojaEstoqueRoute = LojaEstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
+  getParentRoute: () => LojaRoute,
+} as any)
 const LojaCampanhasRoute = LojaCampanhasRouteImport.update({
   id: '/campanhas',
   path: '/campanhas',
@@ -362,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
   '/loja/campanhas': typeof LojaCampanhasRoute
+  '/loja/estoque': typeof LojaEstoqueRoute
   '/loja/negocio': typeof LojaNegocioRoute
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
@@ -413,6 +420,7 @@ export interface FileRoutesByTo {
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
   '/loja/campanhas': typeof LojaCampanhasRoute
+  '/loja/estoque': typeof LojaEstoqueRoute
   '/loja/negocio': typeof LojaNegocioRoute
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
@@ -471,6 +479,7 @@ export interface FileRoutesById {
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
   '/loja/campanhas': typeof LojaCampanhasRoute
+  '/loja/estoque': typeof LojaEstoqueRoute
   '/loja/negocio': typeof LojaNegocioRoute
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
@@ -530,6 +539,7 @@ export interface FileRouteTypes {
     | '/admin/moderacao'
     | '/admin/parceiros'
     | '/loja/campanhas'
+    | '/loja/estoque'
     | '/loja/negocio'
     | '/loja/perfil'
     | '/motorista/alugueis'
@@ -581,6 +591,7 @@ export interface FileRouteTypes {
     | '/admin/moderacao'
     | '/admin/parceiros'
     | '/loja/campanhas'
+    | '/loja/estoque'
     | '/loja/negocio'
     | '/loja/perfil'
     | '/motorista/alugueis'
@@ -638,6 +649,7 @@ export interface FileRouteTypes {
     | '/admin/moderacao'
     | '/admin/parceiros'
     | '/loja/campanhas'
+    | '/loja/estoque'
     | '/loja/negocio'
     | '/loja/perfil'
     | '/motorista/alugueis'
@@ -948,6 +960,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojaNegocioRouteImport
       parentRoute: typeof LojaRoute
     }
+    '/loja/estoque': {
+      id: '/loja/estoque'
+      path: '/estoque'
+      fullPath: '/loja/estoque'
+      preLoaderRoute: typeof LojaEstoqueRouteImport
+      parentRoute: typeof LojaRoute
+    }
     '/loja/campanhas': {
       id: '/loja/campanhas'
       path: '/campanhas'
@@ -1102,6 +1121,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface LojaRouteChildren {
   LojaCampanhasRoute: typeof LojaCampanhasRoute
+  LojaEstoqueRoute: typeof LojaEstoqueRoute
   LojaNegocioRoute: typeof LojaNegocioRoute
   LojaPerfilRoute: typeof LojaPerfilRoute
   LojaIndexRoute: typeof LojaIndexRoute
@@ -1112,6 +1132,7 @@ interface LojaRouteChildren {
 
 const LojaRouteChildren: LojaRouteChildren = {
   LojaCampanhasRoute: LojaCampanhasRoute,
+  LojaEstoqueRoute: LojaEstoqueRoute,
   LojaNegocioRoute: LojaNegocioRoute,
   LojaPerfilRoute: LojaPerfilRoute,
   LojaIndexRoute: LojaIndexRoute,
