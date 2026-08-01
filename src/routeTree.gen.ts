@@ -44,6 +44,7 @@ import { Route as MotoristaCheckinRouteImport } from './routes/motorista.checkin
 import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.beneficios'
 import { Route as MotoristaAlugueisRouteImport } from './routes/motorista.alugueis'
 import { Route as LojaPerfilRouteImport } from './routes/loja.perfil'
+import { Route as LojaOportunidadesRouteImport } from './routes/loja.oportunidades'
 import { Route as LojaNegocioRouteImport } from './routes/loja.negocio'
 import { Route as LojaEstoqueRouteImport } from './routes/loja.estoque'
 import { Route as LojaCampanhasRouteImport } from './routes/loja.campanhas'
@@ -244,6 +245,11 @@ const LojaPerfilRoute = LojaPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => LojaRoute,
 } as any)
+const LojaOportunidadesRoute = LojaOportunidadesRouteImport.update({
+  id: '/oportunidades',
+  path: '/oportunidades',
+  getParentRoute: () => LojaRoute,
+} as any)
 const LojaNegocioRoute = LojaNegocioRouteImport.update({
   id: '/negocio',
   path: '/negocio',
@@ -382,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/loja/campanhas': typeof LojaCampanhasRoute
   '/loja/estoque': typeof LojaEstoqueRoute
   '/loja/negocio': typeof LojaNegocioRoute
+  '/loja/oportunidades': typeof LojaOportunidadesRoute
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
@@ -436,6 +443,7 @@ export interface FileRoutesByTo {
   '/loja/campanhas': typeof LojaCampanhasRoute
   '/loja/estoque': typeof LojaEstoqueRoute
   '/loja/negocio': typeof LojaNegocioRoute
+  '/loja/oportunidades': typeof LojaOportunidadesRoute
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
@@ -497,6 +505,7 @@ export interface FileRoutesById {
   '/loja/campanhas': typeof LojaCampanhasRoute
   '/loja/estoque': typeof LojaEstoqueRoute
   '/loja/negocio': typeof LojaNegocioRoute
+  '/loja/oportunidades': typeof LojaOportunidadesRoute
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
@@ -559,6 +568,7 @@ export interface FileRouteTypes {
     | '/loja/campanhas'
     | '/loja/estoque'
     | '/loja/negocio'
+    | '/loja/oportunidades'
     | '/loja/perfil'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
@@ -613,6 +623,7 @@ export interface FileRouteTypes {
     | '/loja/campanhas'
     | '/loja/estoque'
     | '/loja/negocio'
+    | '/loja/oportunidades'
     | '/loja/perfil'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
@@ -673,6 +684,7 @@ export interface FileRouteTypes {
     | '/loja/campanhas'
     | '/loja/estoque'
     | '/loja/negocio'
+    | '/loja/oportunidades'
     | '/loja/perfil'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
@@ -977,6 +989,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojaPerfilRouteImport
       parentRoute: typeof LojaRoute
     }
+    '/loja/oportunidades': {
+      id: '/loja/oportunidades'
+      path: '/oportunidades'
+      fullPath: '/loja/oportunidades'
+      preLoaderRoute: typeof LojaOportunidadesRouteImport
+      parentRoute: typeof LojaRoute
+    }
     '/loja/negocio': {
       id: '/loja/negocio'
       path: '/negocio'
@@ -1161,6 +1180,7 @@ interface LojaRouteChildren {
   LojaCampanhasRoute: typeof LojaCampanhasRoute
   LojaEstoqueRoute: typeof LojaEstoqueRoute
   LojaNegocioRoute: typeof LojaNegocioRoute
+  LojaOportunidadesRoute: typeof LojaOportunidadesRoute
   LojaPerfilRoute: typeof LojaPerfilRoute
   LojaIndexRoute: typeof LojaIndexRoute
   LojaCatalogoItemIdRoute: typeof LojaCatalogoItemIdRoute
@@ -1174,6 +1194,7 @@ const LojaRouteChildren: LojaRouteChildren = {
   LojaCampanhasRoute: LojaCampanhasRoute,
   LojaEstoqueRoute: LojaEstoqueRoute,
   LojaNegocioRoute: LojaNegocioRoute,
+  LojaOportunidadesRoute: LojaOportunidadesRoute,
   LojaPerfilRoute: LojaPerfilRoute,
   LojaIndexRoute: LojaIndexRoute,
   LojaCatalogoItemIdRoute: LojaCatalogoItemIdRoute,
