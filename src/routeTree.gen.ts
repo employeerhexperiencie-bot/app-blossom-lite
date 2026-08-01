@@ -33,7 +33,6 @@ import { Route as ProprietarioAgendaRouteImport } from './routes/proprietario.ag
 import { Route as PassageiroPerfilRouteImport } from './routes/passageiro.perfil'
 import { Route as PassageiroParceirosRouteImport } from './routes/passageiro.parceiros'
 import { Route as PassageiroCashbackRouteImport } from './routes/passageiro.cashback'
-import { Route as OficinaPromocoesRouteImport } from './routes/oficina.promocoes'
 import { Route as OficinaPerfilRouteImport } from './routes/oficina.perfil'
 import { Route as OficinaFinanceiroRouteImport } from './routes/oficina.financeiro'
 import { Route as OficinaAgendaRouteImport } from './routes/oficina.agenda'
@@ -182,11 +181,6 @@ const PassageiroCashbackRoute = PassageiroCashbackRouteImport.update({
   id: '/cashback',
   path: '/cashback',
   getParentRoute: () => PassageiroRoute,
-} as any)
-const OficinaPromocoesRoute = OficinaPromocoesRouteImport.update({
-  id: '/promocoes',
-  path: '/promocoes',
-  getParentRoute: () => OficinaRoute,
 } as any)
 const OficinaPerfilRoute = OficinaPerfilRouteImport.update({
   id: '/perfil',
@@ -355,7 +349,6 @@ export interface FileRoutesByFullPath {
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
-  '/oficina/promocoes': typeof OficinaPromocoesRoute
   '/passageiro/cashback': typeof PassageiroCashbackRoute
   '/passageiro/parceiros': typeof PassageiroParceirosRoute
   '/passageiro/perfil': typeof PassageiroPerfilRoute
@@ -403,7 +396,6 @@ export interface FileRoutesByTo {
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
-  '/oficina/promocoes': typeof OficinaPromocoesRoute
   '/passageiro/cashback': typeof PassageiroCashbackRoute
   '/passageiro/parceiros': typeof PassageiroParceirosRoute
   '/passageiro/perfil': typeof PassageiroPerfilRoute
@@ -458,7 +450,6 @@ export interface FileRoutesById {
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
-  '/oficina/promocoes': typeof OficinaPromocoesRoute
   '/passageiro/cashback': typeof PassageiroCashbackRoute
   '/passageiro/parceiros': typeof PassageiroParceirosRoute
   '/passageiro/perfil': typeof PassageiroPerfilRoute
@@ -514,7 +505,6 @@ export interface FileRouteTypes {
     | '/oficina/agenda'
     | '/oficina/financeiro'
     | '/oficina/perfil'
-    | '/oficina/promocoes'
     | '/passageiro/cashback'
     | '/passageiro/parceiros'
     | '/passageiro/perfil'
@@ -562,7 +552,6 @@ export interface FileRouteTypes {
     | '/oficina/agenda'
     | '/oficina/financeiro'
     | '/oficina/perfil'
-    | '/oficina/promocoes'
     | '/passageiro/cashback'
     | '/passageiro/parceiros'
     | '/passageiro/perfil'
@@ -616,7 +605,6 @@ export interface FileRouteTypes {
     | '/oficina/agenda'
     | '/oficina/financeiro'
     | '/oficina/perfil'
-    | '/oficina/promocoes'
     | '/passageiro/cashback'
     | '/passageiro/parceiros'
     | '/passageiro/perfil'
@@ -827,13 +815,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/passageiro/cashback'
       preLoaderRoute: typeof PassageiroCashbackRouteImport
       parentRoute: typeof PassageiroRoute
-    }
-    '/oficina/promocoes': {
-      id: '/oficina/promocoes'
-      path: '/promocoes'
-      fullPath: '/oficina/promocoes'
-      preLoaderRoute: typeof OficinaPromocoesRouteImport
-      parentRoute: typeof OficinaRoute
     }
     '/oficina/perfil': {
       id: '/oficina/perfil'
@@ -1120,7 +1101,6 @@ interface OficinaRouteChildren {
   OficinaAgendaRoute: typeof OficinaAgendaRoute
   OficinaFinanceiroRoute: typeof OficinaFinanceiroRoute
   OficinaPerfilRoute: typeof OficinaPerfilRoute
-  OficinaPromocoesRoute: typeof OficinaPromocoesRoute
   OficinaIndexRoute: typeof OficinaIndexRoute
   OficinaServicosOsIdRoute: typeof OficinaServicosOsIdRoute
   OficinaServicosIndexRoute: typeof OficinaServicosIndexRoute
@@ -1130,7 +1110,6 @@ const OficinaRouteChildren: OficinaRouteChildren = {
   OficinaAgendaRoute: OficinaAgendaRoute,
   OficinaFinanceiroRoute: OficinaFinanceiroRoute,
   OficinaPerfilRoute: OficinaPerfilRoute,
-  OficinaPromocoesRoute: OficinaPromocoesRoute,
   OficinaIndexRoute: OficinaIndexRoute,
   OficinaServicosOsIdRoute: OficinaServicosOsIdRoute,
   OficinaServicosIndexRoute: OficinaServicosIndexRoute,

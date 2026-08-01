@@ -7,7 +7,7 @@ const paths = [
   "/", "/auth",
   "/motorista", "/motorista/beneficios", "/motorista/alugueis", "/motorista/perfil",
   "/proprietario", "/proprietario/motoristas", "/proprietario/financeiro", "/proprietario/perfil",
-  "/oficina", "/oficina/agenda", "/oficina/promocoes", "/oficina/perfil",
+  "/oficina", "/oficina/agenda", "/oficina/perfil",
   "/passageiro", "/passageiro/cashback", "/passageiro/parceiros", "/passageiro/perfil",
   "/loja", "/loja/campanhas", "/loja/perfil",
 ];
