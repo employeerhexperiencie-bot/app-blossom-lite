@@ -50,6 +50,7 @@ import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as ProprietarioFrotaIndexRouteImport } from './routes/proprietario.frota.index'
 import { Route as ProprietarioContratosIndexRouteImport } from './routes/proprietario.contratos.index'
+import { Route as OficinaServicosIndexRouteImport } from './routes/oficina.servicos.index'
 import { Route as ProprietarioSolicitacoesIdRouteImport } from './routes/proprietario.solicitacoes.$id'
 import { Route as ProprietarioFrotaNovoRouteImport } from './routes/proprietario.frota.novo'
 import { Route as ProprietarioFrotaCarroIdRouteImport } from './routes/proprietario.frota.$carroId'
@@ -266,6 +267,11 @@ const ProprietarioContratosIndexRoute =
     path: '/contratos/',
     getParentRoute: () => ProprietarioRoute,
   } as any)
+const OficinaServicosIndexRoute = OficinaServicosIndexRouteImport.update({
+  id: '/servicos/',
+  path: '/servicos/',
+  getParentRoute: () => OficinaRoute,
+} as any)
 const ProprietarioSolicitacoesIdRoute =
   ProprietarioSolicitacoesIdRouteImport.update({
     id: '/solicitacoes/$id',
@@ -360,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
 }
@@ -405,6 +412,7 @@ export interface FileRoutesByTo {
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/oficina/servicos': typeof OficinaServicosIndexRoute
   '/proprietario/contratos': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota': typeof ProprietarioFrotaIndexRoute
 }
@@ -457,6 +465,7 @@ export interface FileRoutesById {
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
 }
@@ -510,6 +519,7 @@ export interface FileRouteTypes {
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
   fileRoutesByTo: FileRoutesByTo
@@ -555,6 +565,7 @@ export interface FileRouteTypes {
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/oficina/servicos'
     | '/proprietario/contratos'
     | '/proprietario/frota'
   id:
@@ -606,6 +617,7 @@ export interface FileRouteTypes {
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
   fileRoutesById: FileRoutesById
@@ -911,6 +923,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProprietarioContratosIndexRouteImport
       parentRoute: typeof ProprietarioRoute
     }
+    '/oficina/servicos/': {
+      id: '/oficina/servicos/'
+      path: '/servicos'
+      fullPath: '/oficina/servicos/'
+      preLoaderRoute: typeof OficinaServicosIndexRouteImport
+      parentRoute: typeof OficinaRoute
+    }
     '/proprietario/solicitacoes/$id': {
       id: '/proprietario/solicitacoes/$id'
       path: '/solicitacoes/$id'
@@ -1064,6 +1083,7 @@ interface OficinaRouteChildren {
   OficinaPerfilRoute: typeof OficinaPerfilRoute
   OficinaPromocoesRoute: typeof OficinaPromocoesRoute
   OficinaIndexRoute: typeof OficinaIndexRoute
+  OficinaServicosIndexRoute: typeof OficinaServicosIndexRoute
 }
 
 const OficinaRouteChildren: OficinaRouteChildren = {
@@ -1071,6 +1091,7 @@ const OficinaRouteChildren: OficinaRouteChildren = {
   OficinaPerfilRoute: OficinaPerfilRoute,
   OficinaPromocoesRoute: OficinaPromocoesRoute,
   OficinaIndexRoute: OficinaIndexRoute,
+  OficinaServicosIndexRoute: OficinaServicosIndexRoute,
 }
 
 const OficinaRouteWithChildren =
