@@ -9,7 +9,7 @@ const paths = [
   "/proprietario", "/proprietario/motoristas", "/proprietario/financeiro", "/proprietario/perfil",
   "/oficina", "/oficina/agenda", "/oficina/servicos", "/oficina/financeiro", "/oficina/perfil",
   "/passageiro", "/passageiro/cashback", "/passageiro/parceiros", "/passageiro/perfil",
-  "/loja", "/loja/campanhas", "/loja/perfil",
+  "/loja", "/loja/negocio", "/loja/catalogo", "/loja/estoque", "/loja/pedidos", "/loja/oportunidades", "/loja/plano",
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({

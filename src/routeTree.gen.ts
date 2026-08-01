@@ -44,11 +44,9 @@ import { Route as MotoristaCheckinRouteImport } from './routes/motorista.checkin
 import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.beneficios'
 import { Route as MotoristaAlugueisRouteImport } from './routes/motorista.alugueis'
 import { Route as LojaPlanoRouteImport } from './routes/loja.plano'
-import { Route as LojaPerfilRouteImport } from './routes/loja.perfil'
 import { Route as LojaOportunidadesRouteImport } from './routes/loja.oportunidades'
 import { Route as LojaNegocioRouteImport } from './routes/loja.negocio'
 import { Route as LojaEstoqueRouteImport } from './routes/loja.estoque'
-import { Route as LojaCampanhasRouteImport } from './routes/loja.campanhas'
 import { Route as AdminParceirosRouteImport } from './routes/admin.parceiros'
 import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
@@ -246,11 +244,6 @@ const LojaPlanoRoute = LojaPlanoRouteImport.update({
   path: '/plano',
   getParentRoute: () => LojaRoute,
 } as any)
-const LojaPerfilRoute = LojaPerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => LojaRoute,
-} as any)
 const LojaOportunidadesRoute = LojaOportunidadesRouteImport.update({
   id: '/oportunidades',
   path: '/oportunidades',
@@ -264,11 +257,6 @@ const LojaNegocioRoute = LojaNegocioRouteImport.update({
 const LojaEstoqueRoute = LojaEstoqueRouteImport.update({
   id: '/estoque',
   path: '/estoque',
-  getParentRoute: () => LojaRoute,
-} as any)
-const LojaCampanhasRoute = LojaCampanhasRouteImport.update({
-  id: '/campanhas',
-  path: '/campanhas',
   getParentRoute: () => LojaRoute,
 } as any)
 const AdminParceirosRoute = AdminParceirosRouteImport.update({
@@ -391,11 +379,9 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
-  '/loja/campanhas': typeof LojaCampanhasRoute
   '/loja/estoque': typeof LojaEstoqueRoute
   '/loja/negocio': typeof LojaNegocioRoute
   '/loja/oportunidades': typeof LojaOportunidadesRoute
-  '/loja/perfil': typeof LojaPerfilRoute
   '/loja/plano': typeof LojaPlanoRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
@@ -447,11 +433,9 @@ export interface FileRoutesByTo {
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
-  '/loja/campanhas': typeof LojaCampanhasRoute
   '/loja/estoque': typeof LojaEstoqueRoute
   '/loja/negocio': typeof LojaNegocioRoute
   '/loja/oportunidades': typeof LojaOportunidadesRoute
-  '/loja/perfil': typeof LojaPerfilRoute
   '/loja/plano': typeof LojaPlanoRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
@@ -510,11 +494,9 @@ export interface FileRoutesById {
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
-  '/loja/campanhas': typeof LojaCampanhasRoute
   '/loja/estoque': typeof LojaEstoqueRoute
   '/loja/negocio': typeof LojaNegocioRoute
   '/loja/oportunidades': typeof LojaOportunidadesRoute
-  '/loja/perfil': typeof LojaPerfilRoute
   '/loja/plano': typeof LojaPlanoRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
@@ -574,11 +556,9 @@ export interface FileRouteTypes {
     | '/admin/financeiro'
     | '/admin/moderacao'
     | '/admin/parceiros'
-    | '/loja/campanhas'
     | '/loja/estoque'
     | '/loja/negocio'
     | '/loja/oportunidades'
-    | '/loja/perfil'
     | '/loja/plano'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
@@ -630,11 +610,9 @@ export interface FileRouteTypes {
     | '/admin/financeiro'
     | '/admin/moderacao'
     | '/admin/parceiros'
-    | '/loja/campanhas'
     | '/loja/estoque'
     | '/loja/negocio'
     | '/loja/oportunidades'
-    | '/loja/perfil'
     | '/loja/plano'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
@@ -692,11 +670,9 @@ export interface FileRouteTypes {
     | '/admin/financeiro'
     | '/admin/moderacao'
     | '/admin/parceiros'
-    | '/loja/campanhas'
     | '/loja/estoque'
     | '/loja/negocio'
     | '/loja/oportunidades'
-    | '/loja/perfil'
     | '/loja/plano'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
@@ -1001,13 +977,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojaPlanoRouteImport
       parentRoute: typeof LojaRoute
     }
-    '/loja/perfil': {
-      id: '/loja/perfil'
-      path: '/perfil'
-      fullPath: '/loja/perfil'
-      preLoaderRoute: typeof LojaPerfilRouteImport
-      parentRoute: typeof LojaRoute
-    }
     '/loja/oportunidades': {
       id: '/loja/oportunidades'
       path: '/oportunidades'
@@ -1027,13 +996,6 @@ declare module '@tanstack/react-router' {
       path: '/estoque'
       fullPath: '/loja/estoque'
       preLoaderRoute: typeof LojaEstoqueRouteImport
-      parentRoute: typeof LojaRoute
-    }
-    '/loja/campanhas': {
-      id: '/loja/campanhas'
-      path: '/campanhas'
-      fullPath: '/loja/campanhas'
-      preLoaderRoute: typeof LojaCampanhasRouteImport
       parentRoute: typeof LojaRoute
     }
     '/admin/parceiros': {
@@ -1196,11 +1158,9 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface LojaRouteChildren {
-  LojaCampanhasRoute: typeof LojaCampanhasRoute
   LojaEstoqueRoute: typeof LojaEstoqueRoute
   LojaNegocioRoute: typeof LojaNegocioRoute
   LojaOportunidadesRoute: typeof LojaOportunidadesRoute
-  LojaPerfilRoute: typeof LojaPerfilRoute
   LojaPlanoRoute: typeof LojaPlanoRoute
   LojaIndexRoute: typeof LojaIndexRoute
   LojaCatalogoItemIdRoute: typeof LojaCatalogoItemIdRoute
@@ -1211,11 +1171,9 @@ interface LojaRouteChildren {
 }
 
 const LojaRouteChildren: LojaRouteChildren = {
-  LojaCampanhasRoute: LojaCampanhasRoute,
   LojaEstoqueRoute: LojaEstoqueRoute,
   LojaNegocioRoute: LojaNegocioRoute,
   LojaOportunidadesRoute: LojaOportunidadesRoute,
-  LojaPerfilRoute: LojaPerfilRoute,
   LojaPlanoRoute: LojaPlanoRoute,
   LojaIndexRoute: LojaIndexRoute,
   LojaCatalogoItemIdRoute: LojaCatalogoItemIdRoute,
