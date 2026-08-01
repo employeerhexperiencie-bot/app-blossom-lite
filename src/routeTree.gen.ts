@@ -35,6 +35,7 @@ import { Route as PassageiroParceirosRouteImport } from './routes/passageiro.par
 import { Route as PassageiroCashbackRouteImport } from './routes/passageiro.cashback'
 import { Route as OficinaPromocoesRouteImport } from './routes/oficina.promocoes'
 import { Route as OficinaPerfilRouteImport } from './routes/oficina.perfil'
+import { Route as OficinaFinanceiroRouteImport } from './routes/oficina.financeiro'
 import { Route as OficinaAgendaRouteImport } from './routes/oficina.agenda'
 import { Route as MotoristaPerfilRouteImport } from './routes/motorista.perfil'
 import { Route as MotoristaOrcamentosRouteImport } from './routes/motorista.orcamentos'
@@ -192,6 +193,11 @@ const OficinaPerfilRoute = OficinaPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => OficinaRoute,
 } as any)
+const OficinaFinanceiroRoute = OficinaFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => OficinaRoute,
+} as any)
 const OficinaAgendaRoute = OficinaAgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
+  '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
   '/oficina/promocoes': typeof OficinaPromocoesRoute
   '/passageiro/cashback': typeof PassageiroCashbackRoute
@@ -394,6 +401,7 @@ export interface FileRoutesByTo {
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
+  '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
   '/oficina/promocoes': typeof OficinaPromocoesRoute
   '/passageiro/cashback': typeof PassageiroCashbackRoute
@@ -448,6 +456,7 @@ export interface FileRoutesById {
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
+  '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
   '/oficina/promocoes': typeof OficinaPromocoesRoute
   '/passageiro/cashback': typeof PassageiroCashbackRoute
@@ -503,6 +512,7 @@ export interface FileRouteTypes {
     | '/motorista/orcamentos'
     | '/motorista/perfil'
     | '/oficina/agenda'
+    | '/oficina/financeiro'
     | '/oficina/perfil'
     | '/oficina/promocoes'
     | '/passageiro/cashback'
@@ -550,6 +560,7 @@ export interface FileRouteTypes {
     | '/motorista/orcamentos'
     | '/motorista/perfil'
     | '/oficina/agenda'
+    | '/oficina/financeiro'
     | '/oficina/perfil'
     | '/oficina/promocoes'
     | '/passageiro/cashback'
@@ -603,6 +614,7 @@ export interface FileRouteTypes {
     | '/motorista/orcamentos'
     | '/motorista/perfil'
     | '/oficina/agenda'
+    | '/oficina/financeiro'
     | '/oficina/perfil'
     | '/oficina/promocoes'
     | '/passageiro/cashback'
@@ -828,6 +840,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/oficina/perfil'
       preLoaderRoute: typeof OficinaPerfilRouteImport
+      parentRoute: typeof OficinaRoute
+    }
+    '/oficina/financeiro': {
+      id: '/oficina/financeiro'
+      path: '/financeiro'
+      fullPath: '/oficina/financeiro'
+      preLoaderRoute: typeof OficinaFinanceiroRouteImport
       parentRoute: typeof OficinaRoute
     }
     '/oficina/agenda': {
@@ -1099,6 +1118,7 @@ const MotoristaRouteWithChildren = MotoristaRoute._addFileChildren(
 
 interface OficinaRouteChildren {
   OficinaAgendaRoute: typeof OficinaAgendaRoute
+  OficinaFinanceiroRoute: typeof OficinaFinanceiroRoute
   OficinaPerfilRoute: typeof OficinaPerfilRoute
   OficinaPromocoesRoute: typeof OficinaPromocoesRoute
   OficinaIndexRoute: typeof OficinaIndexRoute
@@ -1108,6 +1128,7 @@ interface OficinaRouteChildren {
 
 const OficinaRouteChildren: OficinaRouteChildren = {
   OficinaAgendaRoute: OficinaAgendaRoute,
+  OficinaFinanceiroRoute: OficinaFinanceiroRoute,
   OficinaPerfilRoute: OficinaPerfilRoute,
   OficinaPromocoesRoute: OficinaPromocoesRoute,
   OficinaIndexRoute: OficinaIndexRoute,
