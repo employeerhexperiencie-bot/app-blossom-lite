@@ -56,6 +56,7 @@ import { Route as ProprietarioFrotaNovoRouteImport } from './routes/proprietario
 import { Route as ProprietarioFrotaCarroIdRouteImport } from './routes/proprietario.frota.$carroId'
 import { Route as ProprietarioContratosNovoRouteImport } from './routes/proprietario.contratos.novo'
 import { Route as ProprietarioContratosIdRouteImport } from './routes/proprietario.contratos.$id'
+import { Route as OficinaServicosOsIdRouteImport } from './routes/oficina.servicos.$osId'
 import { Route as MotoristaCorridasIdRouteImport } from './routes/motorista.corridas.$id'
 import { Route as MotoristaBeneficiosParceiroIdRouteImport } from './routes/motorista.beneficios.$parceiroId'
 import { Route as MotoristaAlugueisCarroIdRouteImport } from './routes/motorista.alugueis.$carroId'
@@ -300,6 +301,11 @@ const ProprietarioContratosIdRoute = ProprietarioContratosIdRouteImport.update({
   path: '/contratos/$id',
   getParentRoute: () => ProprietarioRoute,
 } as any)
+const OficinaServicosOsIdRoute = OficinaServicosOsIdRouteImport.update({
+  id: '/servicos/$osId',
+  path: '/servicos/$osId',
+  getParentRoute: () => OficinaRoute,
+} as any)
 const MotoristaCorridasIdRoute = MotoristaCorridasIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -361,6 +367,7 @@ export interface FileRoutesByFullPath {
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
+  '/oficina/servicos/$osId': typeof OficinaServicosOsIdRoute
   '/proprietario/contratos/$id': typeof ProprietarioContratosIdRoute
   '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
@@ -407,6 +414,7 @@ export interface FileRoutesByTo {
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
+  '/oficina/servicos/$osId': typeof OficinaServicosOsIdRoute
   '/proprietario/contratos/$id': typeof ProprietarioContratosIdRoute
   '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
@@ -460,6 +468,7 @@ export interface FileRoutesById {
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
+  '/oficina/servicos/$osId': typeof OficinaServicosOsIdRoute
   '/proprietario/contratos/$id': typeof ProprietarioContratosIdRoute
   '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
@@ -514,6 +523,7 @@ export interface FileRouteTypes {
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
+    | '/oficina/servicos/$osId'
     | '/proprietario/contratos/$id'
     | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
@@ -560,6 +570,7 @@ export interface FileRouteTypes {
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
+    | '/oficina/servicos/$osId'
     | '/proprietario/contratos/$id'
     | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
@@ -612,6 +623,7 @@ export interface FileRouteTypes {
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
+    | '/oficina/servicos/$osId'
     | '/proprietario/contratos/$id'
     | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
@@ -965,6 +977,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProprietarioContratosIdRouteImport
       parentRoute: typeof ProprietarioRoute
     }
+    '/oficina/servicos/$osId': {
+      id: '/oficina/servicos/$osId'
+      path: '/servicos/$osId'
+      fullPath: '/oficina/servicos/$osId'
+      preLoaderRoute: typeof OficinaServicosOsIdRouteImport
+      parentRoute: typeof OficinaRoute
+    }
     '/motorista/corridas/$id': {
       id: '/motorista/corridas/$id'
       path: '/$id'
@@ -1083,6 +1102,7 @@ interface OficinaRouteChildren {
   OficinaPerfilRoute: typeof OficinaPerfilRoute
   OficinaPromocoesRoute: typeof OficinaPromocoesRoute
   OficinaIndexRoute: typeof OficinaIndexRoute
+  OficinaServicosOsIdRoute: typeof OficinaServicosOsIdRoute
   OficinaServicosIndexRoute: typeof OficinaServicosIndexRoute
 }
 
@@ -1091,6 +1111,7 @@ const OficinaRouteChildren: OficinaRouteChildren = {
   OficinaPerfilRoute: OficinaPerfilRoute,
   OficinaPromocoesRoute: OficinaPromocoesRoute,
   OficinaIndexRoute: OficinaIndexRoute,
+  OficinaServicosOsIdRoute: OficinaServicosOsIdRoute,
   OficinaServicosIndexRoute: OficinaServicosIndexRoute,
 }
 
