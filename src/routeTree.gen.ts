@@ -64,6 +64,7 @@ import { Route as OficinaServicosOsIdRouteImport } from './routes/oficina.servic
 import { Route as MotoristaCorridasIdRouteImport } from './routes/motorista.corridas.$id'
 import { Route as MotoristaBeneficiosParceiroIdRouteImport } from './routes/motorista.beneficios.$parceiroId'
 import { Route as MotoristaAlugueisCarroIdRouteImport } from './routes/motorista.alugueis.$carroId'
+import { Route as LojaPedidosPedidoIdRouteImport } from './routes/loja.pedidos.$pedidoId'
 import { Route as LojaCatalogoNovoRouteImport } from './routes/loja.catalogo.novo'
 import { Route as LojaCatalogoItemIdRouteImport } from './routes/loja.catalogo.$itemId'
 
@@ -349,6 +350,11 @@ const MotoristaAlugueisCarroIdRoute =
     path: '/$carroId',
     getParentRoute: () => MotoristaAlugueisRoute,
   } as any)
+const LojaPedidosPedidoIdRoute = LojaPedidosPedidoIdRouteImport.update({
+  id: '/pedidos/$pedidoId',
+  path: '/pedidos/$pedidoId',
+  getParentRoute: () => LojaRoute,
+} as any)
 const LojaCatalogoNovoRoute = LojaCatalogoNovoRouteImport.update({
   id: '/catalogo/novo',
   path: '/catalogo/novo',
@@ -404,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/proprietario/': typeof ProprietarioIndexRoute
   '/loja/catalogo/$itemId': typeof LojaCatalogoItemIdRoute
   '/loja/catalogo/novo': typeof LojaCatalogoNovoRoute
+  '/loja/pedidos/$pedidoId': typeof LojaPedidosPedidoIdRoute
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
@@ -457,6 +464,7 @@ export interface FileRoutesByTo {
   '/proprietario': typeof ProprietarioIndexRoute
   '/loja/catalogo/$itemId': typeof LojaCatalogoItemIdRoute
   '/loja/catalogo/novo': typeof LojaCatalogoNovoRoute
+  '/loja/pedidos/$pedidoId': typeof LojaPedidosPedidoIdRoute
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
@@ -517,6 +525,7 @@ export interface FileRoutesById {
   '/proprietario/': typeof ProprietarioIndexRoute
   '/loja/catalogo/$itemId': typeof LojaCatalogoItemIdRoute
   '/loja/catalogo/novo': typeof LojaCatalogoNovoRoute
+  '/loja/pedidos/$pedidoId': typeof LojaPedidosPedidoIdRoute
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
@@ -578,6 +587,7 @@ export interface FileRouteTypes {
     | '/proprietario/'
     | '/loja/catalogo/$itemId'
     | '/loja/catalogo/novo'
+    | '/loja/pedidos/$pedidoId'
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
@@ -631,6 +641,7 @@ export interface FileRouteTypes {
     | '/proprietario'
     | '/loja/catalogo/$itemId'
     | '/loja/catalogo/novo'
+    | '/loja/pedidos/$pedidoId'
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
@@ -690,6 +701,7 @@ export interface FileRouteTypes {
     | '/proprietario/'
     | '/loja/catalogo/$itemId'
     | '/loja/catalogo/novo'
+    | '/loja/pedidos/$pedidoId'
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
@@ -1105,6 +1117,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MotoristaAlugueisCarroIdRouteImport
       parentRoute: typeof MotoristaAlugueisRoute
     }
+    '/loja/pedidos/$pedidoId': {
+      id: '/loja/pedidos/$pedidoId'
+      path: '/pedidos/$pedidoId'
+      fullPath: '/loja/pedidos/$pedidoId'
+      preLoaderRoute: typeof LojaPedidosPedidoIdRouteImport
+      parentRoute: typeof LojaRoute
+    }
     '/loja/catalogo/novo': {
       id: '/loja/catalogo/novo'
       path: '/catalogo/novo'
@@ -1146,6 +1165,7 @@ interface LojaRouteChildren {
   LojaIndexRoute: typeof LojaIndexRoute
   LojaCatalogoItemIdRoute: typeof LojaCatalogoItemIdRoute
   LojaCatalogoNovoRoute: typeof LojaCatalogoNovoRoute
+  LojaPedidosPedidoIdRoute: typeof LojaPedidosPedidoIdRoute
   LojaCatalogoIndexRoute: typeof LojaCatalogoIndexRoute
   LojaPedidosIndexRoute: typeof LojaPedidosIndexRoute
 }
@@ -1158,6 +1178,7 @@ const LojaRouteChildren: LojaRouteChildren = {
   LojaIndexRoute: LojaIndexRoute,
   LojaCatalogoItemIdRoute: LojaCatalogoItemIdRoute,
   LojaCatalogoNovoRoute: LojaCatalogoNovoRoute,
+  LojaPedidosPedidoIdRoute: LojaPedidosPedidoIdRoute,
   LojaCatalogoIndexRoute: LojaCatalogoIndexRoute,
   LojaPedidosIndexRoute: LojaPedidosIndexRoute,
 }
