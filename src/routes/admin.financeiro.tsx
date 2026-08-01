@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Wallet, TrendingUp, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { recebimentosMensais } from "@/lib/mock-data";
+import { receitaPlataforma, totalReceitaPlataforma } from "@/lib/monetizacao";
+import { fmtBRL } from "@/lib/mock-parceiro";
 
 export const Route = createFileRoute("/admin/financeiro")({
   head: () => ({ meta: [{ title: "Financeiro — Admin | TCHI LÉVA" }] }),
@@ -10,6 +12,7 @@ export const Route = createFileRoute("/admin/financeiro")({
 
 function Financeiro() {
   const total = recebimentosMensais.reduce((s, m) => s + m.valor, 0);
+  const totalReceita = totalReceitaPlataforma();
   const max = Math.max(...recebimentosMensais.map((m) => m.valor));
   return (
     <>
@@ -45,9 +48,39 @@ function Financeiro() {
           </div>
         </div>
       </PageSection>
+
+      <PageSection className="pt-2">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <h2 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            Receita da plataforma por fonte
+          </h2>
+          <div className="mt-3 flex flex-col gap-2">
+            {receitaPlataforma.map((f) => (
+              <div key={f.key} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-semibold">{f.label}</div>
+                  <div className="truncate text-[11px] text-muted-foreground">{f.descricao}</div>
+                  <div className="mt-1 h-1.5 w-full rounded-full bg-muted">
+                    <div
+                      className="h-1.5 rounded-full gradient-primary"
+                      style={{ width: `${(f.valor / totalReceita) * 100}%` }}
+                    />
+                  </div>
+                </div>
+                <span className="font-display text-sm font-black">{fmtBRL(f.valor)}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+            <span className="text-sm font-semibold">Total mês</span>
+            <span className="font-display text-xl font-black text-primary">{fmtBRL(totalReceita)}</span>
+          </div>
+        </div>
+      </PageSection>
     </>
   );
 }
+
 
 function Box({ icon: Icon, label, value, delta, up }: { icon: typeof Wallet; label: string; value: string; delta: string; up?: boolean }) {
   return (

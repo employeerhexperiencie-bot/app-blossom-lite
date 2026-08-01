@@ -43,14 +43,18 @@ import { Route as MotoristaCorridasRouteImport } from './routes/motorista.corrid
 import { Route as MotoristaCheckinRouteImport } from './routes/motorista.checkin'
 import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.beneficios'
 import { Route as MotoristaAlugueisRouteImport } from './routes/motorista.alugueis'
-import { Route as LojaPerfilRouteImport } from './routes/loja.perfil'
-import { Route as LojaCampanhasRouteImport } from './routes/loja.campanhas'
+import { Route as LojaPlanoRouteImport } from './routes/loja.plano'
+import { Route as LojaOportunidadesRouteImport } from './routes/loja.oportunidades'
+import { Route as LojaNegocioRouteImport } from './routes/loja.negocio'
+import { Route as LojaEstoqueRouteImport } from './routes/loja.estoque'
 import { Route as AdminParceirosRouteImport } from './routes/admin.parceiros'
 import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as ProprietarioFrotaIndexRouteImport } from './routes/proprietario.frota.index'
 import { Route as ProprietarioContratosIndexRouteImport } from './routes/proprietario.contratos.index'
 import { Route as OficinaServicosIndexRouteImport } from './routes/oficina.servicos.index'
+import { Route as LojaPedidosIndexRouteImport } from './routes/loja.pedidos.index'
+import { Route as LojaCatalogoIndexRouteImport } from './routes/loja.catalogo.index'
 import { Route as ProprietarioSolicitacoesIdRouteImport } from './routes/proprietario.solicitacoes.$id'
 import { Route as ProprietarioFrotaNovoRouteImport } from './routes/proprietario.frota.novo'
 import { Route as ProprietarioFrotaCarroIdRouteImport } from './routes/proprietario.frota.$carroId'
@@ -60,6 +64,9 @@ import { Route as OficinaServicosOsIdRouteImport } from './routes/oficina.servic
 import { Route as MotoristaCorridasIdRouteImport } from './routes/motorista.corridas.$id'
 import { Route as MotoristaBeneficiosParceiroIdRouteImport } from './routes/motorista.beneficios.$parceiroId'
 import { Route as MotoristaAlugueisCarroIdRouteImport } from './routes/motorista.alugueis.$carroId'
+import { Route as LojaPedidosPedidoIdRouteImport } from './routes/loja.pedidos.$pedidoId'
+import { Route as LojaCatalogoNovoRouteImport } from './routes/loja.catalogo.novo'
+import { Route as LojaCatalogoItemIdRouteImport } from './routes/loja.catalogo.$itemId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -232,14 +239,24 @@ const MotoristaAlugueisRoute = MotoristaAlugueisRouteImport.update({
   path: '/alugueis',
   getParentRoute: () => MotoristaRoute,
 } as any)
-const LojaPerfilRoute = LojaPerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
+const LojaPlanoRoute = LojaPlanoRouteImport.update({
+  id: '/plano',
+  path: '/plano',
   getParentRoute: () => LojaRoute,
 } as any)
-const LojaCampanhasRoute = LojaCampanhasRouteImport.update({
-  id: '/campanhas',
-  path: '/campanhas',
+const LojaOportunidadesRoute = LojaOportunidadesRouteImport.update({
+  id: '/oportunidades',
+  path: '/oportunidades',
+  getParentRoute: () => LojaRoute,
+} as any)
+const LojaNegocioRoute = LojaNegocioRouteImport.update({
+  id: '/negocio',
+  path: '/negocio',
+  getParentRoute: () => LojaRoute,
+} as any)
+const LojaEstoqueRoute = LojaEstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
   getParentRoute: () => LojaRoute,
 } as any)
 const AdminParceirosRoute = AdminParceirosRouteImport.update({
@@ -272,6 +289,16 @@ const OficinaServicosIndexRoute = OficinaServicosIndexRouteImport.update({
   id: '/servicos/',
   path: '/servicos/',
   getParentRoute: () => OficinaRoute,
+} as any)
+const LojaPedidosIndexRoute = LojaPedidosIndexRouteImport.update({
+  id: '/pedidos/',
+  path: '/pedidos/',
+  getParentRoute: () => LojaRoute,
+} as any)
+const LojaCatalogoIndexRoute = LojaCatalogoIndexRouteImport.update({
+  id: '/catalogo/',
+  path: '/catalogo/',
+  getParentRoute: () => LojaRoute,
 } as any)
 const ProprietarioSolicitacoesIdRoute =
   ProprietarioSolicitacoesIdRouteImport.update({
@@ -323,6 +350,21 @@ const MotoristaAlugueisCarroIdRoute =
     path: '/$carroId',
     getParentRoute: () => MotoristaAlugueisRoute,
   } as any)
+const LojaPedidosPedidoIdRoute = LojaPedidosPedidoIdRouteImport.update({
+  id: '/pedidos/$pedidoId',
+  path: '/pedidos/$pedidoId',
+  getParentRoute: () => LojaRoute,
+} as any)
+const LojaCatalogoNovoRoute = LojaCatalogoNovoRouteImport.update({
+  id: '/catalogo/novo',
+  path: '/catalogo/novo',
+  getParentRoute: () => LojaRoute,
+} as any)
+const LojaCatalogoItemIdRoute = LojaCatalogoItemIdRouteImport.update({
+  id: '/catalogo/$itemId',
+  path: '/catalogo/$itemId',
+  getParentRoute: () => LojaRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -337,8 +379,10 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
-  '/loja/campanhas': typeof LojaCampanhasRoute
-  '/loja/perfil': typeof LojaPerfilRoute
+  '/loja/estoque': typeof LojaEstoqueRoute
+  '/loja/negocio': typeof LojaNegocioRoute
+  '/loja/oportunidades': typeof LojaOportunidadesRoute
+  '/loja/plano': typeof LojaPlanoRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
@@ -364,6 +408,9 @@ export interface FileRoutesByFullPath {
   '/oficina/': typeof OficinaIndexRoute
   '/passageiro/': typeof PassageiroIndexRoute
   '/proprietario/': typeof ProprietarioIndexRoute
+  '/loja/catalogo/$itemId': typeof LojaCatalogoItemIdRoute
+  '/loja/catalogo/novo': typeof LojaCatalogoNovoRoute
+  '/loja/pedidos/$pedidoId': typeof LojaPedidosPedidoIdRoute
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
@@ -373,6 +420,8 @@ export interface FileRoutesByFullPath {
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/loja/catalogo/': typeof LojaCatalogoIndexRoute
+  '/loja/pedidos/': typeof LojaPedidosIndexRoute
   '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
@@ -384,8 +433,10 @@ export interface FileRoutesByTo {
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
-  '/loja/campanhas': typeof LojaCampanhasRoute
-  '/loja/perfil': typeof LojaPerfilRoute
+  '/loja/estoque': typeof LojaEstoqueRoute
+  '/loja/negocio': typeof LojaNegocioRoute
+  '/loja/oportunidades': typeof LojaOportunidadesRoute
+  '/loja/plano': typeof LojaPlanoRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
@@ -411,6 +462,9 @@ export interface FileRoutesByTo {
   '/oficina': typeof OficinaIndexRoute
   '/passageiro': typeof PassageiroIndexRoute
   '/proprietario': typeof ProprietarioIndexRoute
+  '/loja/catalogo/$itemId': typeof LojaCatalogoItemIdRoute
+  '/loja/catalogo/novo': typeof LojaCatalogoNovoRoute
+  '/loja/pedidos/$pedidoId': typeof LojaPedidosPedidoIdRoute
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
@@ -420,6 +474,8 @@ export interface FileRoutesByTo {
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/loja/catalogo': typeof LojaCatalogoIndexRoute
+  '/loja/pedidos': typeof LojaPedidosIndexRoute
   '/oficina/servicos': typeof OficinaServicosIndexRoute
   '/proprietario/contratos': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota': typeof ProprietarioFrotaIndexRoute
@@ -438,8 +494,10 @@ export interface FileRoutesById {
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
-  '/loja/campanhas': typeof LojaCampanhasRoute
-  '/loja/perfil': typeof LojaPerfilRoute
+  '/loja/estoque': typeof LojaEstoqueRoute
+  '/loja/negocio': typeof LojaNegocioRoute
+  '/loja/oportunidades': typeof LojaOportunidadesRoute
+  '/loja/plano': typeof LojaPlanoRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
@@ -465,6 +523,9 @@ export interface FileRoutesById {
   '/oficina/': typeof OficinaIndexRoute
   '/passageiro/': typeof PassageiroIndexRoute
   '/proprietario/': typeof ProprietarioIndexRoute
+  '/loja/catalogo/$itemId': typeof LojaCatalogoItemIdRoute
+  '/loja/catalogo/novo': typeof LojaCatalogoNovoRoute
+  '/loja/pedidos/$pedidoId': typeof LojaPedidosPedidoIdRoute
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
@@ -474,6 +535,8 @@ export interface FileRoutesById {
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/loja/catalogo/': typeof LojaCatalogoIndexRoute
+  '/loja/pedidos/': typeof LojaPedidosIndexRoute
   '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
@@ -493,8 +556,10 @@ export interface FileRouteTypes {
     | '/admin/financeiro'
     | '/admin/moderacao'
     | '/admin/parceiros'
-    | '/loja/campanhas'
-    | '/loja/perfil'
+    | '/loja/estoque'
+    | '/loja/negocio'
+    | '/loja/oportunidades'
+    | '/loja/plano'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
     | '/motorista/checkin'
@@ -520,6 +585,9 @@ export interface FileRouteTypes {
     | '/oficina/'
     | '/passageiro/'
     | '/proprietario/'
+    | '/loja/catalogo/$itemId'
+    | '/loja/catalogo/novo'
+    | '/loja/pedidos/$pedidoId'
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
@@ -529,6 +597,8 @@ export interface FileRouteTypes {
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/loja/catalogo/'
+    | '/loja/pedidos/'
     | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
@@ -540,8 +610,10 @@ export interface FileRouteTypes {
     | '/admin/financeiro'
     | '/admin/moderacao'
     | '/admin/parceiros'
-    | '/loja/campanhas'
-    | '/loja/perfil'
+    | '/loja/estoque'
+    | '/loja/negocio'
+    | '/loja/oportunidades'
+    | '/loja/plano'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
     | '/motorista/checkin'
@@ -567,6 +639,9 @@ export interface FileRouteTypes {
     | '/oficina'
     | '/passageiro'
     | '/proprietario'
+    | '/loja/catalogo/$itemId'
+    | '/loja/catalogo/novo'
+    | '/loja/pedidos/$pedidoId'
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
@@ -576,6 +651,8 @@ export interface FileRouteTypes {
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/loja/catalogo'
+    | '/loja/pedidos'
     | '/oficina/servicos'
     | '/proprietario/contratos'
     | '/proprietario/frota'
@@ -593,8 +670,10 @@ export interface FileRouteTypes {
     | '/admin/financeiro'
     | '/admin/moderacao'
     | '/admin/parceiros'
-    | '/loja/campanhas'
-    | '/loja/perfil'
+    | '/loja/estoque'
+    | '/loja/negocio'
+    | '/loja/oportunidades'
+    | '/loja/plano'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
     | '/motorista/checkin'
@@ -620,6 +699,9 @@ export interface FileRouteTypes {
     | '/oficina/'
     | '/passageiro/'
     | '/proprietario/'
+    | '/loja/catalogo/$itemId'
+    | '/loja/catalogo/novo'
+    | '/loja/pedidos/$pedidoId'
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
@@ -629,6 +711,8 @@ export interface FileRouteTypes {
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/loja/catalogo/'
+    | '/loja/pedidos/'
     | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
@@ -886,18 +970,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MotoristaAlugueisRouteImport
       parentRoute: typeof MotoristaRoute
     }
-    '/loja/perfil': {
-      id: '/loja/perfil'
-      path: '/perfil'
-      fullPath: '/loja/perfil'
-      preLoaderRoute: typeof LojaPerfilRouteImport
+    '/loja/plano': {
+      id: '/loja/plano'
+      path: '/plano'
+      fullPath: '/loja/plano'
+      preLoaderRoute: typeof LojaPlanoRouteImport
       parentRoute: typeof LojaRoute
     }
-    '/loja/campanhas': {
-      id: '/loja/campanhas'
-      path: '/campanhas'
-      fullPath: '/loja/campanhas'
-      preLoaderRoute: typeof LojaCampanhasRouteImport
+    '/loja/oportunidades': {
+      id: '/loja/oportunidades'
+      path: '/oportunidades'
+      fullPath: '/loja/oportunidades'
+      preLoaderRoute: typeof LojaOportunidadesRouteImport
+      parentRoute: typeof LojaRoute
+    }
+    '/loja/negocio': {
+      id: '/loja/negocio'
+      path: '/negocio'
+      fullPath: '/loja/negocio'
+      preLoaderRoute: typeof LojaNegocioRouteImport
+      parentRoute: typeof LojaRoute
+    }
+    '/loja/estoque': {
+      id: '/loja/estoque'
+      path: '/estoque'
+      fullPath: '/loja/estoque'
+      preLoaderRoute: typeof LojaEstoqueRouteImport
       parentRoute: typeof LojaRoute
     }
     '/admin/parceiros': {
@@ -941,6 +1039,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/oficina/servicos/'
       preLoaderRoute: typeof OficinaServicosIndexRouteImport
       parentRoute: typeof OficinaRoute
+    }
+    '/loja/pedidos/': {
+      id: '/loja/pedidos/'
+      path: '/pedidos'
+      fullPath: '/loja/pedidos/'
+      preLoaderRoute: typeof LojaPedidosIndexRouteImport
+      parentRoute: typeof LojaRoute
+    }
+    '/loja/catalogo/': {
+      id: '/loja/catalogo/'
+      path: '/catalogo'
+      fullPath: '/loja/catalogo/'
+      preLoaderRoute: typeof LojaCatalogoIndexRouteImport
+      parentRoute: typeof LojaRoute
     }
     '/proprietario/solicitacoes/$id': {
       id: '/proprietario/solicitacoes/$id'
@@ -1005,6 +1117,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MotoristaAlugueisCarroIdRouteImport
       parentRoute: typeof MotoristaAlugueisRoute
     }
+    '/loja/pedidos/$pedidoId': {
+      id: '/loja/pedidos/$pedidoId'
+      path: '/pedidos/$pedidoId'
+      fullPath: '/loja/pedidos/$pedidoId'
+      preLoaderRoute: typeof LojaPedidosPedidoIdRouteImport
+      parentRoute: typeof LojaRoute
+    }
+    '/loja/catalogo/novo': {
+      id: '/loja/catalogo/novo'
+      path: '/catalogo/novo'
+      fullPath: '/loja/catalogo/novo'
+      preLoaderRoute: typeof LojaCatalogoNovoRouteImport
+      parentRoute: typeof LojaRoute
+    }
+    '/loja/catalogo/$itemId': {
+      id: '/loja/catalogo/$itemId'
+      path: '/catalogo/$itemId'
+      fullPath: '/loja/catalogo/$itemId'
+      preLoaderRoute: typeof LojaCatalogoItemIdRouteImport
+      parentRoute: typeof LojaRoute
+    }
   }
 }
 
@@ -1025,15 +1158,29 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface LojaRouteChildren {
-  LojaCampanhasRoute: typeof LojaCampanhasRoute
-  LojaPerfilRoute: typeof LojaPerfilRoute
+  LojaEstoqueRoute: typeof LojaEstoqueRoute
+  LojaNegocioRoute: typeof LojaNegocioRoute
+  LojaOportunidadesRoute: typeof LojaOportunidadesRoute
+  LojaPlanoRoute: typeof LojaPlanoRoute
   LojaIndexRoute: typeof LojaIndexRoute
+  LojaCatalogoItemIdRoute: typeof LojaCatalogoItemIdRoute
+  LojaCatalogoNovoRoute: typeof LojaCatalogoNovoRoute
+  LojaPedidosPedidoIdRoute: typeof LojaPedidosPedidoIdRoute
+  LojaCatalogoIndexRoute: typeof LojaCatalogoIndexRoute
+  LojaPedidosIndexRoute: typeof LojaPedidosIndexRoute
 }
 
 const LojaRouteChildren: LojaRouteChildren = {
-  LojaCampanhasRoute: LojaCampanhasRoute,
-  LojaPerfilRoute: LojaPerfilRoute,
+  LojaEstoqueRoute: LojaEstoqueRoute,
+  LojaNegocioRoute: LojaNegocioRoute,
+  LojaOportunidadesRoute: LojaOportunidadesRoute,
+  LojaPlanoRoute: LojaPlanoRoute,
   LojaIndexRoute: LojaIndexRoute,
+  LojaCatalogoItemIdRoute: LojaCatalogoItemIdRoute,
+  LojaCatalogoNovoRoute: LojaCatalogoNovoRoute,
+  LojaPedidosPedidoIdRoute: LojaPedidosPedidoIdRoute,
+  LojaCatalogoIndexRoute: LojaCatalogoIndexRoute,
+  LojaPedidosIndexRoute: LojaPedidosIndexRoute,
 }
 
 const LojaRouteWithChildren = LojaRoute._addFileChildren(LojaRouteChildren)
@@ -1188,13 +1335,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
