@@ -44,6 +44,7 @@ import { Route as MotoristaCheckinRouteImport } from './routes/motorista.checkin
 import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.beneficios'
 import { Route as MotoristaAlugueisRouteImport } from './routes/motorista.alugueis'
 import { Route as LojaPerfilRouteImport } from './routes/loja.perfil'
+import { Route as LojaNegocioRouteImport } from './routes/loja.negocio'
 import { Route as LojaCampanhasRouteImport } from './routes/loja.campanhas'
 import { Route as AdminParceirosRouteImport } from './routes/admin.parceiros'
 import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
@@ -51,6 +52,7 @@ import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as ProprietarioFrotaIndexRouteImport } from './routes/proprietario.frota.index'
 import { Route as ProprietarioContratosIndexRouteImport } from './routes/proprietario.contratos.index'
 import { Route as OficinaServicosIndexRouteImport } from './routes/oficina.servicos.index'
+import { Route as LojaCatalogoIndexRouteImport } from './routes/loja.catalogo.index'
 import { Route as ProprietarioSolicitacoesIdRouteImport } from './routes/proprietario.solicitacoes.$id'
 import { Route as ProprietarioFrotaNovoRouteImport } from './routes/proprietario.frota.novo'
 import { Route as ProprietarioFrotaCarroIdRouteImport } from './routes/proprietario.frota.$carroId'
@@ -237,6 +239,11 @@ const LojaPerfilRoute = LojaPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => LojaRoute,
 } as any)
+const LojaNegocioRoute = LojaNegocioRouteImport.update({
+  id: '/negocio',
+  path: '/negocio',
+  getParentRoute: () => LojaRoute,
+} as any)
 const LojaCampanhasRoute = LojaCampanhasRouteImport.update({
   id: '/campanhas',
   path: '/campanhas',
@@ -272,6 +279,11 @@ const OficinaServicosIndexRoute = OficinaServicosIndexRouteImport.update({
   id: '/servicos/',
   path: '/servicos/',
   getParentRoute: () => OficinaRoute,
+} as any)
+const LojaCatalogoIndexRoute = LojaCatalogoIndexRouteImport.update({
+  id: '/catalogo/',
+  path: '/catalogo/',
+  getParentRoute: () => LojaRoute,
 } as any)
 const ProprietarioSolicitacoesIdRoute =
   ProprietarioSolicitacoesIdRouteImport.update({
@@ -338,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
   '/loja/campanhas': typeof LojaCampanhasRoute
+  '/loja/negocio': typeof LojaNegocioRoute
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
@@ -373,6 +386,7 @@ export interface FileRoutesByFullPath {
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/loja/catalogo/': typeof LojaCatalogoIndexRoute
   '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
@@ -385,6 +399,7 @@ export interface FileRoutesByTo {
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
   '/loja/campanhas': typeof LojaCampanhasRoute
+  '/loja/negocio': typeof LojaNegocioRoute
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
@@ -420,6 +435,7 @@ export interface FileRoutesByTo {
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/loja/catalogo': typeof LojaCatalogoIndexRoute
   '/oficina/servicos': typeof OficinaServicosIndexRoute
   '/proprietario/contratos': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota': typeof ProprietarioFrotaIndexRoute
@@ -439,6 +455,7 @@ export interface FileRoutesById {
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/parceiros': typeof AdminParceirosRoute
   '/loja/campanhas': typeof LojaCampanhasRoute
+  '/loja/negocio': typeof LojaNegocioRoute
   '/loja/perfil': typeof LojaPerfilRoute
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
@@ -474,6 +491,7 @@ export interface FileRoutesById {
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/loja/catalogo/': typeof LojaCatalogoIndexRoute
   '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
@@ -494,6 +512,7 @@ export interface FileRouteTypes {
     | '/admin/moderacao'
     | '/admin/parceiros'
     | '/loja/campanhas'
+    | '/loja/negocio'
     | '/loja/perfil'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
@@ -529,6 +548,7 @@ export interface FileRouteTypes {
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/loja/catalogo/'
     | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
@@ -541,6 +561,7 @@ export interface FileRouteTypes {
     | '/admin/moderacao'
     | '/admin/parceiros'
     | '/loja/campanhas'
+    | '/loja/negocio'
     | '/loja/perfil'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
@@ -576,6 +597,7 @@ export interface FileRouteTypes {
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/loja/catalogo'
     | '/oficina/servicos'
     | '/proprietario/contratos'
     | '/proprietario/frota'
@@ -594,6 +616,7 @@ export interface FileRouteTypes {
     | '/admin/moderacao'
     | '/admin/parceiros'
     | '/loja/campanhas'
+    | '/loja/negocio'
     | '/loja/perfil'
     | '/motorista/alugueis'
     | '/motorista/beneficios'
@@ -629,6 +652,7 @@ export interface FileRouteTypes {
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/loja/catalogo/'
     | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
@@ -893,6 +917,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojaPerfilRouteImport
       parentRoute: typeof LojaRoute
     }
+    '/loja/negocio': {
+      id: '/loja/negocio'
+      path: '/negocio'
+      fullPath: '/loja/negocio'
+      preLoaderRoute: typeof LojaNegocioRouteImport
+      parentRoute: typeof LojaRoute
+    }
     '/loja/campanhas': {
       id: '/loja/campanhas'
       path: '/campanhas'
@@ -941,6 +972,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/oficina/servicos/'
       preLoaderRoute: typeof OficinaServicosIndexRouteImport
       parentRoute: typeof OficinaRoute
+    }
+    '/loja/catalogo/': {
+      id: '/loja/catalogo/'
+      path: '/catalogo'
+      fullPath: '/loja/catalogo/'
+      preLoaderRoute: typeof LojaCatalogoIndexRouteImport
+      parentRoute: typeof LojaRoute
     }
     '/proprietario/solicitacoes/$id': {
       id: '/proprietario/solicitacoes/$id'
@@ -1026,14 +1064,18 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface LojaRouteChildren {
   LojaCampanhasRoute: typeof LojaCampanhasRoute
+  LojaNegocioRoute: typeof LojaNegocioRoute
   LojaPerfilRoute: typeof LojaPerfilRoute
   LojaIndexRoute: typeof LojaIndexRoute
+  LojaCatalogoIndexRoute: typeof LojaCatalogoIndexRoute
 }
 
 const LojaRouteChildren: LojaRouteChildren = {
   LojaCampanhasRoute: LojaCampanhasRoute,
+  LojaNegocioRoute: LojaNegocioRoute,
   LojaPerfilRoute: LojaPerfilRoute,
   LojaIndexRoute: LojaIndexRoute,
+  LojaCatalogoIndexRoute: LojaCatalogoIndexRoute,
 }
 
 const LojaRouteWithChildren = LojaRoute._addFileChildren(LojaRouteChildren)
@@ -1188,13 +1230,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
