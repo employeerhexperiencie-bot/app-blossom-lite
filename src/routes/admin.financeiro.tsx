@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Wallet, TrendingUp, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { recebimentosMensais } from "@/lib/mock-data";
+import { receitaPlataforma, totalReceitaPlataforma } from "@/lib/monetizacao";
+import { fmtBRL } from "@/lib/mock-parceiro";
 
 export const Route = createFileRoute("/admin/financeiro")({
   head: () => ({ meta: [{ title: "Financeiro — Admin | TCHI LÉVA" }] }),
