@@ -12,6 +12,7 @@ export const Route = createFileRoute("/admin/financeiro")({
 
 function Financeiro() {
   const total = recebimentosMensais.reduce((s, m) => s + m.valor, 0);
+  const totalReceita = totalReceitaPlataforma();
   const max = Math.max(...recebimentosMensais.map((m) => m.valor));
   return (
     <>
