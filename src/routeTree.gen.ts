@@ -62,6 +62,7 @@ import { Route as OficinaServicosOsIdRouteImport } from './routes/oficina.servic
 import { Route as MotoristaCorridasIdRouteImport } from './routes/motorista.corridas.$id'
 import { Route as MotoristaBeneficiosParceiroIdRouteImport } from './routes/motorista.beneficios.$parceiroId'
 import { Route as MotoristaAlugueisCarroIdRouteImport } from './routes/motorista.alugueis.$carroId'
+import { Route as LojaCatalogoNovoRouteImport } from './routes/loja.catalogo.novo'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -335,6 +336,11 @@ const MotoristaAlugueisCarroIdRoute =
     path: '/$carroId',
     getParentRoute: () => MotoristaAlugueisRoute,
   } as any)
+const LojaCatalogoNovoRoute = LojaCatalogoNovoRouteImport.update({
+  id: '/catalogo/novo',
+  path: '/catalogo/novo',
+  getParentRoute: () => LojaRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -377,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/oficina/': typeof OficinaIndexRoute
   '/passageiro/': typeof PassageiroIndexRoute
   '/proprietario/': typeof ProprietarioIndexRoute
+  '/loja/catalogo/novo': typeof LojaCatalogoNovoRoute
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
@@ -426,6 +433,7 @@ export interface FileRoutesByTo {
   '/oficina': typeof OficinaIndexRoute
   '/passageiro': typeof PassageiroIndexRoute
   '/proprietario': typeof ProprietarioIndexRoute
+  '/loja/catalogo/novo': typeof LojaCatalogoNovoRoute
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
@@ -482,6 +490,7 @@ export interface FileRoutesById {
   '/oficina/': typeof OficinaIndexRoute
   '/passageiro/': typeof PassageiroIndexRoute
   '/proprietario/': typeof ProprietarioIndexRoute
+  '/loja/catalogo/novo': typeof LojaCatalogoNovoRoute
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
@@ -539,6 +548,7 @@ export interface FileRouteTypes {
     | '/oficina/'
     | '/passageiro/'
     | '/proprietario/'
+    | '/loja/catalogo/novo'
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
@@ -588,6 +598,7 @@ export interface FileRouteTypes {
     | '/oficina'
     | '/passageiro'
     | '/proprietario'
+    | '/loja/catalogo/novo'
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
@@ -643,6 +654,7 @@ export interface FileRouteTypes {
     | '/oficina/'
     | '/passageiro/'
     | '/proprietario/'
+    | '/loja/catalogo/novo'
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
@@ -1043,6 +1055,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MotoristaAlugueisCarroIdRouteImport
       parentRoute: typeof MotoristaAlugueisRoute
     }
+    '/loja/catalogo/novo': {
+      id: '/loja/catalogo/novo'
+      path: '/catalogo/novo'
+      fullPath: '/loja/catalogo/novo'
+      preLoaderRoute: typeof LojaCatalogoNovoRouteImport
+      parentRoute: typeof LojaRoute
+    }
   }
 }
 
@@ -1067,6 +1086,7 @@ interface LojaRouteChildren {
   LojaNegocioRoute: typeof LojaNegocioRoute
   LojaPerfilRoute: typeof LojaPerfilRoute
   LojaIndexRoute: typeof LojaIndexRoute
+  LojaCatalogoNovoRoute: typeof LojaCatalogoNovoRoute
   LojaCatalogoIndexRoute: typeof LojaCatalogoIndexRoute
 }
 
@@ -1075,6 +1095,7 @@ const LojaRouteChildren: LojaRouteChildren = {
   LojaNegocioRoute: LojaNegocioRoute,
   LojaPerfilRoute: LojaPerfilRoute,
   LojaIndexRoute: LojaIndexRoute,
+  LojaCatalogoNovoRoute: LojaCatalogoNovoRoute,
   LojaCatalogoIndexRoute: LojaCatalogoIndexRoute,
 }
 
