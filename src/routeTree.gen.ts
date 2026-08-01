@@ -33,8 +33,8 @@ import { Route as ProprietarioAgendaRouteImport } from './routes/proprietario.ag
 import { Route as PassageiroPerfilRouteImport } from './routes/passageiro.perfil'
 import { Route as PassageiroParceirosRouteImport } from './routes/passageiro.parceiros'
 import { Route as PassageiroCashbackRouteImport } from './routes/passageiro.cashback'
-import { Route as OficinaPromocoesRouteImport } from './routes/oficina.promocoes'
 import { Route as OficinaPerfilRouteImport } from './routes/oficina.perfil'
+import { Route as OficinaFinanceiroRouteImport } from './routes/oficina.financeiro'
 import { Route as OficinaAgendaRouteImport } from './routes/oficina.agenda'
 import { Route as MotoristaPerfilRouteImport } from './routes/motorista.perfil'
 import { Route as MotoristaOrcamentosRouteImport } from './routes/motorista.orcamentos'
@@ -50,11 +50,13 @@ import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as ProprietarioFrotaIndexRouteImport } from './routes/proprietario.frota.index'
 import { Route as ProprietarioContratosIndexRouteImport } from './routes/proprietario.contratos.index'
+import { Route as OficinaServicosIndexRouteImport } from './routes/oficina.servicos.index'
 import { Route as ProprietarioSolicitacoesIdRouteImport } from './routes/proprietario.solicitacoes.$id'
 import { Route as ProprietarioFrotaNovoRouteImport } from './routes/proprietario.frota.novo'
 import { Route as ProprietarioFrotaCarroIdRouteImport } from './routes/proprietario.frota.$carroId'
 import { Route as ProprietarioContratosNovoRouteImport } from './routes/proprietario.contratos.novo'
 import { Route as ProprietarioContratosIdRouteImport } from './routes/proprietario.contratos.$id'
+import { Route as OficinaServicosOsIdRouteImport } from './routes/oficina.servicos.$osId'
 import { Route as MotoristaCorridasIdRouteImport } from './routes/motorista.corridas.$id'
 import { Route as MotoristaBeneficiosParceiroIdRouteImport } from './routes/motorista.beneficios.$parceiroId'
 import { Route as MotoristaAlugueisCarroIdRouteImport } from './routes/motorista.alugueis.$carroId'
@@ -180,14 +182,14 @@ const PassageiroCashbackRoute = PassageiroCashbackRouteImport.update({
   path: '/cashback',
   getParentRoute: () => PassageiroRoute,
 } as any)
-const OficinaPromocoesRoute = OficinaPromocoesRouteImport.update({
-  id: '/promocoes',
-  path: '/promocoes',
-  getParentRoute: () => OficinaRoute,
-} as any)
 const OficinaPerfilRoute = OficinaPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => OficinaRoute,
+} as any)
+const OficinaFinanceiroRoute = OficinaFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
   getParentRoute: () => OficinaRoute,
 } as any)
 const OficinaAgendaRoute = OficinaAgendaRouteImport.update({
@@ -266,6 +268,11 @@ const ProprietarioContratosIndexRoute =
     path: '/contratos/',
     getParentRoute: () => ProprietarioRoute,
   } as any)
+const OficinaServicosIndexRoute = OficinaServicosIndexRouteImport.update({
+  id: '/servicos/',
+  path: '/servicos/',
+  getParentRoute: () => OficinaRoute,
+} as any)
 const ProprietarioSolicitacoesIdRoute =
   ProprietarioSolicitacoesIdRouteImport.update({
     id: '/solicitacoes/$id',
@@ -293,6 +300,11 @@ const ProprietarioContratosIdRoute = ProprietarioContratosIdRouteImport.update({
   id: '/contratos/$id',
   path: '/contratos/$id',
   getParentRoute: () => ProprietarioRoute,
+} as any)
+const OficinaServicosOsIdRoute = OficinaServicosOsIdRouteImport.update({
+  id: '/servicos/$osId',
+  path: '/servicos/$osId',
+  getParentRoute: () => OficinaRoute,
 } as any)
 const MotoristaCorridasIdRoute = MotoristaCorridasIdRouteImport.update({
   id: '/$id',
@@ -335,8 +347,8 @@ export interface FileRoutesByFullPath {
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
+  '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
-  '/oficina/promocoes': typeof OficinaPromocoesRoute
   '/passageiro/cashback': typeof PassageiroCashbackRoute
   '/passageiro/parceiros': typeof PassageiroParceirosRoute
   '/passageiro/perfil': typeof PassageiroPerfilRoute
@@ -355,11 +367,13 @@ export interface FileRoutesByFullPath {
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
+  '/oficina/servicos/$osId': typeof OficinaServicosOsIdRoute
   '/proprietario/contratos/$id': typeof ProprietarioContratosIdRoute
   '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
 }
@@ -380,8 +394,8 @@ export interface FileRoutesByTo {
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
+  '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
-  '/oficina/promocoes': typeof OficinaPromocoesRoute
   '/passageiro/cashback': typeof PassageiroCashbackRoute
   '/passageiro/parceiros': typeof PassageiroParceirosRoute
   '/passageiro/perfil': typeof PassageiroPerfilRoute
@@ -400,11 +414,13 @@ export interface FileRoutesByTo {
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
+  '/oficina/servicos/$osId': typeof OficinaServicosOsIdRoute
   '/proprietario/contratos/$id': typeof ProprietarioContratosIdRoute
   '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/oficina/servicos': typeof OficinaServicosIndexRoute
   '/proprietario/contratos': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota': typeof ProprietarioFrotaIndexRoute
 }
@@ -432,8 +448,8 @@ export interface FileRoutesById {
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
+  '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
-  '/oficina/promocoes': typeof OficinaPromocoesRoute
   '/passageiro/cashback': typeof PassageiroCashbackRoute
   '/passageiro/parceiros': typeof PassageiroParceirosRoute
   '/passageiro/perfil': typeof PassageiroPerfilRoute
@@ -452,11 +468,13 @@ export interface FileRoutesById {
   '/motorista/alugueis/$carroId': typeof MotoristaAlugueisCarroIdRoute
   '/motorista/beneficios/$parceiroId': typeof MotoristaBeneficiosParceiroIdRoute
   '/motorista/corridas/$id': typeof MotoristaCorridasIdRoute
+  '/oficina/servicos/$osId': typeof OficinaServicosOsIdRoute
   '/proprietario/contratos/$id': typeof ProprietarioContratosIdRoute
   '/proprietario/contratos/novo': typeof ProprietarioContratosNovoRoute
   '/proprietario/frota/$carroId': typeof ProprietarioFrotaCarroIdRoute
   '/proprietario/frota/novo': typeof ProprietarioFrotaNovoRoute
   '/proprietario/solicitacoes/$id': typeof ProprietarioSolicitacoesIdRoute
+  '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
 }
@@ -485,8 +503,8 @@ export interface FileRouteTypes {
     | '/motorista/orcamentos'
     | '/motorista/perfil'
     | '/oficina/agenda'
+    | '/oficina/financeiro'
     | '/oficina/perfil'
-    | '/oficina/promocoes'
     | '/passageiro/cashback'
     | '/passageiro/parceiros'
     | '/passageiro/perfil'
@@ -505,11 +523,13 @@ export interface FileRouteTypes {
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
+    | '/oficina/servicos/$osId'
     | '/proprietario/contratos/$id'
     | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
   fileRoutesByTo: FileRoutesByTo
@@ -530,8 +550,8 @@ export interface FileRouteTypes {
     | '/motorista/orcamentos'
     | '/motorista/perfil'
     | '/oficina/agenda'
+    | '/oficina/financeiro'
     | '/oficina/perfil'
-    | '/oficina/promocoes'
     | '/passageiro/cashback'
     | '/passageiro/parceiros'
     | '/passageiro/perfil'
@@ -550,11 +570,13 @@ export interface FileRouteTypes {
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
+    | '/oficina/servicos/$osId'
     | '/proprietario/contratos/$id'
     | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/oficina/servicos'
     | '/proprietario/contratos'
     | '/proprietario/frota'
   id:
@@ -581,8 +603,8 @@ export interface FileRouteTypes {
     | '/motorista/orcamentos'
     | '/motorista/perfil'
     | '/oficina/agenda'
+    | '/oficina/financeiro'
     | '/oficina/perfil'
-    | '/oficina/promocoes'
     | '/passageiro/cashback'
     | '/passageiro/parceiros'
     | '/passageiro/perfil'
@@ -601,11 +623,13 @@ export interface FileRouteTypes {
     | '/motorista/alugueis/$carroId'
     | '/motorista/beneficios/$parceiroId'
     | '/motorista/corridas/$id'
+    | '/oficina/servicos/$osId'
     | '/proprietario/contratos/$id'
     | '/proprietario/contratos/novo'
     | '/proprietario/frota/$carroId'
     | '/proprietario/frota/novo'
     | '/proprietario/solicitacoes/$id'
+    | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
   fileRoutesById: FileRoutesById
@@ -792,18 +816,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PassageiroCashbackRouteImport
       parentRoute: typeof PassageiroRoute
     }
-    '/oficina/promocoes': {
-      id: '/oficina/promocoes'
-      path: '/promocoes'
-      fullPath: '/oficina/promocoes'
-      preLoaderRoute: typeof OficinaPromocoesRouteImport
-      parentRoute: typeof OficinaRoute
-    }
     '/oficina/perfil': {
       id: '/oficina/perfil'
       path: '/perfil'
       fullPath: '/oficina/perfil'
       preLoaderRoute: typeof OficinaPerfilRouteImport
+      parentRoute: typeof OficinaRoute
+    }
+    '/oficina/financeiro': {
+      id: '/oficina/financeiro'
+      path: '/financeiro'
+      fullPath: '/oficina/financeiro'
+      preLoaderRoute: typeof OficinaFinanceiroRouteImport
       parentRoute: typeof OficinaRoute
     }
     '/oficina/agenda': {
@@ -911,6 +935,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProprietarioContratosIndexRouteImport
       parentRoute: typeof ProprietarioRoute
     }
+    '/oficina/servicos/': {
+      id: '/oficina/servicos/'
+      path: '/servicos'
+      fullPath: '/oficina/servicos/'
+      preLoaderRoute: typeof OficinaServicosIndexRouteImport
+      parentRoute: typeof OficinaRoute
+    }
     '/proprietario/solicitacoes/$id': {
       id: '/proprietario/solicitacoes/$id'
       path: '/solicitacoes/$id'
@@ -945,6 +976,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/proprietario/contratos/$id'
       preLoaderRoute: typeof ProprietarioContratosIdRouteImport
       parentRoute: typeof ProprietarioRoute
+    }
+    '/oficina/servicos/$osId': {
+      id: '/oficina/servicos/$osId'
+      path: '/servicos/$osId'
+      fullPath: '/oficina/servicos/$osId'
+      preLoaderRoute: typeof OficinaServicosOsIdRouteImport
+      parentRoute: typeof OficinaRoute
     }
     '/motorista/corridas/$id': {
       id: '/motorista/corridas/$id'
@@ -1061,16 +1099,20 @@ const MotoristaRouteWithChildren = MotoristaRoute._addFileChildren(
 
 interface OficinaRouteChildren {
   OficinaAgendaRoute: typeof OficinaAgendaRoute
+  OficinaFinanceiroRoute: typeof OficinaFinanceiroRoute
   OficinaPerfilRoute: typeof OficinaPerfilRoute
-  OficinaPromocoesRoute: typeof OficinaPromocoesRoute
   OficinaIndexRoute: typeof OficinaIndexRoute
+  OficinaServicosOsIdRoute: typeof OficinaServicosOsIdRoute
+  OficinaServicosIndexRoute: typeof OficinaServicosIndexRoute
 }
 
 const OficinaRouteChildren: OficinaRouteChildren = {
   OficinaAgendaRoute: OficinaAgendaRoute,
+  OficinaFinanceiroRoute: OficinaFinanceiroRoute,
   OficinaPerfilRoute: OficinaPerfilRoute,
-  OficinaPromocoesRoute: OficinaPromocoesRoute,
   OficinaIndexRoute: OficinaIndexRoute,
+  OficinaServicosOsIdRoute: OficinaServicosOsIdRoute,
+  OficinaServicosIndexRoute: OficinaServicosIndexRoute,
 }
 
 const OficinaRouteWithChildren =
@@ -1146,13 +1188,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
