@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, Gauge, Wallet, Car, Wrench, CalendarClock, Pi
 import { PageSection } from "@/components/AppShell";
 import { FiltroBar } from "@/components/FiltroBar";
 import { CardMeuVeiculo } from "@/components/motorista/CardMeuVeiculo";
-import { fmtBRL, historicoFinanceiro, operacaoDia, operacaoMes, veiculoDoMotorista } from "@/lib/mock-operacao";
+import { custosDoDia, fmtBRL, historicoFinanceiro, operacaoDia, operacaoMes, veiculoDoMotorista } from "@/lib/mock-operacao";
 import { fmtData } from "@/lib/mock-proprietario";
 
 export const Route = createFileRoute("/motorista/operacao")({
@@ -29,12 +29,6 @@ function Operacao() {
   const dia = operacaoDia();
   const mes = operacaoMes();
   const atual = periodo === "dia" ? dia : mes;
-  const linhas = periodo === "dia"
-    ? [
-        { label: "Aluguel do veículo", valor: dia.custos && 0 },
-      ]
-    : [];
-  void linhas;
 
   const veiculo = veiculoDoMotorista();
 
@@ -45,7 +39,7 @@ function Operacao() {
     return l;
   }, [busca, ordem]);
 
-  const custos = periodo === "dia" ? custosDia() : mes.linhas;
+  const custos = periodo === "dia" ? custosDoDia() : mes.linhas;
 
   return (
     <>
@@ -181,20 +175,6 @@ function Operacao() {
     </>
   );
 }
-
-function custosDia() {
-  // importado de forma tardia para manter a rota enxuta
-  return operacaoDiaLinhas();
-}
-
-function operacaoDiaLinhas() {
-  return custosDoDiaCache;
-}
-
-const custosDoDiaCache = (() => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  return [] as { label: string; valor: number; cor: string }[];
-})();
 
 function Kpi({ icon: Icon, label, value, tint }: { icon: typeof Wallet; label: string; value: string; tint: string }) {
   return (

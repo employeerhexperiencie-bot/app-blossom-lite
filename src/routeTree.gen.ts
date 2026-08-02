@@ -39,6 +39,7 @@ import { Route as OficinaAgendaRouteImport } from './routes/oficina.agenda'
 import { Route as MotoristaRodarRouteImport } from './routes/motorista.rodar'
 import { Route as MotoristaPerfilRouteImport } from './routes/motorista.perfil'
 import { Route as MotoristaOrcamentosRouteImport } from './routes/motorista.orcamentos'
+import { Route as MotoristaOperacaoRouteImport } from './routes/motorista.operacao'
 import { Route as MotoristaJornadaRouteImport } from './routes/motorista.jornada'
 import { Route as MotoristaCorridasRouteImport } from './routes/motorista.corridas'
 import { Route as MotoristaClubeRouteImport } from './routes/motorista.clube'
@@ -221,6 +222,11 @@ const MotoristaOrcamentosRoute = MotoristaOrcamentosRouteImport.update({
   path: '/orcamentos',
   getParentRoute: () => MotoristaRoute,
 } as any)
+const MotoristaOperacaoRoute = MotoristaOperacaoRouteImport.update({
+  id: '/operacao',
+  path: '/operacao',
+  getParentRoute: () => MotoristaRoute,
+} as any)
 const MotoristaJornadaRoute = MotoristaJornadaRouteImport.update({
   id: '/jornada',
   path: '/jornada',
@@ -401,6 +407,7 @@ export interface FileRoutesByFullPath {
   '/motorista/clube': typeof MotoristaClubeRoute
   '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
+  '/motorista/operacao': typeof MotoristaOperacaoRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/motorista/rodar': typeof MotoristaRodarRoute
@@ -457,6 +464,7 @@ export interface FileRoutesByTo {
   '/motorista/clube': typeof MotoristaClubeRoute
   '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
+  '/motorista/operacao': typeof MotoristaOperacaoRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/motorista/rodar': typeof MotoristaRodarRoute
@@ -520,6 +528,7 @@ export interface FileRoutesById {
   '/motorista/clube': typeof MotoristaClubeRoute
   '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
+  '/motorista/operacao': typeof MotoristaOperacaoRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
   '/motorista/rodar': typeof MotoristaRodarRoute
@@ -584,6 +593,7 @@ export interface FileRouteTypes {
     | '/motorista/clube'
     | '/motorista/corridas'
     | '/motorista/jornada'
+    | '/motorista/operacao'
     | '/motorista/orcamentos'
     | '/motorista/perfil'
     | '/motorista/rodar'
@@ -640,6 +650,7 @@ export interface FileRouteTypes {
     | '/motorista/clube'
     | '/motorista/corridas'
     | '/motorista/jornada'
+    | '/motorista/operacao'
     | '/motorista/orcamentos'
     | '/motorista/perfil'
     | '/motorista/rodar'
@@ -702,6 +713,7 @@ export interface FileRouteTypes {
     | '/motorista/clube'
     | '/motorista/corridas'
     | '/motorista/jornada'
+    | '/motorista/operacao'
     | '/motorista/orcamentos'
     | '/motorista/perfil'
     | '/motorista/rodar'
@@ -964,6 +976,13 @@ declare module '@tanstack/react-router' {
       path: '/orcamentos'
       fullPath: '/motorista/orcamentos'
       preLoaderRoute: typeof MotoristaOrcamentosRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/motorista/operacao': {
+      id: '/motorista/operacao'
+      path: '/operacao'
+      fullPath: '/motorista/operacao'
+      preLoaderRoute: typeof MotoristaOperacaoRouteImport
       parentRoute: typeof MotoristaRoute
     }
     '/motorista/jornada': {
@@ -1263,6 +1282,7 @@ interface MotoristaRouteChildren {
   MotoristaClubeRoute: typeof MotoristaClubeRoute
   MotoristaCorridasRoute: typeof MotoristaCorridasRouteWithChildren
   MotoristaJornadaRoute: typeof MotoristaJornadaRoute
+  MotoristaOperacaoRoute: typeof MotoristaOperacaoRoute
   MotoristaOrcamentosRoute: typeof MotoristaOrcamentosRoute
   MotoristaPerfilRoute: typeof MotoristaPerfilRoute
   MotoristaRodarRoute: typeof MotoristaRodarRoute
@@ -1276,6 +1296,7 @@ const MotoristaRouteChildren: MotoristaRouteChildren = {
   MotoristaClubeRoute: MotoristaClubeRoute,
   MotoristaCorridasRoute: MotoristaCorridasRouteWithChildren,
   MotoristaJornadaRoute: MotoristaJornadaRoute,
+  MotoristaOperacaoRoute: MotoristaOperacaoRoute,
   MotoristaOrcamentosRoute: MotoristaOrcamentosRoute,
   MotoristaPerfilRoute: MotoristaPerfilRoute,
   MotoristaRodarRoute: MotoristaRodarRoute,
