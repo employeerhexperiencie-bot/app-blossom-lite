@@ -41,6 +41,7 @@ import { Route as MotoristaPerfilRouteImport } from './routes/motorista.perfil'
 import { Route as MotoristaOrcamentosRouteImport } from './routes/motorista.orcamentos'
 import { Route as MotoristaJornadaRouteImport } from './routes/motorista.jornada'
 import { Route as MotoristaCorridasRouteImport } from './routes/motorista.corridas'
+import { Route as MotoristaClubeRouteImport } from './routes/motorista.clube'
 import { Route as MotoristaCheckinRouteImport } from './routes/motorista.checkin'
 import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.beneficios'
 import { Route as MotoristaAlugueisRouteImport } from './routes/motorista.alugueis'
@@ -230,6 +231,11 @@ const MotoristaCorridasRoute = MotoristaCorridasRouteImport.update({
   path: '/corridas',
   getParentRoute: () => MotoristaRoute,
 } as any)
+const MotoristaClubeRoute = MotoristaClubeRouteImport.update({
+  id: '/clube',
+  path: '/clube',
+  getParentRoute: () => MotoristaRoute,
+} as any)
 const MotoristaCheckinRoute = MotoristaCheckinRouteImport.update({
   id: '/checkin',
   path: '/checkin',
@@ -392,6 +398,7 @@ export interface FileRoutesByFullPath {
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
+  '/motorista/clube': typeof MotoristaClubeRoute
   '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
@@ -447,6 +454,7 @@ export interface FileRoutesByTo {
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
+  '/motorista/clube': typeof MotoristaClubeRoute
   '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
@@ -509,6 +517,7 @@ export interface FileRoutesById {
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
+  '/motorista/clube': typeof MotoristaClubeRoute
   '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
@@ -572,6 +581,7 @@ export interface FileRouteTypes {
     | '/motorista/alugueis'
     | '/motorista/beneficios'
     | '/motorista/checkin'
+    | '/motorista/clube'
     | '/motorista/corridas'
     | '/motorista/jornada'
     | '/motorista/orcamentos'
@@ -627,6 +637,7 @@ export interface FileRouteTypes {
     | '/motorista/alugueis'
     | '/motorista/beneficios'
     | '/motorista/checkin'
+    | '/motorista/clube'
     | '/motorista/corridas'
     | '/motorista/jornada'
     | '/motorista/orcamentos'
@@ -688,6 +699,7 @@ export interface FileRouteTypes {
     | '/motorista/alugueis'
     | '/motorista/beneficios'
     | '/motorista/checkin'
+    | '/motorista/clube'
     | '/motorista/corridas'
     | '/motorista/jornada'
     | '/motorista/orcamentos'
@@ -968,6 +980,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MotoristaCorridasRouteImport
       parentRoute: typeof MotoristaRoute
     }
+    '/motorista/clube': {
+      id: '/motorista/clube'
+      path: '/clube'
+      fullPath: '/motorista/clube'
+      preLoaderRoute: typeof MotoristaClubeRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
     '/motorista/checkin': {
       id: '/motorista/checkin'
       path: '/checkin'
@@ -1241,6 +1260,7 @@ interface MotoristaRouteChildren {
   MotoristaAlugueisRoute: typeof MotoristaAlugueisRouteWithChildren
   MotoristaBeneficiosRoute: typeof MotoristaBeneficiosRouteWithChildren
   MotoristaCheckinRoute: typeof MotoristaCheckinRoute
+  MotoristaClubeRoute: typeof MotoristaClubeRoute
   MotoristaCorridasRoute: typeof MotoristaCorridasRouteWithChildren
   MotoristaJornadaRoute: typeof MotoristaJornadaRoute
   MotoristaOrcamentosRoute: typeof MotoristaOrcamentosRoute
@@ -1253,6 +1273,7 @@ const MotoristaRouteChildren: MotoristaRouteChildren = {
   MotoristaAlugueisRoute: MotoristaAlugueisRouteWithChildren,
   MotoristaBeneficiosRoute: MotoristaBeneficiosRouteWithChildren,
   MotoristaCheckinRoute: MotoristaCheckinRoute,
+  MotoristaClubeRoute: MotoristaClubeRoute,
   MotoristaCorridasRoute: MotoristaCorridasRouteWithChildren,
   MotoristaJornadaRoute: MotoristaJornadaRoute,
   MotoristaOrcamentosRoute: MotoristaOrcamentosRoute,
