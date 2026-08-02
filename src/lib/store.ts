@@ -70,6 +70,9 @@ export const useConect = create<ConectState>()(
       corridaAtivaId: null,
       corridasFeitasHoje: [],
       orcamentosEnviados: [],
+      statusOperacao: "offline",
+      onlineDesde: null,
+      minutosOnlineHoje: 0,
 
       setPerfil: (p) => set({ perfilAtivo: p }),
       setNome: (n) => set({ nomeUsuario: n }),
@@ -93,12 +96,26 @@ export const useConect = create<ConectState>()(
       },
       resetCheckin: () => set({ checkin: null }),
 
-      aceitarCorrida: (id) => set({ corridaAtivaId: id }),
+      aceitarCorrida: (id) => set({ corridaAtivaId: id, statusOperacao: "em_corrida" }),
       finalizarCorrida: (id) => {
         const feitas = get().corridasFeitasHoje;
-        set({ corridaAtivaId: null, corridasFeitasHoje: [...feitas, id] });
+        set({ corridaAtivaId: null, corridasFeitasHoje: [...feitas, id], statusOperacao: "online" });
       },
-      cancelarCorrida: () => set({ corridaAtivaId: null }),
+      cancelarCorrida: () => set({ corridaAtivaId: null, statusOperacao: "online" }),
+
+      ficarOnline: () => set({ statusOperacao: "online", onlineDesde: Date.now() }),
+      ficarOffline: () => {
+        const desde = get().onlineDesde;
+        const extra = desde ? Math.round((Date.now() - desde) / 60000) : 0;
+        set({
+          statusOperacao: "offline",
+          onlineDesde: null,
+          minutosOnlineHoje: get().minutosOnlineHoje + extra,
+        });
+      },
+      encerrarDia: () => set({ statusOperacao: "fim_do_dia", onlineDesde: null }),
+      reabrirDia: () => set({ statusOperacao: "offline" }),
+
 
       enviarOrcamento: (servico) => {
         const enviados = get().orcamentosEnviados;
