@@ -36,6 +36,7 @@ import { Route as PassageiroCashbackRouteImport } from './routes/passageiro.cash
 import { Route as OficinaPerfilRouteImport } from './routes/oficina.perfil'
 import { Route as OficinaFinanceiroRouteImport } from './routes/oficina.financeiro'
 import { Route as OficinaAgendaRouteImport } from './routes/oficina.agenda'
+import { Route as MotoristaRodarRouteImport } from './routes/motorista.rodar'
 import { Route as MotoristaPerfilRouteImport } from './routes/motorista.perfil'
 import { Route as MotoristaOrcamentosRouteImport } from './routes/motorista.orcamentos'
 import { Route as MotoristaJornadaRouteImport } from './routes/motorista.jornada'
@@ -203,6 +204,11 @@ const OficinaAgendaRoute = OficinaAgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
   getParentRoute: () => OficinaRoute,
+} as any)
+const MotoristaRodarRoute = MotoristaRodarRouteImport.update({
+  id: '/rodar',
+  path: '/rodar',
+  getParentRoute: () => MotoristaRoute,
 } as any)
 const MotoristaPerfilRoute = MotoristaPerfilRouteImport.update({
   id: '/perfil',
@@ -390,6 +396,7 @@ export interface FileRoutesByFullPath {
   '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/motorista/rodar': typeof MotoristaRodarRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
@@ -444,6 +451,7 @@ export interface FileRoutesByTo {
   '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/motorista/rodar': typeof MotoristaRodarRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
@@ -505,6 +513,7 @@ export interface FileRoutesById {
   '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/motorista/rodar': typeof MotoristaRodarRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
@@ -567,6 +576,7 @@ export interface FileRouteTypes {
     | '/motorista/jornada'
     | '/motorista/orcamentos'
     | '/motorista/perfil'
+    | '/motorista/rodar'
     | '/oficina/agenda'
     | '/oficina/financeiro'
     | '/oficina/perfil'
@@ -621,6 +631,7 @@ export interface FileRouteTypes {
     | '/motorista/jornada'
     | '/motorista/orcamentos'
     | '/motorista/perfil'
+    | '/motorista/rodar'
     | '/oficina/agenda'
     | '/oficina/financeiro'
     | '/oficina/perfil'
@@ -681,6 +692,7 @@ export interface FileRouteTypes {
     | '/motorista/jornada'
     | '/motorista/orcamentos'
     | '/motorista/perfil'
+    | '/motorista/rodar'
     | '/oficina/agenda'
     | '/oficina/financeiro'
     | '/oficina/perfil'
@@ -920,6 +932,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/oficina/agenda'
       preLoaderRoute: typeof OficinaAgendaRouteImport
       parentRoute: typeof OficinaRoute
+    }
+    '/motorista/rodar': {
+      id: '/motorista/rodar'
+      path: '/rodar'
+      fullPath: '/motorista/rodar'
+      preLoaderRoute: typeof MotoristaRodarRouteImport
+      parentRoute: typeof MotoristaRoute
     }
     '/motorista/perfil': {
       id: '/motorista/perfil'
@@ -1226,6 +1245,7 @@ interface MotoristaRouteChildren {
   MotoristaJornadaRoute: typeof MotoristaJornadaRoute
   MotoristaOrcamentosRoute: typeof MotoristaOrcamentosRoute
   MotoristaPerfilRoute: typeof MotoristaPerfilRoute
+  MotoristaRodarRoute: typeof MotoristaRodarRoute
   MotoristaIndexRoute: typeof MotoristaIndexRoute
 }
 
@@ -1237,6 +1257,7 @@ const MotoristaRouteChildren: MotoristaRouteChildren = {
   MotoristaJornadaRoute: MotoristaJornadaRoute,
   MotoristaOrcamentosRoute: MotoristaOrcamentosRoute,
   MotoristaPerfilRoute: MotoristaPerfilRoute,
+  MotoristaRodarRoute: MotoristaRodarRoute,
   MotoristaIndexRoute: MotoristaIndexRoute,
 }
 
