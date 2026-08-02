@@ -36,10 +36,13 @@ import { Route as PassageiroCashbackRouteImport } from './routes/passageiro.cash
 import { Route as OficinaPerfilRouteImport } from './routes/oficina.perfil'
 import { Route as OficinaFinanceiroRouteImport } from './routes/oficina.financeiro'
 import { Route as OficinaAgendaRouteImport } from './routes/oficina.agenda'
+import { Route as MotoristaRodarRouteImport } from './routes/motorista.rodar'
 import { Route as MotoristaPerfilRouteImport } from './routes/motorista.perfil'
 import { Route as MotoristaOrcamentosRouteImport } from './routes/motorista.orcamentos'
+import { Route as MotoristaOperacaoRouteImport } from './routes/motorista.operacao'
 import { Route as MotoristaJornadaRouteImport } from './routes/motorista.jornada'
 import { Route as MotoristaCorridasRouteImport } from './routes/motorista.corridas'
+import { Route as MotoristaClubeRouteImport } from './routes/motorista.clube'
 import { Route as MotoristaCheckinRouteImport } from './routes/motorista.checkin'
 import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.beneficios'
 import { Route as MotoristaAlugueisRouteImport } from './routes/motorista.alugueis'
@@ -204,6 +207,11 @@ const OficinaAgendaRoute = OficinaAgendaRouteImport.update({
   path: '/agenda',
   getParentRoute: () => OficinaRoute,
 } as any)
+const MotoristaRodarRoute = MotoristaRodarRouteImport.update({
+  id: '/rodar',
+  path: '/rodar',
+  getParentRoute: () => MotoristaRoute,
+} as any)
 const MotoristaPerfilRoute = MotoristaPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -214,6 +222,11 @@ const MotoristaOrcamentosRoute = MotoristaOrcamentosRouteImport.update({
   path: '/orcamentos',
   getParentRoute: () => MotoristaRoute,
 } as any)
+const MotoristaOperacaoRoute = MotoristaOperacaoRouteImport.update({
+  id: '/operacao',
+  path: '/operacao',
+  getParentRoute: () => MotoristaRoute,
+} as any)
 const MotoristaJornadaRoute = MotoristaJornadaRouteImport.update({
   id: '/jornada',
   path: '/jornada',
@@ -222,6 +235,11 @@ const MotoristaJornadaRoute = MotoristaJornadaRouteImport.update({
 const MotoristaCorridasRoute = MotoristaCorridasRouteImport.update({
   id: '/corridas',
   path: '/corridas',
+  getParentRoute: () => MotoristaRoute,
+} as any)
+const MotoristaClubeRoute = MotoristaClubeRouteImport.update({
+  id: '/clube',
+  path: '/clube',
   getParentRoute: () => MotoristaRoute,
 } as any)
 const MotoristaCheckinRoute = MotoristaCheckinRouteImport.update({
@@ -386,10 +404,13 @@ export interface FileRoutesByFullPath {
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
+  '/motorista/clube': typeof MotoristaClubeRoute
   '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
+  '/motorista/operacao': typeof MotoristaOperacaoRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/motorista/rodar': typeof MotoristaRodarRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
@@ -440,10 +461,13 @@ export interface FileRoutesByTo {
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
+  '/motorista/clube': typeof MotoristaClubeRoute
   '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
+  '/motorista/operacao': typeof MotoristaOperacaoRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/motorista/rodar': typeof MotoristaRodarRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
@@ -501,10 +525,13 @@ export interface FileRoutesById {
   '/motorista/alugueis': typeof MotoristaAlugueisRouteWithChildren
   '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
+  '/motorista/clube': typeof MotoristaClubeRoute
   '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
+  '/motorista/operacao': typeof MotoristaOperacaoRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
   '/motorista/perfil': typeof MotoristaPerfilRoute
+  '/motorista/rodar': typeof MotoristaRodarRoute
   '/oficina/agenda': typeof OficinaAgendaRoute
   '/oficina/financeiro': typeof OficinaFinanceiroRoute
   '/oficina/perfil': typeof OficinaPerfilRoute
@@ -563,10 +590,13 @@ export interface FileRouteTypes {
     | '/motorista/alugueis'
     | '/motorista/beneficios'
     | '/motorista/checkin'
+    | '/motorista/clube'
     | '/motorista/corridas'
     | '/motorista/jornada'
+    | '/motorista/operacao'
     | '/motorista/orcamentos'
     | '/motorista/perfil'
+    | '/motorista/rodar'
     | '/oficina/agenda'
     | '/oficina/financeiro'
     | '/oficina/perfil'
@@ -617,10 +647,13 @@ export interface FileRouteTypes {
     | '/motorista/alugueis'
     | '/motorista/beneficios'
     | '/motorista/checkin'
+    | '/motorista/clube'
     | '/motorista/corridas'
     | '/motorista/jornada'
+    | '/motorista/operacao'
     | '/motorista/orcamentos'
     | '/motorista/perfil'
+    | '/motorista/rodar'
     | '/oficina/agenda'
     | '/oficina/financeiro'
     | '/oficina/perfil'
@@ -677,10 +710,13 @@ export interface FileRouteTypes {
     | '/motorista/alugueis'
     | '/motorista/beneficios'
     | '/motorista/checkin'
+    | '/motorista/clube'
     | '/motorista/corridas'
     | '/motorista/jornada'
+    | '/motorista/operacao'
     | '/motorista/orcamentos'
     | '/motorista/perfil'
+    | '/motorista/rodar'
     | '/oficina/agenda'
     | '/oficina/financeiro'
     | '/oficina/perfil'
@@ -921,6 +957,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OficinaAgendaRouteImport
       parentRoute: typeof OficinaRoute
     }
+    '/motorista/rodar': {
+      id: '/motorista/rodar'
+      path: '/rodar'
+      fullPath: '/motorista/rodar'
+      preLoaderRoute: typeof MotoristaRodarRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
     '/motorista/perfil': {
       id: '/motorista/perfil'
       path: '/perfil'
@@ -935,6 +978,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MotoristaOrcamentosRouteImport
       parentRoute: typeof MotoristaRoute
     }
+    '/motorista/operacao': {
+      id: '/motorista/operacao'
+      path: '/operacao'
+      fullPath: '/motorista/operacao'
+      preLoaderRoute: typeof MotoristaOperacaoRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
     '/motorista/jornada': {
       id: '/motorista/jornada'
       path: '/jornada'
@@ -947,6 +997,13 @@ declare module '@tanstack/react-router' {
       path: '/corridas'
       fullPath: '/motorista/corridas'
       preLoaderRoute: typeof MotoristaCorridasRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/motorista/clube': {
+      id: '/motorista/clube'
+      path: '/clube'
+      fullPath: '/motorista/clube'
+      preLoaderRoute: typeof MotoristaClubeRouteImport
       parentRoute: typeof MotoristaRoute
     }
     '/motorista/checkin': {
@@ -1222,10 +1279,13 @@ interface MotoristaRouteChildren {
   MotoristaAlugueisRoute: typeof MotoristaAlugueisRouteWithChildren
   MotoristaBeneficiosRoute: typeof MotoristaBeneficiosRouteWithChildren
   MotoristaCheckinRoute: typeof MotoristaCheckinRoute
+  MotoristaClubeRoute: typeof MotoristaClubeRoute
   MotoristaCorridasRoute: typeof MotoristaCorridasRouteWithChildren
   MotoristaJornadaRoute: typeof MotoristaJornadaRoute
+  MotoristaOperacaoRoute: typeof MotoristaOperacaoRoute
   MotoristaOrcamentosRoute: typeof MotoristaOrcamentosRoute
   MotoristaPerfilRoute: typeof MotoristaPerfilRoute
+  MotoristaRodarRoute: typeof MotoristaRodarRoute
   MotoristaIndexRoute: typeof MotoristaIndexRoute
 }
 
@@ -1233,10 +1293,13 @@ const MotoristaRouteChildren: MotoristaRouteChildren = {
   MotoristaAlugueisRoute: MotoristaAlugueisRouteWithChildren,
   MotoristaBeneficiosRoute: MotoristaBeneficiosRouteWithChildren,
   MotoristaCheckinRoute: MotoristaCheckinRoute,
+  MotoristaClubeRoute: MotoristaClubeRoute,
   MotoristaCorridasRoute: MotoristaCorridasRouteWithChildren,
   MotoristaJornadaRoute: MotoristaJornadaRoute,
+  MotoristaOperacaoRoute: MotoristaOperacaoRoute,
   MotoristaOrcamentosRoute: MotoristaOrcamentosRoute,
   MotoristaPerfilRoute: MotoristaPerfilRoute,
+  MotoristaRodarRoute: MotoristaRodarRoute,
   MotoristaIndexRoute: MotoristaIndexRoute,
 }
 
@@ -1335,13 +1398,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
