@@ -119,6 +119,10 @@ function Passaporte() {
               <Info k="Marca / Modelo" v={`${c.marca} ${c.modelo}`} />
               <Info k="Ano" v={String(c.ano)} />
               <Info k="Placa" v={c.placa} />
+              {(c.cor || c.combustivel) && <Info k="Cor / Combustível" v={`${c.cor ?? "—"} · ${c.combustivel ?? "—"}`} />}
+              {c.renavam && <Info k="RENAVAM" v={c.renavam} />}
+              {c.chassi && <Info k="Chassi" v={c.chassi} />}
+              {c.observacoes && <Info k="Observações" v={c.observacoes} />}
               <Info k="Cidade" v={c.cidade} />
               <Info k="Seguro" v={c.seguro ? "Ativo" : "Sem seguro"} />
               <Info k="Diária / Mensal / Caução" v={`R$ ${c.diaria} · R$ ${c.mensal} · R$ ${c.caucao}`} />

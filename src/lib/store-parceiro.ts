@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useShallow } from "zustand/react/shallow";
 import {
   catalogoParceiroMock,
   movimentosMock,
@@ -121,8 +122,11 @@ export function usePedido(id: string | undefined): Pedido | undefined {
 }
 
 export function useEstoqueBaixo(): ItemCatalogo[] {
-  return useParceiro((s) =>
-    s.catalogo.filter((i) => i.tipo === "produto" && (i.quantidade ?? 0) <= (i.estoqueMinimo ?? 0))
+  // useShallow: o filtro cria um array novo a cada leitura; sem ele o Zustand 5 entra em laço
+  return useParceiro(
+    useShallow((s) =>
+      s.catalogo.filter((i) => i.tipo === "produto" && (i.quantidade ?? 0) <= (i.estoqueMinimo ?? 0))
+    )
   );
 }
 

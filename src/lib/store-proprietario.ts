@@ -19,6 +19,7 @@ import {
   type SolicitacaoLocacao,
   type Lembrete,
   type CustoCategoria,
+  type DadosRecebimento,
 } from "./mock-proprietario";
 import type { Carro } from "./mock-data";
 import { carros as carrosBase } from "./mock-data";
@@ -37,6 +38,11 @@ type State = {
   lembretes: Record<string, ConfigLembretes>;
   solicitacoes: SolicitacaoLocacao[];
   lembretesVeiculo: Lembrete[];
+  recebimento: DadosRecebimento | null;
+
+  salvarRecebimento: (dados: DadosRecebimento) => void;
+  gerarCobranca: (contratoId: string, dados: { valor: number; vencimento: string }) => string;
+  marcarCobrancaEnviada: (pagamentoId: string) => void;
 
   registrarPagamento: (id: string) => void;
   registrarPagamentoDetalhado: (contratoId: string, dados: { valor: number; data: string; forma: Pagamento["forma"] }) => void;
@@ -96,7 +102,27 @@ export const useProprietario = create<State>()(
       lembretes: {},
       solicitacoes: [],
       lembretesVeiculo: [],
+      recebimento: null,
 
+      salvarRecebimento: (dados) => set({ recebimento: dados }),
+      gerarCobranca: (contratoId, { valor, vencimento }) => {
+        const id = `pg${Date.now()}`;
+        // txid do Pix: só letras e números, até 25 caracteres
+        const txid = `TL${contratoId}${Date.now().toString(36)}`.replace(/[^A-Za-z0-9]/g, "").slice(0, 25);
+        set({
+          pagamentos: [
+            { id, contratoId, valor, data: vencimento, forma: "Pix", status: "pendente", txid },
+            ...get().pagamentos,
+          ],
+        });
+        return id;
+      },
+      marcarCobrancaEnviada: (pagamentoId) =>
+        set({
+          pagamentos: get().pagamentos.map((p) =>
+            p.id === pagamentoId ? { ...p, cobradoEm: new Date().toISOString().slice(0, 10) } : p
+          ),
+        }),
 
       registrarPagamento: (id) =>
         set({
@@ -313,6 +339,12 @@ export const useProprietario = create<State>()(
         set({
           solicitacoes: get().solicitacoes.map((s) => (s.id === id ? { ...s, status: "aceita" } : s)),
         });
+        // O carro deixa de estar disponível: tira o anúncio do ar
+        get().despublicarVeiculo(sol.carroId);
+        // A notificação da solicitação já foi tratada
+        get()
+          .notificacoes.filter((n) => n.solicitacaoId === id)
+          .forEach((n) => get().marcarLida(n.id));
         return get().criarContrato({
           carroId: sol.carroId,
           motoristaId: motorista.id,
@@ -324,10 +356,14 @@ export const useProprietario = create<State>()(
           observacoes: "Contrato gerado via aceite de solicitação do marketplace.",
         });
       },
-      recusarSolicitacao: (id) =>
+      recusarSolicitacao: (id) => {
         set({
           solicitacoes: get().solicitacoes.map((s) => (s.id === id ? { ...s, status: "recusada" } : s)),
-        }),
+        });
+        get()
+          .notificacoes.filter((n) => n.solicitacaoId === id)
+          .forEach((n) => get().marcarLida(n.id));
+      },
     }),
     { name: "proprietario-state" }
   )
@@ -356,8 +392,8 @@ export function useFinanceiroPorVeiculo(): { carroId: string; receita: number; c
 export function useCarros(): Carro[] {
   const overrides = useProprietario((s) => s.carrosOverrides);
   const novos = useProprietario((s) => s.carrosNovos);
-  const base = carrosBase.map((c) => ({ ...c, ...(overrides[c.id] ?? {}) }));
-  return [...novos, ...base];
+  const aplicar = (c: Carro): Carro => ({ ...c, ...(overrides[c.id] ?? {}) });
+  return [...novos.map(aplicar), ...carrosBase.map(aplicar)];
 }
 
 export function useCarro(id: string | undefined): Carro | undefined {
@@ -365,7 +401,7 @@ export function useCarro(id: string | undefined): Carro | undefined {
   const novos = useProprietario((s) => s.carrosNovos);
   if (!id) return undefined;
   const novo = novos.find((n) => n.id === id);
-  if (novo) return novo;
+  if (novo) return { ...novo, ...(overrides[id] ?? {}) };
   const base = carrosBase.find((c) => c.id === id);
   if (!base) return undefined;
   return { ...base, ...(overrides[id] ?? {}) };

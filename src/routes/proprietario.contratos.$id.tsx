@@ -1,6 +1,6 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Ban, Check, StopCircle, Plus, Bell } from "lucide-react";
-import { useState } from "react";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, Ban, Check, StopCircle, Plus, Bell, FileDown, QrCode, Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,10 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { fmtBRL, fmtData, lembretesDefault, type Pagamento } from "@/lib/mock-proprietario";
 import { useProprietario, useCarro } from "@/lib/store-proprietario";
+import { useConect } from "@/lib/store";
+import { CobrancaPixDialog } from "@/components/proprietario/CobrancaPixDialog";
+import { proximoVencimento } from "@/lib/pix";
+import type { Contrato } from "@/lib/mock-proprietario";
 
 export const Route = createFileRoute("/proprietario/contratos/$id")({
   loader: ({ params }) => ({ id: params.id }),
@@ -21,7 +25,15 @@ type Aba = "geral" | "pagamentos" | "lembretes";
 function Detalhe() {
   const { id } = Route.useLoaderData();
   const contrato = useProprietario((s) => s.contratos.find((c) => c.id === id));
-  const pagamentos = useProprietario((s) => s.pagamentos.filter((p) => p.contratoId === id));
+  const todosPagamentos = useProprietario((s) => s.pagamentos);
+  const pagamentos = useMemo(
+    () => todosPagamentos.filter((p) => p.contratoId === id).sort((a, b) => (a.data < b.data ? 1 : -1)),
+    [todosPagamentos, id],
+  );
+  const gerarCobranca = useProprietario((s) => s.gerarCobranca);
+  const nomeUsuario = useConect((s) => s.nomeUsuario);
+  const recebimento = useProprietario((s) => s.recebimento);
+  const [gerandoPdf, setGerandoPdf] = useState(false);
   const registrarPagamento = useProprietario((s) => s.registrarPagamento);
   const registrarPagamentoDetalhado = useProprietario((s) => s.registrarPagamentoDetalhado);
   const encerrar = useProprietario((s) => s.encerrarContrato);
@@ -80,6 +92,31 @@ function Detalhe() {
               <p className="rounded-2xl border border-border bg-card p-3 text-xs text-muted-foreground">{contrato.observacoes}</p>
             )}
 
+            <Button
+              variant="outline"
+              className="w-full rounded-xl"
+              disabled={gerandoPdf}
+              onClick={async () => {
+                setGerandoPdf(true);
+                try {
+                  const { baixarContratoPdf } = await import("@/lib/contrato-pdf");
+                  await baixarContratoPdf({
+                    contrato,
+                    carro,
+                    proprietarioNome: recebimento?.nome || nomeUsuario || "Proprietário",
+                  });
+                  toast.success("Contrato em PDF baixado");
+                } catch {
+                  toast.error("Não foi possível gerar o PDF");
+                } finally {
+                  setGerandoPdf(false);
+                }
+              }}
+            >
+              {gerandoPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+              Baixar contrato (PDF)
+            </Button>
+
             {contrato.status === "ativo" && (
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" className="rounded-xl" onClick={() => { suspender(contrato.id); toast("Contrato suspenso"); }}>
@@ -95,6 +132,10 @@ function Detalhe() {
 
         {aba === "pagamentos" && (
           <PagamentosPanel
+            temChavePix={!!recebimento}
+            contrato={contrato}
+            veiculo={carro ? `${carro.marca} ${carro.modelo}` : "veículo"}
+            onGerarCobranca={gerarCobranca}
             contratoId={id}
             pagamentos={pagamentos}
             onRegistrar={registrarPagamento}
@@ -113,22 +154,50 @@ function Detalhe() {
   );
 }
 
-function PagamentosPanel({ contratoId, pagamentos, onRegistrar, onRegistrarDetalhado }: {
+function PagamentosPanel({ temChavePix, contrato, veiculo, onGerarCobranca, contratoId, pagamentos, onRegistrar, onRegistrarDetalhado }: {
+  temChavePix: boolean;
+  contrato: Contrato;
+  veiculo: string;
+  onGerarCobranca: (contratoId: string, dados: { valor: number; vencimento: string }) => string;
   contratoId: string;
   pagamentos: Pagamento[];
   onRegistrar: (id: string) => void;
   onRegistrarDetalhado: (contratoId: string, dados: { valor: number; data: string; forma: Pagamento["forma"] }) => void;
 }) {
   const [aberto, setAberto] = useState(false);
-  const [valor, setValor] = useState(120);
+  const [cobrandoId, setCobrandoId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const cobrando = pagamentos.find((p) => p.id === cobrandoId) ?? null;
+  const [valor, setValor] = useState(contrato.valor);
   const [data, setData] = useState(new Date().toISOString().slice(0, 10));
   const [forma, setForma] = useState<Pagamento["forma"]>("Pix");
 
   return (
     <div className="mt-4">
+      {contrato.status === "ativo" && (
+        <Button
+          size="sm"
+          className="mb-2 w-full rounded-xl gradient-primary text-primary-foreground shadow-glow"
+          onClick={() => {
+            if (!temChavePix) {
+              toast("Cadastre sua chave Pix para gerar cobranças");
+              navigate({ to: "/proprietario/perfil" });
+              return;
+            }
+            const ultimo = pagamentos[0]?.data;
+            const novoId = onGerarCobranca(contratoId, {
+              valor: contrato.valor,
+              vencimento: proximoVencimento(ultimo, contrato.periodicidade),
+            });
+            setCobrandoId(novoId);
+          }}
+        >
+          <QrCode className="mr-2 h-4 w-4" /> Gerar cobrança Pix
+        </Button>
+      )}
       {!aberto ? (
         <Button size="sm" variant="outline" className="mb-3 w-full rounded-xl" onClick={() => setAberto(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Registrar pagamento
+          <Plus className="mr-2 h-4 w-4" /> Registrar pagamento recebido
         </Button>
       ) : (
         <div className="mb-3 space-y-3 rounded-2xl border border-primary/40 bg-primary/5 p-3">
@@ -162,10 +231,13 @@ function PagamentosPanel({ contratoId, pagamentos, onRegistrar, onRegistrarDetal
 
       <div className="flex flex-col gap-2">
         {pagamentos.map((p) => (
-          <div key={p.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card">
+          <div key={p.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card">
             <div className="min-w-0">
               <div className="font-semibold">{fmtBRL(p.valor)}</div>
-              <div className="text-xs text-muted-foreground">{fmtData(p.data)} · {p.forma}</div>
+              <div className="truncate text-xs text-muted-foreground">
+                {fmtData(p.data)} · {p.forma}
+                {p.cobradoEm && " · cobrança enviada"}
+              </div>
             </div>
             <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
               p.status === "pago" ? "bg-success/15 text-success" :
@@ -174,15 +246,27 @@ function PagamentosPanel({ contratoId, pagamentos, onRegistrar, onRegistrarDetal
             }`}>
               {p.status}
             </span>
-            {p.status !== "pago" && (
-              <Button size="icon" variant="outline" className="h-8 w-8 rounded-full" onClick={() => { onRegistrar(p.id); toast.success("Pagamento marcado"); }}>
+            {p.status !== "pago" ? (
+              <Button size="icon" variant="outline" className="h-8 w-8 rounded-full" aria-label="Cobrar via Pix" onClick={() => setCobrandoId(p.id)}>
+                <QrCode className="h-4 w-4 text-primary" />
+              </Button>
+            ) : <span />}
+            {p.status !== "pago" ? (
+              <Button size="icon" variant="outline" className="h-8 w-8 rounded-full" aria-label="Marcar como pago" onClick={() => { onRegistrar(p.id); toast.success("Pagamento marcado como pago"); }}>
                 <Check className="h-4 w-4 text-success" />
               </Button>
-            )}
+            ) : <span />}
           </div>
         ))}
         {pagamentos.length === 0 && <p className="text-sm text-muted-foreground">Sem pagamentos registrados.</p>}
       </div>
+
+      <CobrancaPixDialog
+        pagamento={cobrando}
+        motoristaNome={contrato.motoristaNome}
+        veiculo={veiculo}
+        onClose={() => setCobrandoId(null)}
+      />
     </div>
   );
 }
