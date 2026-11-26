@@ -198,6 +198,23 @@ export type SolicitacaoLocacao = {
   duracao?: string;
 };
 
+// Dados do proprietário usados no contrato e na cobrança por Pix.
+export type PerfilDono = {
+  nome: string;
+  documento: string; // CPF ou CNPJ
+  telefone: string;
+  cidade: string;
+  chavePix: string;
+};
+
+export const perfilDonoVazio: PerfilDono = {
+  nome: "",
+  documento: "",
+  telefone: "",
+  cidade: "São Paulo",
+  chavePix: "",
+};
+
 // Motorista que está usando o app neste aparelho (protótipo sem login real)
 export const MOTORISTA_LOGADO_ID = "eu";
 
@@ -206,19 +223,6 @@ export type ConfigLembretes = {
   antecedenciaDias: number; // 0/1/3
   fotoPainelMensal: boolean;
   documentacao: boolean;
-};
-
-export type AnuncioMarketplace = {
-  id: string;
-  proprietario: string;
-  marca: string;
-  modelo: string;
-  ano: number;
-  cidade: string;
-  valor: number;
-  periodicidade: "diaria" | "mensal";
-  foto: string;
-  regras: string;
 };
 
 // -------- Seeds ----------
@@ -627,45 +631,6 @@ export const motoristasCandidatos: MotoristaCandidato[] = [
     pontualidade: 82,
     historico: "Motorista novo. Ainda sem histórico de aluguel na plataforma.",
     observacoes: "Solicitou parcelar caução em 2x.",
-  },
-];
-
-export const marketplaceMock: AnuncioMarketplace[] = [
-  {
-    id: "mk1",
-    proprietario: "Rafael T.",
-    marca: "Volkswagen",
-    modelo: "Polo",
-    ano: 2023,
-    cidade: "São Paulo",
-    valor: 125,
-    periodicidade: "diaria",
-    foto: "https://images.unsplash.com/photo-1600661653561-629509216228?w=600&h=400&fit=crop",
-    regras: "Sem app de entrega. CNH B há +2 anos.",
-  },
-  {
-    id: "mk2",
-    proprietario: "Marina S.",
-    marca: "Fiat",
-    modelo: "Mobi",
-    ano: 2022,
-    cidade: "Guarulhos",
-    valor: 85,
-    periodicidade: "diaria",
-    foto: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=400&fit=crop",
-    regras: "Caução R$ 1.000. Rodagem livre.",
-  },
-  {
-    id: "mk3",
-    proprietario: "Bruno L.",
-    marca: "Nissan",
-    modelo: "Versa",
-    ano: 2024,
-    cidade: "São Paulo",
-    valor: 2900,
-    periodicidade: "mensal",
-    foto: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=600&h=400&fit=crop",
-    regras: "Motorista com 4.8+ e 6 meses de plataforma.",
   },
 ];
 

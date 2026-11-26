@@ -25,6 +25,8 @@ import {
   type MotoristaCandidato,
   hojeISO,
   fmtBRL,
+  perfilDonoVazio,
+  type PerfilDono,
 } from "./mock-proprietario";
 import type { Carro } from "./mock-data";
 import { carros as carrosBase } from "./mock-data";
@@ -45,9 +47,11 @@ type State = {
   solicitacoes: SolicitacaoLocacao[];
   lembretesVeiculo: Lembrete[];
   checklists: Checklist[];
+  perfil: PerfilDono;
 
   registrarPagamento: (id: string) => void;
   sincronizarCobrancas: () => void;
+  salvarPerfil: (perfil: PerfilDono) => void;
   registrarPagamentoDetalhado: (
     contratoId: string,
     dados: { valor: number; data: string; forma: Pagamento["forma"] },
@@ -134,6 +138,7 @@ export const useProprietario = create<State>()(
       solicitacoes: [],
       lembretesVeiculo: [],
       checklists: [],
+      perfil: perfilDonoVazio,
 
       registrarPagamento: (id) =>
         set({
@@ -178,6 +183,7 @@ export const useProprietario = create<State>()(
           ],
         });
       },
+      salvarPerfil: (perfil) => set({ perfil }),
       sincronizarCobrancas: () => {
         const hoje = hojeISO();
         const pagamentos = get().pagamentos;
@@ -711,6 +717,16 @@ export function useCarro(id: string | undefined): Carro | undefined {
   const base = carrosBase.find((c) => c.id === id);
   if (!base) return undefined;
   return { ...base, ...(overrides[id] ?? {}) };
+}
+
+/** Itens de manutenção de todos os carros, com as atualizações feitas no app. */
+export function useManutencaoTodos(): ItemManutencao[] {
+  const extras = useProprietario((s) => s.manutencaoExtras);
+  const overrides = useProprietario((s) => s.manutencaoOverrides);
+  return useMemo(
+    () => [...manutencaoMock, ...extras].map((m) => ({ ...m, ...(overrides[m.id] ?? {}) })),
+    [extras, overrides],
+  );
 }
 
 export function useManutencaoDoCarro(carroId: string): ItemManutencao[] {

@@ -7,8 +7,9 @@ import { motoristas } from "@/lib/mock-data";
 import { fmtBRL, fmtData, statusContratoLabel } from "@/lib/mock-proprietario";
 import { useProprietario } from "@/lib/store-proprietario";
 import { motoristasDosContratos } from "@/lib/motoristas-proprietario";
+import { ContratosNav } from "@/components/proprietario/ContratosNav";
 
-export const Route = createFileRoute("/proprietario/motoristas")({
+export const Route = createFileRoute("/proprietario/contratos/motoristas")({
   head: () => ({ meta: [{ title: "Motoristas — TCHI LÉVA" }] }),
   component: Motoristas,
 });
@@ -43,6 +44,7 @@ function Motoristas() {
 
   return (
     <PageSection>
+      <ContratosNav atual="motoristas" />
       <div className="mb-3">
         <FiltroBar
           busca={busca}

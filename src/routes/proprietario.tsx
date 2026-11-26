@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Car, FileText, CalendarClock, User, LayoutDashboard, Bell } from "lucide-react";
+import { Car, FileText, User, LayoutDashboard, Bell, Wallet } from "lucide-react";
 import { AppShell, type Tab } from "@/components/AppShell";
 import { useProprietario } from "@/lib/store-proprietario";
 
@@ -10,7 +10,7 @@ const tabs: Tab[] = [
   { to: "/proprietario", label: "Início", icon: LayoutDashboard },
   { to: "/proprietario/frota", label: "Frota", icon: Car },
   { to: "/proprietario/contratos", label: "Contratos", icon: FileText },
-  { to: "/proprietario/agenda", label: "Agenda", icon: CalendarClock },
+  { to: "/proprietario/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/proprietario/perfil", label: "Perfil", icon: User },
 ];
 

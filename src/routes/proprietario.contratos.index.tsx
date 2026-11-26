@@ -11,6 +11,7 @@ import {
   statusContratoLabel,
 } from "@/lib/mock-proprietario";
 import { useProprietario, useCarros } from "@/lib/store-proprietario";
+import { ContratosNav } from "@/components/proprietario/ContratosNav";
 
 export const Route = createFileRoute("/proprietario/contratos/")({
   head: () => ({ meta: [{ title: "Contratos — TCHI LÉVA" }] }),
@@ -19,7 +20,9 @@ export const Route = createFileRoute("/proprietario/contratos/")({
 
 function Contratos() {
   const contratos = useProprietario((s) => s.contratos);
+  const solicitacoes = useProprietario((s) => s.solicitacoes);
   const carros = useCarros();
+  const propostas = solicitacoes.filter((s) => s.status === "pendente");
   const [status, setStatus] = useState<string>("todos");
   const [carroId, setCarroId] = useState<string>("todos");
   const [busca, setBusca] = useState("");
@@ -43,6 +46,38 @@ function Contratos() {
   return (
     <>
       <PageSection>
+        <ContratosNav atual="contratos" />
+        {propostas.length > 0 && (
+          <div className="mb-4">
+            <h2 className="mb-2 font-street text-xs font-black uppercase tracking-wider text-muted-foreground">
+              Propostas esperando resposta
+            </h2>
+            <div className="flex flex-col gap-2">
+              {propostas.map((s) => {
+                const carro = carros.find((c) => c.id === s.carroId);
+                return (
+                  <Link
+                    key={s.id}
+                    to="/proprietario/solicitacoes/$id"
+                    params={{ id: s.id }}
+                    className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold">
+                        {s.candidato?.nome ?? "Motorista"}
+                      </div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {carro ? `${carro.marca} ${carro.modelo}` : "Carro"}
+                        {s.valorProposto != null ? ` · ${fmtBRL(s.valorProposto)}` : ""}
+                      </div>
+                    </div>
+                    <span className="text-xs font-semibold text-primary">Responder</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <Link to="/proprietario/contratos/novo">
           <Button className="w-full rounded-xl gradient-primary text-primary-foreground shadow-glow">
             <Plus className="mr-2 h-4 w-4" /> Novo contrato

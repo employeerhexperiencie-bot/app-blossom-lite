@@ -24,8 +24,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { carros } from "@/lib/mock-data";
-import { fmtBRL, MOTORISTA_LOGADO_ID, type Contrato } from "@/lib/mock-proprietario";
-import { useCarro, useProprietario } from "@/lib/store-proprietario";
+import {
+  fmtBRL,
+  fmtData,
+  MOTORISTA_LOGADO_ID,
+  type Contrato,
+  type Pagamento,
+} from "@/lib/mock-proprietario";
+import { useCarro, useProprietario, usePagamentosDoContrato } from "@/lib/store-proprietario";
+import { PixCobranca } from "@/components/proprietario/PixCobranca";
 import { useCandidatoMotorista } from "@/lib/motorista-perfil";
 import { caucaoPorNivel } from "@/lib/cobrancas";
 
@@ -76,6 +83,11 @@ function CarroDetalhe() {
   );
 
   const [open, setOpen] = useState(false);
+  const [pagando, setPagando] = useState<Pagamento | null>(null);
+  const pagamentosContrato = usePagamentosDoContrato(contrato?.id ?? "");
+  const abertos = pagamentosContrato
+    .filter((p) => p.status !== "pago")
+    .sort((a, b) => ((a.vencimento ?? a.data) < (b.vencimento ?? b.data) ? -1 : 1));
   const [valor, setValor] = useState(String(c.diaria));
   const [periodicidade, setPeriodicidade] = useState<Contrato["periodicidade"]>("diaria");
   const [duracao, setDuracao] = useState("");
@@ -173,12 +185,42 @@ function CarroDetalhe() {
             </div>
           </div>
         ) : contrato?.status === "ativo" ? (
-          <div className="mt-6 flex items-start gap-3 rounded-2xl border border-success/40 bg-success/10 p-4 text-sm">
-            <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-            <p>
-              <b>Este carro está alugado com você.</b> {fmtBRL(contrato.valor)}{" "}
-              {periodicidadeLabel[contrato.periodicidade]}.
-            </p>
+          <div className="mt-6 space-y-3">
+            <div className="flex items-start gap-3 rounded-2xl border border-success/40 bg-success/10 p-4 text-sm">
+              <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+              <p>
+                <b>Este carro está alugado com você.</b> {fmtBRL(contrato.valor)}{" "}
+                {periodicidadeLabel[contrato.periodicidade]}.
+              </p>
+            </div>
+            {abertos.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-4">
+                <div className="mb-2 text-sm font-semibold">Aluguel a pagar</div>
+                <div className="flex flex-col gap-2">
+                  {abertos.map((p) => (
+                    <div key={p.id} className="flex items-center justify-between gap-2 text-sm">
+                      <div>
+                        <div className="font-semibold">{fmtBRL(p.valor)}</div>
+                        <div
+                          className={`text-xs ${p.status === "atrasado" ? "text-destructive" : "text-muted-foreground"}`}
+                        >
+                          {p.status === "atrasado" ? "Atrasado · " : ""}vence em{" "}
+                          {fmtData(p.vencimento ?? p.data)}
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl"
+                        onClick={() => setPagando(p)}
+                      >
+                        Pagar com Pix
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : proposta ? (
           <div className="mt-6 rounded-2xl border border-border bg-card p-4">
@@ -212,6 +254,18 @@ function CarroDetalhe() {
           </Button>
         )}
       </div>
+
+      {pagando && contrato && (
+        <PixCobranca
+          aberto
+          paraMotorista
+          onFechar={() => setPagando(null)}
+          valor={pagando.valor}
+          identificador={pagando.id}
+          descricao={`Aluguel do ${c.marca} ${c.modelo}`}
+          vencimento={pagando.vencimento ?? pagando.data}
+        />
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="rounded-2xl">

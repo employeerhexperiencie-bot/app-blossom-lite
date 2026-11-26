@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
   ArrowLeft,
+  QrCode,
   Ban,
   Check,
   StopCircle,
@@ -18,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ChecklistForm, ChecklistResumo } from "@/components/proprietario/ChecklistForm";
+import { PixCobranca } from "@/components/proprietario/PixCobranca";
 import { combustivelLabel, compararChecklists } from "@/lib/checklist";
 import { emAberto, proximoVencimento } from "@/lib/cobrancas";
 import {
@@ -261,6 +263,7 @@ function PagamentosPanel({
   const [data, setData] = useState(hojeISO());
   const [forma, setForma] = useState<Pagamento["forma"]>("Pix");
   const [limite, setLimite] = useState(20);
+  const [cobrando, setCobrando] = useState<Pagamento | null>(null);
 
   const ordenados = [...pagamentos].sort((a, b) =>
     (a.vencimento ?? a.data) < (b.vencimento ?? b.data) ? 1 : -1,
@@ -367,7 +370,7 @@ function PagamentosPanel({
         {ordenados.slice(0, limite).map((p) => (
           <div
             key={p.id}
-            className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card"
+            className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card"
           >
             <div className="min-w-0">
               <div className="font-semibold">{fmtBRL(p.valor)}</div>
@@ -388,6 +391,19 @@ function PagamentosPanel({
             >
               {p.status}
             </span>
+            {p.status !== "pago" ? (
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-8 w-8 rounded-full"
+                aria-label="Cobrar com Pix"
+                onClick={() => setCobrando(p)}
+              >
+                <QrCode className="h-4 w-4 text-primary" />
+              </Button>
+            ) : (
+              <span className="w-8" />
+            )}
             {p.status !== "pago" ? (
               <Button
                 size="icon"
@@ -420,6 +436,16 @@ function PagamentosPanel({
           <p className="text-sm text-muted-foreground">Sem pagamentos registrados.</p>
         )}
       </div>
+      {cobrando && (
+        <PixCobranca
+          aberto
+          onFechar={() => setCobrando(null)}
+          valor={cobrando.valor}
+          identificador={cobrando.id}
+          descricao={`Aluguel de ${contrato.motoristaNome}`}
+          vencimento={cobrando.vencimento ?? cobrando.data}
+        />
+      )}
     </div>
   );
 }
