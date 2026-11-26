@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { fmtBRL, fmtData, lembretesDefault, type Pagamento } from "@/lib/mock-proprietario";
-import { useProprietario, useCarro } from "@/lib/store-proprietario";
+import { useProprietario, useCarro, usePagamentosDoContrato } from "@/lib/store-proprietario";
 
 export const Route = createFileRoute("/proprietario/contratos/$id")({
   loader: ({ params }) => ({ id: params.id }),
@@ -21,7 +21,7 @@ type Aba = "geral" | "pagamentos" | "lembretes";
 function Detalhe() {
   const { id } = Route.useLoaderData();
   const contrato = useProprietario((s) => s.contratos.find((c) => c.id === id));
-  const pagamentos = useProprietario((s) => s.pagamentos.filter((p) => p.contratoId === id));
+  const pagamentos = usePagamentosDoContrato(id);
   const registrarPagamento = useProprietario((s) => s.registrarPagamento);
   const registrarPagamentoDetalhado = useProprietario((s) => s.registrarPagamentoDetalhado);
   const encerrar = useProprietario((s) => s.encerrarContrato);

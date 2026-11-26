@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useShallow } from "zustand/react/shallow";
 import {
   contratosMock,
   pagamentosMock,
@@ -339,6 +340,12 @@ export function todosEventosDoCarro(carroId: string, extras: EventoVeiculo[]): E
   const base = eventosMock.filter((e) => e.carroId === carroId);
   const ex = extras.filter((e) => e.carroId === carroId);
   return [...ex, ...base].sort((a, b) => (a.data < b.data ? 1 : -1));
+}
+
+// Pagamentos de um contrato. O useShallow evita o laço infinito de renderização:
+// sem ele, o filter cria um array novo a cada leitura e o zustand 5 re-renderiza sem parar.
+export function usePagamentosDoContrato(contratoId: string): Pagamento[] {
+  return useProprietario(useShallow((s) => s.pagamentos.filter((p) => p.contratoId === contratoId)));
 }
 
 export function useFinanceiroPorVeiculo(): { carroId: string; receita: number; custos: number }[] {
