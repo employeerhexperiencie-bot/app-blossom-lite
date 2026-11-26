@@ -1,47 +1,93 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Ban, Check, StopCircle, Plus, Bell } from "lucide-react";
+import {
+  ArrowLeft,
+  Ban,
+  Check,
+  StopCircle,
+  Plus,
+  Bell,
+  Clock,
+  Star,
+  Megaphone,
+} from "lucide-react";
 import { useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { fmtBRL, fmtData, lembretesDefault, type Pagamento } from "@/lib/mock-proprietario";
-import { useProprietario, useCarro, usePagamentosDoContrato } from "@/lib/store-proprietario";
+import { ChecklistForm, ChecklistResumo } from "@/components/proprietario/ChecklistForm";
+import { combustivelLabel, compararChecklists } from "@/lib/checklist";
+import {
+  fmtBRL,
+  fmtData,
+  lembretesDefault,
+  statusContratoLabel,
+  type Checklist,
+  type Contrato,
+  type Pagamento,
+} from "@/lib/mock-proprietario";
+import {
+  useProprietario,
+  useCarro,
+  usePagamentosDoContrato,
+  useChecklistsDoContrato,
+} from "@/lib/store-proprietario";
 
 export const Route = createFileRoute("/proprietario/contratos/$id")({
   loader: ({ params }) => ({ id: params.id }),
   head: () => ({ meta: [{ title: "Contrato — TCHI LÉVA" }] }),
   component: Detalhe,
-  notFoundComponent: () => <div className="p-10 text-center text-muted-foreground">Contrato não encontrado.</div>,
+  notFoundComponent: () => (
+    <div className="p-10 text-center text-muted-foreground">Contrato não encontrado.</div>
+  ),
 });
 
-type Aba = "geral" | "pagamentos" | "lembretes";
+type Aba = "geral" | "checklist" | "pagamentos" | "lembretes";
+const abaLabel: Record<Aba, string> = {
+  geral: "Geral",
+  checklist: "Checklist",
+  pagamentos: "Pagamentos",
+  lembretes: "Lembretes",
+};
 
 function Detalhe() {
   const { id } = Route.useLoaderData();
   const contrato = useProprietario((s) => s.contratos.find((c) => c.id === id));
   const pagamentos = usePagamentosDoContrato(id);
+  const checklists = useChecklistsDoContrato(id);
   const registrarPagamento = useProprietario((s) => s.registrarPagamento);
   const registrarPagamentoDetalhado = useProprietario((s) => s.registrarPagamentoDetalhado);
-  const encerrar = useProprietario((s) => s.encerrarContrato);
   const suspender = useProprietario((s) => s.suspenderContrato);
   const lembretesSalvos = useProprietario((s) => s.lembretes[id]);
   const salvarLembretes = useProprietario((s) => s.salvarLembretes);
+  const anuncio = useProprietario((s) => (contrato ? s.anuncios[contrato.carroId] : undefined));
+  const publicar = useProprietario((s) => s.publicarVeiculo);
   const [aba, setAba] = useState<Aba>("geral");
+  const [encerrando, setEncerrando] = useState(false);
 
   const carro = useCarro(contrato?.carroId);
   if (!contrato) throw notFound();
 
+  const entrada = checklists.find((c) => c.tipo === "entrada");
+  const devolucao = checklists.find((c) => c.tipo === "devolucao");
+  const emAndamento = contrato.status === "ativo" || contrato.status === "suspenso";
+
   return (
     <>
       <PageSection>
-        <Link to="/proprietario/contratos" className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+        <Link
+          to="/proprietario/contratos"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> Contratos
         </Link>
 
         <div className="mt-3 rounded-3xl gradient-primary p-5 text-primary-foreground shadow-glow">
-          <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">Contrato</div>
+          <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">
+            Contrato
+          </div>
           <div className="font-street text-2xl font-black uppercase">{contrato.motoristaNome}</div>
           <div className="mt-1 text-xs opacity-90">
             {carro ? `${carro.marca} ${carro.modelo} · ${carro.placa}` : "—"}
@@ -53,16 +99,42 @@ function Detalhe() {
           </div>
         </div>
 
+        {contrato.status === "aguardando_aceite" && (
+          <div className="mt-3 flex items-start gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-3">
+            <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <p className="text-xs">
+              <b>Aguardando o motorista aceitar.</b> O contrato aparece no app dele, em Aluguéis. O
+              carro só fica alugado depois do aceite.
+            </p>
+          </div>
+        )}
+        {contrato.status === "recusado" && (
+          <div className="mt-3 rounded-2xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+            O motorista recusou este contrato. O carro continua disponível.
+          </div>
+        )}
+        {contrato.status === "ativo" && !entrada && (
+          <button
+            onClick={() => setAba("checklist")}
+            className="mt-3 w-full rounded-2xl border border-warning/50 bg-warning/10 p-3 text-left text-xs"
+          >
+            <b>Falta o checklist de entrada.</b> Registre km, combustível e avarias na entrega do
+            carro: é a base para o acerto da caução na devolução.
+          </button>
+        )}
+
         <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-          {(["geral", "pagamentos", "lembretes"] as Aba[]).map((a) => (
+          {(Object.keys(abaLabel) as Aba[]).map((a) => (
             <button
               key={a}
               onClick={() => setAba(a)}
-              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold capitalize ${
-                aba === a ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                aba === a
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card"
               }`}
             >
-              {a}
+              {abaLabel[a]}
             </button>
           ))}
         </div>
@@ -72,25 +144,76 @@ function Detalhe() {
             <div className="grid grid-cols-2 gap-2">
               <Info k="Início" v={fmtData(contrato.inicio)} />
               <Info k="Fim" v={contrato.fim ? fmtData(contrato.fim) : "Em aberto"} />
-              <Info k="Status" v={contrato.status} className="capitalize" />
+              <Info k="Status" v={statusContratoLabel[contrato.status]} />
               {carro && <Info k="Veículo" v={`${carro.marca} ${carro.modelo}`} />}
             </div>
 
             {contrato.observacoes && (
-              <p className="rounded-2xl border border-border bg-card p-3 text-xs text-muted-foreground">{contrato.observacoes}</p>
+              <p className="rounded-2xl border border-border bg-card p-3 text-xs text-muted-foreground">
+                {contrato.observacoes}
+              </p>
             )}
 
-            {contrato.status === "ativo" && (
+            {contrato.status === "encerrado" && <ResumoEncerramento contrato={contrato} />}
+
+            {contrato.status === "encerrado" && anuncio && !anuncio.publicado && (
+              <Button
+                className="w-full rounded-xl gradient-primary text-primary-foreground"
+                onClick={() => {
+                  publicar(contrato.carroId, anuncio);
+                  toast.success("Anúncio publicado de novo");
+                }}
+              >
+                <Megaphone className="mr-2 h-4 w-4" /> Republicar o carro
+              </Button>
+            )}
+
+            {emAndamento && !encerrando && (
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="rounded-xl" onClick={() => { suspender(contrato.id); toast("Contrato suspenso"); }}>
-                  <StopCircle className="mr-2 h-4 w-4" /> Suspender
-                </Button>
-                <Button variant="outline" className="rounded-xl" onClick={() => { encerrar(contrato.id); toast.success("Contrato encerrado"); }}>
+                {contrato.status === "ativo" ? (
+                  <Button
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={() => {
+                      suspender(contrato.id);
+                      toast("Contrato suspenso");
+                    }}
+                  >
+                    <StopCircle className="mr-2 h-4 w-4" /> Suspender
+                  </Button>
+                ) : (
+                  <span />
+                )}
+                <Button
+                  variant="outline"
+                  className="rounded-xl"
+                  onClick={() => setEncerrando(true)}
+                >
                   <Ban className="mr-2 h-4 w-4" /> Encerrar
                 </Button>
               </div>
             )}
+
+            {emAndamento && encerrando && (
+              <EncerrarPanel
+                contrato={contrato}
+                kmCarro={carro?.km ?? 0}
+                entrada={entrada}
+                devolucao={devolucao}
+                onCancelar={() => setEncerrando(false)}
+                onConcluido={() => setEncerrando(false)}
+              />
+            )}
           </div>
+        )}
+
+        {aba === "checklist" && (
+          <ChecklistPanel
+            contrato={contrato}
+            kmCarro={carro?.km ?? 0}
+            entrada={entrada}
+            devolucao={devolucao}
+          />
         )}
 
         {aba === "pagamentos" && (
@@ -105,7 +228,10 @@ function Detalhe() {
         {aba === "lembretes" && (
           <LembretesPanel
             atual={lembretesSalvos ?? lembretesDefault}
-            onSalvar={(cfg) => { salvarLembretes(id, cfg); toast.success("Lembretes atualizados"); }}
+            onSalvar={(cfg) => {
+              salvarLembretes(id, cfg);
+              toast.success("Lembretes atualizados");
+            }}
           />
         )}
       </PageSection>
@@ -113,11 +239,19 @@ function Detalhe() {
   );
 }
 
-function PagamentosPanel({ contratoId, pagamentos, onRegistrar, onRegistrarDetalhado }: {
+function PagamentosPanel({
+  contratoId,
+  pagamentos,
+  onRegistrar,
+  onRegistrarDetalhado,
+}: {
   contratoId: string;
   pagamentos: Pagamento[];
   onRegistrar: (id: string) => void;
-  onRegistrarDetalhado: (contratoId: string, dados: { valor: number; data: string; forma: Pagamento["forma"] }) => void;
+  onRegistrarDetalhado: (
+    contratoId: string,
+    dados: { valor: number; data: string; forma: Pagamento["forma"] },
+  ) => void;
 }) {
   const [aberto, setAberto] = useState(false);
   const [valor, setValor] = useState(120);
@@ -127,7 +261,12 @@ function PagamentosPanel({ contratoId, pagamentos, onRegistrar, onRegistrarDetal
   return (
     <div className="mt-4">
       {!aberto ? (
-        <Button size="sm" variant="outline" className="mb-3 w-full rounded-xl" onClick={() => setAberto(true)}>
+        <Button
+          size="sm"
+          variant="outline"
+          className="mb-3 w-full rounded-xl"
+          onClick={() => setAberto(true)}
+        >
           <Plus className="mr-2 h-4 w-4" /> Registrar pagamento
         </Button>
       ) : (
@@ -135,24 +274,51 @@ function PagamentosPanel({ contratoId, pagamentos, onRegistrar, onRegistrarDetal
           <div className="grid grid-cols-3 gap-2">
             <div>
               <Label className="text-xs">Valor</Label>
-              <Input className="mt-1" type="number" value={valor} onChange={(e) => setValor(+e.target.value)} />
+              <Input
+                className="mt-1"
+                type="number"
+                value={valor}
+                onChange={(e) => setValor(+e.target.value)}
+              />
             </div>
             <div>
               <Label className="text-xs">Data</Label>
-              <Input className="mt-1" type="date" value={data} onChange={(e) => setData(e.target.value)} />
+              <Input
+                className="mt-1"
+                type="date"
+                value={data}
+                onChange={(e) => setData(e.target.value)}
+              />
             </div>
             <div>
               <Label className="text-xs">Forma</Label>
-              <select value={forma} onChange={(e) => setForma(e.target.value as Pagamento["forma"])} className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm">
-                <option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Transferência</option>
+              <select
+                value={forma}
+                onChange={(e) => setForma(e.target.value as Pagamento["forma"])}
+                className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm"
+              >
+                <option>Pix</option>
+                <option>Dinheiro</option>
+                <option>Cartão</option>
+                <option>Transferência</option>
               </select>
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setAberto(false)}>Cancelar</Button>
+            <Button
+              variant="outline"
+              className="flex-1 rounded-xl"
+              onClick={() => setAberto(false)}
+            >
+              Cancelar
+            </Button>
             <Button
               className="flex-1 rounded-xl gradient-primary text-primary-foreground"
-              onClick={() => { onRegistrarDetalhado(contratoId, { valor, data, forma }); toast.success("Pagamento registrado"); setAberto(false); }}
+              onClick={() => {
+                onRegistrarDetalhado(contratoId, { valor, data, forma });
+                toast.success("Pagamento registrado");
+                setAberto(false);
+              }}
             >
               Salvar
             </Button>
@@ -162,32 +328,57 @@ function PagamentosPanel({ contratoId, pagamentos, onRegistrar, onRegistrarDetal
 
       <div className="flex flex-col gap-2">
         {pagamentos.map((p) => (
-          <div key={p.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card">
+          <div
+            key={p.id}
+            className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card"
+          >
             <div className="min-w-0">
               <div className="font-semibold">{fmtBRL(p.valor)}</div>
-              <div className="text-xs text-muted-foreground">{fmtData(p.data)} · {p.forma}</div>
+              <div className="text-xs text-muted-foreground">
+                {fmtData(p.data)} · {p.forma}
+              </div>
             </div>
-            <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-              p.status === "pago" ? "bg-success/15 text-success" :
-              p.status === "pendente" ? "bg-warning/20 text-warning-foreground" :
-              "bg-destructive/15 text-destructive"
-            }`}>
+            <span
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                p.status === "pago"
+                  ? "bg-success/15 text-success"
+                  : p.status === "pendente"
+                    ? "bg-warning/20 text-warning-foreground"
+                    : "bg-destructive/15 text-destructive"
+              }`}
+            >
               {p.status}
             </span>
             {p.status !== "pago" && (
-              <Button size="icon" variant="outline" className="h-8 w-8 rounded-full" onClick={() => { onRegistrar(p.id); toast.success("Pagamento marcado"); }}>
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-8 w-8 rounded-full"
+                onClick={() => {
+                  onRegistrar(p.id);
+                  toast.success("Pagamento marcado");
+                }}
+              >
                 <Check className="h-4 w-4 text-success" />
               </Button>
             )}
           </div>
         ))}
-        {pagamentos.length === 0 && <p className="text-sm text-muted-foreground">Sem pagamentos registrados.</p>}
+        {pagamentos.length === 0 && (
+          <p className="text-sm text-muted-foreground">Sem pagamentos registrados.</p>
+        )}
       </div>
     </div>
   );
 }
 
-function LembretesPanel({ atual, onSalvar }: { atual: typeof lembretesDefault; onSalvar: (cfg: typeof lembretesDefault) => void }) {
+function LembretesPanel({
+  atual,
+  onSalvar,
+}: {
+  atual: typeof lembretesDefault;
+  onSalvar: (cfg: typeof lembretesDefault) => void;
+}) {
   const [cfg, setCfg] = useState(atual);
   return (
     <div className="mt-4 space-y-3">
@@ -234,7 +425,10 @@ function LembretesPanel({ atual, onSalvar }: { atual: typeof lembretesDefault; o
             desc="Lembrete de docs vencendo."
           />
         </div>
-        <Button className="mt-4 w-full rounded-xl gradient-primary text-primary-foreground" onClick={() => onSalvar(cfg)}>
+        <Button
+          className="mt-4 w-full rounded-xl gradient-primary text-primary-foreground"
+          onClick={() => onSalvar(cfg)}
+        >
           Salvar preferências
         </Button>
       </div>
@@ -242,10 +436,25 @@ function LembretesPanel({ atual, onSalvar }: { atual: typeof lembretesDefault; o
   );
 }
 
-function Toggle({ checked, onChange, label, desc }: { checked: boolean; onChange: (v: boolean) => void; label: string; desc: string }) {
+function Toggle({
+  checked,
+  onChange,
+  label,
+  desc,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+  desc: string;
+}) {
   return (
     <label className="flex cursor-pointer items-start gap-3">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-1 h-4 w-4 accent-current" />
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-1 h-4 w-4 accent-current"
+      />
       <div className="min-w-0">
         <div className="text-sm font-semibold">{label}</div>
         <div className="text-xs text-muted-foreground">{desc}</div>
@@ -259,6 +468,275 @@ function Info({ k, v, className = "" }: { k: string; v: string; className?: stri
     <div className="rounded-2xl border border-border bg-card px-3 py-2">
       <div className="text-[10px] uppercase text-muted-foreground">{k}</div>
       <div className={`text-sm font-semibold ${className}`}>{v}</div>
+    </div>
+  );
+}
+
+function ChecklistPanel({
+  contrato,
+  kmCarro,
+  entrada,
+  devolucao,
+}: {
+  contrato: Contrato;
+  kmCarro: number;
+  entrada?: Checklist;
+  devolucao?: Checklist;
+}) {
+  const salvar = useProprietario((s) => s.salvarChecklist);
+  const [editando, setEditando] = useState<Checklist["tipo"] | null>(null);
+  const podeEntrada = contrato.status === "ativo" || contrato.status === "suspenso";
+  const podeDevolucao = podeEntrada && !!entrada;
+
+  const bloco = (
+    tipo: Checklist["tipo"],
+    atual: Checklist | undefined,
+    pode: boolean,
+    aviso: string,
+  ) => (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="font-street text-sm font-black uppercase tracking-wider">
+          {tipo === "entrada" ? "Entrega do carro" : "Devolução do carro"}
+        </div>
+        {atual && (
+          <span className="text-[10px] uppercase text-muted-foreground">{fmtData(atual.data)}</span>
+        )}
+      </div>
+      {editando === tipo ? (
+        <ChecklistForm
+          tipo={tipo}
+          kmInicial={
+            tipo === "devolucao" && entrada ? Math.max(kmCarro, entrada.itens.km) : kmCarro
+          }
+          atual={atual?.itens}
+          onCancelar={() => setEditando(null)}
+          onSalvar={(itens) => {
+            salvar({ contratoId: contrato.id, tipo, itens });
+            toast.success("Checklist salvo no Passaporte do carro");
+            setEditando(null);
+          }}
+        />
+      ) : atual ? (
+        <>
+          <ChecklistResumo checklist={atual} />
+          {pode && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-3 w-full rounded-xl"
+              onClick={() => setEditando(tipo)}
+            >
+              Refazer checklist
+            </Button>
+          )}
+        </>
+      ) : pode ? (
+        <Button
+          size="sm"
+          variant="outline"
+          className="w-full rounded-xl"
+          onClick={() => setEditando(tipo)}
+        >
+          <Plus className="mr-2 h-4 w-4" /> Preencher checklist
+        </Button>
+      ) : (
+        <p className="text-xs text-muted-foreground">{aviso}</p>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="mt-4 flex flex-col gap-3">
+      {bloco(
+        "entrada",
+        entrada,
+        podeEntrada,
+        "Disponível depois que o motorista aceitar o contrato.",
+      )}
+      {bloco("devolucao", devolucao, podeDevolucao, "Faça primeiro o checklist de entrada.")}
+    </div>
+  );
+}
+
+function EncerrarPanel({
+  contrato,
+  kmCarro,
+  entrada,
+  devolucao,
+  onCancelar,
+  onConcluido,
+}: {
+  contrato: Contrato;
+  kmCarro: number;
+  entrada?: Checklist;
+  devolucao?: Checklist;
+  onCancelar: () => void;
+  onConcluido: () => void;
+}) {
+  const salvarChecklist = useProprietario((s) => s.salvarChecklist);
+  const finalizar = useProprietario((s) => s.finalizarContrato);
+  const [desconto, setDesconto] = useState(0);
+  const [motivo, setMotivo] = useState("");
+  const [nota, setNota] = useState(5);
+  const [comentario, setComentario] = useState("");
+  const diff = compararChecklists(entrada, devolucao);
+
+  return (
+    <div className="space-y-3 rounded-2xl border border-primary/40 bg-primary/5 p-4">
+      <div className="font-street text-sm font-black uppercase tracking-wider">
+        Encerrar contrato
+      </div>
+
+      {!devolucao ? (
+        <>
+          <p className="text-xs text-muted-foreground">
+            Passo 1 de 2: registre como o carro voltou.
+            {!entrada &&
+              " Este contrato não tem checklist de entrada, então não haverá comparação."}
+          </p>
+          <ChecklistForm
+            tipo="devolucao"
+            kmInicial={entrada ? Math.max(kmCarro, entrada.itens.km) : kmCarro}
+            onCancelar={onCancelar}
+            onSalvar={(itens) => {
+              salvarChecklist({ contratoId: contrato.id, tipo: "devolucao", itens });
+              toast.success("Checklist de devolução salvo");
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground">
+            Passo 2 de 2: acerto da caução e avaliação.
+          </p>
+          {diff ? (
+            <div className="rounded-xl border border-border bg-card p-3 text-xs">
+              <div className="mb-1 font-semibold">Entrega x devolução</div>
+              <ul className="space-y-1">
+                <li>{diff.kmRodados.toLocaleString("pt-BR")} km rodados no contrato</li>
+                <li className={diff.combustivelMenor ? "text-destructive" : ""}>
+                  Combustível: {combustivelLabel[entrada!.itens.combustivel]} →{" "}
+                  {combustivelLabel[devolucao.itens.combustivel]}
+                </li>
+                <li className={diff.pneusPiores ? "text-destructive" : ""}>
+                  Pneus: {entrada!.itens.pneus} → {devolucao.itens.pneus}
+                </li>
+                <li className={diff.novasAvarias ? "text-destructive" : ""}>
+                  {diff.novasAvarias ? `Avarias novas: ${diff.novasAvarias}` : "Sem avarias novas"}
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-border bg-card p-3 text-xs text-muted-foreground">
+              Sem checklist de entrada para comparar.
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Desconto na caução (R$)</Label>
+              <Input
+                className="mt-1"
+                type="number"
+                min={0}
+                max={contrato.caucao}
+                value={desconto}
+                onChange={(e) =>
+                  setDesconto(Math.min(contrato.caucao, Math.max(0, +e.target.value)))
+                }
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Devolver ao motorista</Label>
+              <div className="mt-1 flex h-10 items-center rounded-lg border border-border bg-background px-3 text-sm font-semibold">
+                {fmtBRL(contrato.caucao - desconto)}
+              </div>
+            </div>
+          </div>
+          {desconto > 0 && (
+            <div>
+              <Label className="text-xs">Motivo do desconto</Label>
+              <Input
+                className="mt-1"
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
+                placeholder="Ex.: risco na porta"
+              />
+            </div>
+          )}
+
+          <div>
+            <Label className="text-xs">Avaliação do motorista</Label>
+            <Estrelas nota={nota} onChange={setNota} />
+            <Textarea
+              className="mt-2"
+              rows={2}
+              value={comentario}
+              onChange={(e) => setComentario(e.target.value)}
+              placeholder="Comentário opcional"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1 rounded-xl" onClick={onCancelar}>
+              Cancelar
+            </Button>
+            <Button
+              disabled={desconto > 0 && !motivo.trim()}
+              className="flex-1 rounded-xl gradient-primary text-primary-foreground"
+              onClick={() => {
+                finalizar(contrato.id, {
+                  desconto,
+                  motivo: motivo.trim() || undefined,
+                  nota,
+                  comentario: comentario.trim() || undefined,
+                });
+                toast.success("Contrato encerrado e carro liberado");
+                onConcluido();
+              }}
+            >
+              <Check className="mr-2 h-4 w-4" /> Encerrar contrato
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ResumoEncerramento({ contrato }: { contrato: Contrato }) {
+  if (!contrato.acerto && !contrato.avaliacao) return null;
+  return (
+    <div className="rounded-2xl border border-border bg-card p-3 text-xs">
+      <div className="mb-2 font-semibold">Encerramento</div>
+      {contrato.acerto && (
+        <p>
+          Caução {fmtBRL(contrato.acerto.caucao)} · desconto {fmtBRL(contrato.acerto.desconto)}
+          {contrato.acerto.motivo ? ` (${contrato.acerto.motivo})` : ""} · devolvido{" "}
+          {fmtBRL(contrato.acerto.devolvido)}
+        </p>
+      )}
+      {contrato.avaliacao && (
+        <p className="mt-1">
+          Avaliação: {contrato.avaliacao.nota} de 5
+          {contrato.avaliacao.comentario ? ` — ${contrato.avaliacao.comentario}` : ""}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Estrelas({ nota, onChange }: { nota: number; onChange: (n: number) => void }) {
+  return (
+    <div className="mt-1 flex gap-1">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button key={n} type="button" onClick={() => onChange(n)} aria-label={`${n} estrelas`}>
+          <Star
+            className={`h-6 w-6 ${n <= nota ? "fill-warning text-warning" : "text-muted-foreground"}`}
+          />
+        </button>
+      ))}
     </div>
   );
 }

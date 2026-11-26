@@ -4,7 +4,12 @@ import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { FiltroBar } from "@/components/FiltroBar";
-import { fmtBRL, fmtData } from "@/lib/mock-proprietario";
+import {
+  fmtBRL,
+  fmtData,
+  statusContratoClasse,
+  statusContratoLabel,
+} from "@/lib/mock-proprietario";
 import { useProprietario, useCarros } from "@/lib/store-proprietario";
 
 export const Route = createFileRoute("/proprietario/contratos/")({
@@ -32,7 +37,8 @@ function Contratos() {
     });
   }, [contratos, status, carroId, busca, faixa]);
 
-  const ativos = (status !== "todos" ? 1 : 0) + (carroId !== "todos" ? 1 : 0) + (faixa !== "todos" ? 1 : 0);
+  const ativos =
+    (status !== "todos" ? 1 : 0) + (carroId !== "todos" ? 1 : 0) + (faixa !== "todos" ? 1 : 0);
 
   return (
     <>
@@ -48,26 +54,41 @@ function Contratos() {
             onBusca={setBusca}
             buscaPlaceholder="Buscar motorista..."
             ativos={ativos}
-            onLimpar={() => { setStatus("todos"); setCarroId("todos"); setBusca(""); setFaixa("todos"); }}
+            onLimpar={() => {
+              setStatus("todos");
+              setCarroId("todos");
+              setBusca("");
+              setFaixa("todos");
+            }}
             chips={[
               {
-                key: "st", label: "Status", value: status, onChange: setStatus,
+                key: "st",
+                label: "Status",
+                value: status,
+                onChange: setStatus,
                 options: [
                   { value: "todos", label: "Todos" },
+                  { value: "aguardando_aceite", label: "Aguardando aceite" },
                   { value: "ativo", label: "Ativo" },
                   { value: "suspenso", label: "Suspenso" },
                   { value: "encerrado", label: "Encerrado" },
                 ],
               },
               {
-                key: "car", label: "Veículo", value: carroId, onChange: setCarroId,
+                key: "car",
+                label: "Veículo",
+                value: carroId,
+                onChange: setCarroId,
                 options: [
                   { value: "todos", label: "Todos" },
                   ...carros.map((c) => ({ value: c.id, label: `${c.marca} ${c.modelo}` })),
                 ],
               },
               {
-                key: "fx", label: "Valor", value: faixa, onChange: setFaixa,
+                key: "fx",
+                label: "Valor",
+                value: faixa,
+                onChange: setFaixa,
                 options: [
                   { value: "todos", label: "Todos" },
                   { value: "ate100", label: "Até R$100" },
@@ -94,16 +115,17 @@ function Contratos() {
                 <div className="min-w-0">
                   <div className="truncate font-semibold">{ct.motoristaNome}</div>
                   <div className="truncate text-xs text-muted-foreground">
-                    {carro ? `${carro.marca} ${carro.modelo}` : "—"} · {fmtBRL(ct.valor)} / {ct.periodicidade}
+                    {carro ? `${carro.marca} ${carro.modelo}` : "—"} · {fmtBRL(ct.valor)} /{" "}
+                    {ct.periodicidade}
                   </div>
-                  <div className="text-[10px] uppercase text-muted-foreground">Desde {fmtData(ct.inicio)}</div>
+                  <div className="text-[10px] uppercase text-muted-foreground">
+                    Desde {fmtData(ct.inicio)}
+                  </div>
                 </div>
-                <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
-                  ct.status === "ativo" ? "bg-success/15 text-success" :
-                  ct.status === "suspenso" ? "bg-warning/20 text-warning-foreground" :
-                  "bg-muted text-muted-foreground"
-                }`}>
-                  {ct.status}
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusContratoClasse[ct.status]}`}
+                >
+                  {statusContratoLabel[ct.status]}
                 </span>
               </Link>
             );

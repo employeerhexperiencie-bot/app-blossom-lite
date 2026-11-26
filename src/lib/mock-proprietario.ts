@@ -13,10 +13,16 @@ export type EventoTipo =
   | "km"
   | "custo"
   | "observacao"
+  | "checklist"
   | "outro";
 
-export type CustoCategoria = "lavagem" | "multa" | "estacionamento" | "ipva" | "combustivel" | "outro";
-
+export type CustoCategoria =
+  | "lavagem"
+  | "multa"
+  | "estacionamento"
+  | "ipva"
+  | "combustivel"
+  | "outro";
 
 export type EventoVeiculo = {
   id: string;
@@ -41,7 +47,6 @@ export type Lembrete = {
   feito: boolean;
   criadoEm: string;
 };
-
 
 export type DocStatus = "ok" | "vencendo" | "vencido";
 export type DocumentoVeiculo = {
@@ -83,8 +88,33 @@ export type Contrato = {
   caucao: number;
   inicio: string;
   fim?: string;
-  status: "ativo" | "encerrado" | "suspenso";
+  status: StatusContrato;
   observacoes?: string;
+  solicitacaoId?: string;
+  acerto?: AcertoCaucao;
+  avaliacao?: AvaliacaoMotorista;
+};
+
+// aguardando_aceite: o proprietário enviou o contrato e falta o motorista aceitar no app dele.
+export type StatusContrato = "aguardando_aceite" | "ativo" | "suspenso" | "encerrado" | "recusado";
+
+export type AcertoCaucao = { caucao: number; desconto: number; devolvido: number; motivo?: string };
+export type AvaliacaoMotorista = { nota: number; comentario?: string };
+
+export const statusContratoLabel: Record<StatusContrato, string> = {
+  aguardando_aceite: "Aguardando aceite",
+  ativo: "Ativo",
+  suspenso: "Suspenso",
+  encerrado: "Encerrado",
+  recusado: "Recusado",
+};
+
+export const statusContratoClasse: Record<StatusContrato, string> = {
+  aguardando_aceite: "bg-primary/15 text-primary",
+  ativo: "bg-success/15 text-success",
+  suspenso: "bg-warning/20 text-warning-foreground",
+  encerrado: "bg-muted text-muted-foreground",
+  recusado: "bg-destructive/15 text-destructive",
 };
 
 export type Pagamento = {
@@ -142,7 +172,8 @@ export type MotoristaCandidato = {
   avaliacao: number;
   tempoPlataforma: string;
   corridas: number;
-  pontualidade: number; // 0-100
+  pontualidade?: number; // 0-100
+  nivel?: string; // nome do nível no Clube TCHI LÉVA
   historico: string;
   observacoes?: string;
   foto?: string;
@@ -155,7 +186,15 @@ export type SolicitacaoLocacao = {
   data: string;
   status: "pendente" | "aceita" | "recusada";
   mensagem?: string;
+  // Dados enviados pelo motorista junto com a proposta
+  candidato?: MotoristaCandidato;
+  valorProposto?: number;
+  periodicidade?: Contrato["periodicidade"];
+  duracao?: string;
 };
+
+// Motorista que está usando o app neste aparelho (protótipo sem login real)
+export const MOTORISTA_LOGADO_ID = "eu";
 
 export type ConfigLembretes = {
   vencimentoAluguel: boolean;
@@ -180,25 +219,129 @@ export type AnuncioMarketplace = {
 // -------- Seeds ----------
 
 export const eventosMock: EventoVeiculo[] = [
-  { id: "e1", carroId: "c1", tipo: "cadastro", titulo: "Veículo cadastrado", data: "2025-06-01", km: 32000 },
-  { id: "e2", carroId: "c1", tipo: "locacao", titulo: "Alugado para João Silva", data: "2025-08-15", km: 34500 },
-  { id: "e3", carroId: "c1", tipo: "troca-oleo", titulo: "Troca de óleo + filtro", data: "2025-11-04", km: 36500, valor: 180 },
-  { id: "e4", carroId: "c1", tipo: "multa", titulo: "Multa leve — Zona Azul", data: "2026-01-12", valor: 130 },
-  { id: "e5", carroId: "c1", tipo: "revisao", titulo: "Revisão dos 38 mil", data: "2026-03-22", km: 38000, valor: 420 },
+  {
+    id: "e1",
+    carroId: "c1",
+    tipo: "cadastro",
+    titulo: "Veículo cadastrado",
+    data: "2025-06-01",
+    km: 32000,
+  },
+  {
+    id: "e2",
+    carroId: "c1",
+    tipo: "locacao",
+    titulo: "Alugado para João Silva",
+    data: "2025-08-15",
+    km: 34500,
+  },
+  {
+    id: "e3",
+    carroId: "c1",
+    tipo: "troca-oleo",
+    titulo: "Troca de óleo + filtro",
+    data: "2025-11-04",
+    km: 36500,
+    valor: 180,
+  },
+  {
+    id: "e4",
+    carroId: "c1",
+    tipo: "multa",
+    titulo: "Multa leve — Zona Azul",
+    data: "2026-01-12",
+    valor: 130,
+  },
+  {
+    id: "e5",
+    carroId: "c1",
+    tipo: "revisao",
+    titulo: "Revisão dos 38 mil",
+    data: "2026-03-22",
+    km: 38000,
+    valor: 420,
+  },
 
-  { id: "e6", carroId: "c2", tipo: "cadastro", titulo: "Veículo cadastrado", data: "2025-09-10", km: 18000 },
-  { id: "e7", carroId: "c2", tipo: "troca-pneu", titulo: "Troca de 2 pneus dianteiros", data: "2026-02-14", km: 21000, valor: 780 },
+  {
+    id: "e6",
+    carroId: "c2",
+    tipo: "cadastro",
+    titulo: "Veículo cadastrado",
+    data: "2025-09-10",
+    km: 18000,
+  },
+  {
+    id: "e7",
+    carroId: "c2",
+    tipo: "troca-pneu",
+    titulo: "Troca de 2 pneus dianteiros",
+    data: "2026-02-14",
+    km: 21000,
+    valor: 780,
+  },
   { id: "e8", carroId: "c2", tipo: "documento", titulo: "Seguro renovado", data: "2026-05-01" },
 
-  { id: "e9", carroId: "c3", tipo: "cadastro", titulo: "Veículo cadastrado", data: "2024-12-01", km: 48000 },
-  { id: "e10", carroId: "c3", tipo: "acidente", titulo: "Batida leve traseira", data: "2025-10-04", km: 52000, valor: 1800 },
-  { id: "e11", carroId: "c3", tipo: "revisao", titulo: "Revisão completa", data: "2026-02-20", km: 55000, valor: 890 },
+  {
+    id: "e9",
+    carroId: "c3",
+    tipo: "cadastro",
+    titulo: "Veículo cadastrado",
+    data: "2024-12-01",
+    km: 48000,
+  },
+  {
+    id: "e10",
+    carroId: "c3",
+    tipo: "acidente",
+    titulo: "Batida leve traseira",
+    data: "2025-10-04",
+    km: 52000,
+    valor: 1800,
+  },
+  {
+    id: "e11",
+    carroId: "c3",
+    tipo: "revisao",
+    titulo: "Revisão completa",
+    data: "2026-02-20",
+    km: 55000,
+    valor: 890,
+  },
 
-  { id: "e12", carroId: "c4", tipo: "cadastro", titulo: "Veículo cadastrado", data: "2025-04-11", km: 30000 },
-  { id: "e13", carroId: "c4", tipo: "acidente", titulo: "Colisão frontal — em manutenção", data: "2026-06-30", km: 41000 },
+  {
+    id: "e12",
+    carroId: "c4",
+    tipo: "cadastro",
+    titulo: "Veículo cadastrado",
+    data: "2025-04-11",
+    km: 30000,
+  },
+  {
+    id: "e13",
+    carroId: "c4",
+    tipo: "acidente",
+    titulo: "Colisão frontal — em manutenção",
+    data: "2026-06-30",
+    km: 41000,
+  },
 
-  { id: "e14", carroId: "c5", tipo: "cadastro", titulo: "Veículo cadastrado", data: "2026-02-10", km: 12000 },
-  { id: "e15", carroId: "c5", tipo: "troca-oleo", titulo: "Troca de óleo", data: "2026-05-15", km: 17000, valor: 165 },
+  {
+    id: "e14",
+    carroId: "c5",
+    tipo: "cadastro",
+    titulo: "Veículo cadastrado",
+    data: "2026-02-10",
+    km: 12000,
+  },
+  {
+    id: "e15",
+    carroId: "c5",
+    tipo: "troca-oleo",
+    titulo: "Troca de óleo",
+    data: "2026-05-15",
+    km: 17000,
+    valor: 165,
+  },
 ];
 
 export const documentosMock: DocumentoVeiculo[] = [
@@ -214,67 +357,219 @@ export const documentosMock: DocumentoVeiculo[] = [
 ];
 
 export const manutencaoMock: ItemManutencao[] = [
-  { id: "m1", carroId: "c1", item: "Óleo", intervaloKm: 10000, intervaloMeses: 6, ultimoKm: 36500, ultimaData: "2025-11-04", proximoKm: 46500, proximaData: "2026-05-04" },
-  { id: "m2", carroId: "c1", item: "Pneus", intervaloKm: 40000, ultimoKm: 32000, ultimaData: "2025-06-01", proximoKm: 72000 },
-  { id: "m3", carroId: "c1", item: "Freios", intervaloKm: 30000, ultimoKm: 32000, ultimaData: "2025-06-01", proximoKm: 62000 },
-  { id: "m4", carroId: "c2", item: "Óleo", intervaloKm: 10000, ultimoKm: 18000, ultimaData: "2025-09-10", proximoKm: 28000, proximaData: "2026-03-10" },
-  { id: "m5", carroId: "c2", item: "Pneus", ultimoKm: 21000, ultimaData: "2026-02-14", proximoKm: 61000 },
-  { id: "m6", carroId: "c3", item: "Óleo", intervaloKm: 10000, ultimoKm: 55000, ultimaData: "2026-02-20", proximoKm: 65000 },
+  {
+    id: "m1",
+    carroId: "c1",
+    item: "Óleo",
+    intervaloKm: 10000,
+    intervaloMeses: 6,
+    ultimoKm: 36500,
+    ultimaData: "2025-11-04",
+    proximoKm: 46500,
+    proximaData: "2026-05-04",
+  },
+  {
+    id: "m2",
+    carroId: "c1",
+    item: "Pneus",
+    intervaloKm: 40000,
+    ultimoKm: 32000,
+    ultimaData: "2025-06-01",
+    proximoKm: 72000,
+  },
+  {
+    id: "m3",
+    carroId: "c1",
+    item: "Freios",
+    intervaloKm: 30000,
+    ultimoKm: 32000,
+    ultimaData: "2025-06-01",
+    proximoKm: 62000,
+  },
+  {
+    id: "m4",
+    carroId: "c2",
+    item: "Óleo",
+    intervaloKm: 10000,
+    ultimoKm: 18000,
+    ultimaData: "2025-09-10",
+    proximoKm: 28000,
+    proximaData: "2026-03-10",
+  },
+  {
+    id: "m5",
+    carroId: "c2",
+    item: "Pneus",
+    ultimoKm: 21000,
+    ultimaData: "2026-02-14",
+    proximoKm: 61000,
+  },
+  {
+    id: "m6",
+    carroId: "c3",
+    item: "Óleo",
+    intervaloKm: 10000,
+    ultimoKm: 55000,
+    ultimaData: "2026-02-20",
+    proximoKm: 65000,
+  },
 ];
 
 export const contratosMock: Contrato[] = [
   {
-    id: "ct1", carroId: "c1", motoristaId: "m1", motoristaNome: "João Silva",
-    valor: 110, periodicidade: "diaria", caucao: 1500,
-    inicio: "2025-08-15", status: "ativo",
+    id: "ct1",
+    carroId: "c1",
+    motoristaId: "m1",
+    motoristaNome: "João Silva",
+    valor: 110,
+    periodicidade: "diaria",
+    caucao: 1500,
+    inicio: "2025-08-15",
+    status: "ativo",
     observacoes: "Rodízio livre. Sem restrição de área.",
   },
   {
-    id: "ct2", carroId: "c4", motoristaId: "m4", motoristaNome: "Ricardo Alves",
-    valor: 95, periodicidade: "diaria", caucao: 1200,
-    inicio: "2026-04-01", status: "suspenso",
+    id: "ct2",
+    carroId: "c4",
+    motoristaId: "m4",
+    motoristaNome: "Ricardo Alves",
+    valor: 95,
+    periodicidade: "diaria",
+    caucao: 1200,
+    inicio: "2026-04-01",
+    status: "suspenso",
     observacoes: "Em manutenção pós-colisão.",
   },
   {
-    id: "ct3", carroId: "c2", motoristaId: "m2", motoristaNome: "Marcos Lima",
-    valor: 2600, periodicidade: "mensal", caucao: 1500,
-    inicio: "2025-11-01", fim: "2026-04-30", status: "encerrado",
+    id: "ct3",
+    carroId: "c2",
+    motoristaId: "m2",
+    motoristaNome: "Marcos Lima",
+    valor: 2600,
+    periodicidade: "mensal",
+    caucao: 1500,
+    inicio: "2025-11-01",
+    fim: "2026-04-30",
+    status: "encerrado",
   },
 ];
 
 export const pagamentosMock: Pagamento[] = [
   { id: "pg1", contratoId: "ct1", valor: 110, data: "2026-07-19", forma: "Pix", status: "pago" },
   { id: "pg2", contratoId: "ct1", valor: 110, data: "2026-07-18", forma: "Pix", status: "pago" },
-  { id: "pg3", contratoId: "ct1", valor: 110, data: "2026-07-20", forma: "Pix", status: "pendente" },
+  {
+    id: "pg3",
+    contratoId: "ct1",
+    valor: 110,
+    data: "2026-07-20",
+    forma: "Pix",
+    status: "pendente",
+  },
   { id: "pg4", contratoId: "ct2", valor: 95, data: "2026-06-25", forma: "Pix", status: "atrasado" },
-  { id: "pg5", contratoId: "ct3", valor: 2600, data: "2026-04-01", forma: "Transferência", status: "pago" },
-  { id: "pg6", contratoId: "ct3", valor: 2600, data: "2026-03-01", forma: "Transferência", status: "pago" },
+  {
+    id: "pg5",
+    contratoId: "ct3",
+    valor: 2600,
+    data: "2026-04-01",
+    forma: "Transferência",
+    status: "pago",
+  },
+  {
+    id: "pg6",
+    contratoId: "ct3",
+    valor: 2600,
+    data: "2026-03-01",
+    forma: "Transferência",
+    status: "pago",
+  },
 ];
 
 export const notificacoesMock: Notificacao[] = [
-  { id: "n1", tipo: "pagamento", titulo: "Pagamento atrasado", descricao: "Ricardo Alves — R$ 95 (Kwid)", data: "Hoje", urgencia: "alta", carroId: "c4", contratoId: "ct2" },
-  { id: "n2", tipo: "documento", titulo: "IPVA vencido", descricao: "Chevrolet Onix — placa ABC-1D23", data: "Hoje", urgencia: "alta", carroId: "c1" },
-  { id: "n3", tipo: "documento", titulo: "Seguro vencendo em 20 dias", descricao: "Chevrolet Onix", data: "Hoje", urgencia: "media", carroId: "c1" },
-  { id: "n4", tipo: "manutencao", titulo: "Troca de óleo próxima", descricao: "HB20 — em ~500 km", data: "Ontem", urgencia: "media", carroId: "c2" },
-  { id: "n5", tipo: "contrato", titulo: "Contrato encerrando", descricao: "Marcos Lima — HB20 em 15 dias", data: "2 dias", urgencia: "baixa", carroId: "c2", contratoId: "ct3" },
-  { id: "n6", tipo: "info", titulo: "Corolla disponível para nova locação", descricao: "Sem contrato ativo há 5 dias", data: "3 dias", urgencia: "baixa", carroId: "c3" },
+  {
+    id: "n1",
+    tipo: "pagamento",
+    titulo: "Pagamento atrasado",
+    descricao: "Ricardo Alves — R$ 95 (Kwid)",
+    data: "Hoje",
+    urgencia: "alta",
+    carroId: "c4",
+    contratoId: "ct2",
+  },
+  {
+    id: "n2",
+    tipo: "documento",
+    titulo: "IPVA vencido",
+    descricao: "Chevrolet Onix — placa ABC-1D23",
+    data: "Hoje",
+    urgencia: "alta",
+    carroId: "c1",
+  },
+  {
+    id: "n3",
+    tipo: "documento",
+    titulo: "Seguro vencendo em 20 dias",
+    descricao: "Chevrolet Onix",
+    data: "Hoje",
+    urgencia: "media",
+    carroId: "c1",
+  },
+  {
+    id: "n4",
+    tipo: "manutencao",
+    titulo: "Troca de óleo próxima",
+    descricao: "HB20 — em ~500 km",
+    data: "Ontem",
+    urgencia: "media",
+    carroId: "c2",
+  },
+  {
+    id: "n5",
+    tipo: "contrato",
+    titulo: "Contrato encerrando",
+    descricao: "Marcos Lima — HB20 em 15 dias",
+    data: "2 dias",
+    urgencia: "baixa",
+    carroId: "c2",
+    contratoId: "ct3",
+  },
+  {
+    id: "n6",
+    tipo: "info",
+    titulo: "Corolla disponível para nova locação",
+    descricao: "Sem contrato ativo há 5 dias",
+    data: "3 dias",
+    urgencia: "baixa",
+    carroId: "c3",
+  },
 ];
 
 export const motoristasCandidatos: MotoristaCandidato[] = [
   {
-    id: "mc1", nome: "Fernanda Rocha", avaliacao: 4.9, tempoPlataforma: "1 ano e 4 meses",
-    corridas: 2130, pontualidade: 98,
+    id: "mc1",
+    nome: "Fernanda Rocha",
+    avaliacao: 4.9,
+    tempoPlataforma: "1 ano e 4 meses",
+    corridas: 2130,
+    pontualidade: 98,
     historico: "3 aluguéis anteriores concluídos. Sem multas graves. Sempre devolveu limpo.",
     observacoes: "Prefere carros automáticos.",
   },
   {
-    id: "mc2", nome: "Diego Nunes", avaliacao: 4.7, tempoPlataforma: "8 meses",
-    corridas: 940, pontualidade: 91,
+    id: "mc2",
+    nome: "Diego Nunes",
+    avaliacao: 4.7,
+    tempoPlataforma: "8 meses",
+    corridas: 940,
+    pontualidade: 91,
     historico: "1 aluguel anterior, contrato encerrado no prazo. 1 multa leve.",
   },
   {
-    id: "mc3", nome: "Alan Ribeiro", avaliacao: 4.4, tempoPlataforma: "3 meses",
-    corridas: 210, pontualidade: 82,
+    id: "mc3",
+    nome: "Alan Ribeiro",
+    avaliacao: 4.4,
+    tempoPlataforma: "3 meses",
+    corridas: 210,
+    pontualidade: 82,
     historico: "Motorista novo. Ainda sem histórico de aluguel na plataforma.",
     observacoes: "Solicitou parcelar caução em 2x.",
   },
@@ -282,20 +577,38 @@ export const motoristasCandidatos: MotoristaCandidato[] = [
 
 export const marketplaceMock: AnuncioMarketplace[] = [
   {
-    id: "mk1", proprietario: "Rafael T.", marca: "Volkswagen", modelo: "Polo", ano: 2023,
-    cidade: "São Paulo", valor: 125, periodicidade: "diaria",
+    id: "mk1",
+    proprietario: "Rafael T.",
+    marca: "Volkswagen",
+    modelo: "Polo",
+    ano: 2023,
+    cidade: "São Paulo",
+    valor: 125,
+    periodicidade: "diaria",
     foto: "https://images.unsplash.com/photo-1600661653561-629509216228?w=600&h=400&fit=crop",
     regras: "Sem app de entrega. CNH B há +2 anos.",
   },
   {
-    id: "mk2", proprietario: "Marina S.", marca: "Fiat", modelo: "Mobi", ano: 2022,
-    cidade: "Guarulhos", valor: 85, periodicidade: "diaria",
+    id: "mk2",
+    proprietario: "Marina S.",
+    marca: "Fiat",
+    modelo: "Mobi",
+    ano: 2022,
+    cidade: "Guarulhos",
+    valor: 85,
+    periodicidade: "diaria",
     foto: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=400&fit=crop",
     regras: "Caução R$ 1.000. Rodagem livre.",
   },
   {
-    id: "mk3", proprietario: "Bruno L.", marca: "Nissan", modelo: "Versa", ano: 2024,
-    cidade: "São Paulo", valor: 2900, periodicidade: "mensal",
+    id: "mk3",
+    proprietario: "Bruno L.",
+    marca: "Nissan",
+    modelo: "Versa",
+    ano: 2024,
+    cidade: "São Paulo",
+    valor: 2900,
+    periodicidade: "mensal",
     foto: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=600&h=400&fit=crop",
     regras: "Motorista com 4.8+ e 6 meses de plataforma.",
   },
@@ -311,8 +624,12 @@ export const financeiroPorVeiculo: { carroId: string; receita: number; custos: n
 ];
 
 export const custosMensais = [
-  { mes: "Jan", valor: 1200 }, { mes: "Fev", valor: 900 }, { mes: "Mar", valor: 1600 },
-  { mes: "Abr", valor: 800 }, { mes: "Mai", valor: 1100 }, { mes: "Jun", valor: 2200 },
+  { mes: "Jan", valor: 1200 },
+  { mes: "Fev", valor: 900 },
+  { mes: "Mar", valor: 1600 },
+  { mes: "Abr", valor: 800 },
+  { mes: "Mai", valor: 1100 },
+  { mes: "Jun", valor: 2200 },
 ];
 
 export const lembretesDefault: ConfigLembretes = {
@@ -337,15 +654,29 @@ export function eventoIcone(tipo: EventoTipo): string {
     km: "📏",
     custo: "💸",
     observacao: "📝",
+    checklist: "📋",
     outro: "•",
   };
   return map[tipo];
 }
 
+// Data de hoje no fuso local, no formato AAAA-MM-DD. toISOString() usa UTC e, à noite no Brasil, já devolve o dia seguinte.
+export function hojeISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export const periodicidadeLabel: Record<Contrato["periodicidade"], string> = {
+  diaria: "diária",
+  semanal: "semanal",
+  mensal: "mensal",
+};
 
 export function fmtData(iso: string): string {
   try {
-    const d = new Date(iso);
+    // "AAAA-MM-DD" sozinho é lido como meia-noite UTC, que no Brasil cai no dia anterior; lemos no fuso local.
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+    const d = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(iso);
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
   } catch {
     return iso;
