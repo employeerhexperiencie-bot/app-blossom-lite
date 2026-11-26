@@ -1,4 +1,5 @@
 // Mock data + tipos para o módulo Proprietário TCHI LÉVA (sem banco)
+import { somarPeriodos, vencimentosEntre } from "./cobrancas";
 
 export type EventoTipo =
   | "cadastro"
@@ -91,6 +92,8 @@ export type Contrato = {
   status: StatusContrato;
   observacoes?: string;
   solicitacaoId?: string;
+  // A partir desta data o app gera as cobranças do aluguel automaticamente.
+  cobrancaDesde?: string;
   acerto?: AcertoCaucao;
   avaliacao?: AvaliacaoMotorista;
 };
@@ -124,6 +127,8 @@ export type Pagamento = {
   data: string;
   forma: "Pix" | "Dinheiro" | "Cartão" | "Transferência";
   status: "pago" | "pendente" | "atrasado";
+  vencimento?: string; // data em que a cobrança vence
+  pagoEm?: string; // data em que foi paga
 };
 
 export type ChecklistItem = {
@@ -342,6 +347,32 @@ export const eventosMock: EventoVeiculo[] = [
     km: 17000,
     valor: 165,
   },
+  // Custos recentes, com datas relativas a hoje, para o Financeiro mostrar o mês corrente.
+  {
+    id: "e16",
+    carroId: "c1",
+    tipo: "troca-oleo",
+    titulo: "Troca de óleo + filtro",
+    data: somarPeriodos(hojeISO(), "diaria", -40),
+    valor: 185,
+  },
+  {
+    id: "e17",
+    carroId: "c1",
+    tipo: "custo",
+    titulo: "Lavagem completa",
+    data: somarPeriodos(hojeISO(), "diaria", -12),
+    valor: 60,
+    categoria: "lavagem",
+  },
+  {
+    id: "e18",
+    carroId: "c5",
+    tipo: "revisao",
+    titulo: "Revisão periódica",
+    data: somarPeriodos(hojeISO(), "diaria", -25),
+    valor: 390,
+  },
 ];
 
 export const documentosMock: DocumentoVeiculo[] = [
@@ -418,6 +449,7 @@ export const manutencaoMock: ItemManutencao[] = [
 export const contratosMock: Contrato[] = [
   {
     id: "ct1",
+    cobrancaDesde: hojeISO(),
     carroId: "c1",
     motoristaId: "m1",
     motoristaNome: "João Silva",
@@ -454,35 +486,58 @@ export const contratosMock: Contrato[] = [
   },
 ];
 
-export const pagamentosMock: Pagamento[] = [
-  { id: "pg1", contratoId: "ct1", valor: 110, data: "2026-07-19", forma: "Pix", status: "pago" },
-  { id: "pg2", contratoId: "ct1", valor: 110, data: "2026-07-18", forma: "Pix", status: "pago" },
-  {
-    id: "pg3",
-    contratoId: "ct1",
-    valor: 110,
-    data: "2026-07-20",
-    forma: "Pix",
-    status: "pendente",
-  },
-  { id: "pg4", contratoId: "ct2", valor: 95, data: "2026-06-25", forma: "Pix", status: "atrasado" },
-  {
-    id: "pg5",
-    contratoId: "ct3",
-    valor: 2600,
-    data: "2026-04-01",
-    forma: "Transferência",
-    status: "pago",
-  },
-  {
-    id: "pg6",
-    contratoId: "ct3",
-    valor: 2600,
-    data: "2026-03-01",
-    forma: "Transferência",
-    status: "pago",
-  },
-];
+// Histórico de pagamentos gerado a partir dos contratos simulados.
+// ct1: diária paga por Pix desde o início do contrato, com dois atrasos recentes; a cobrança automática segue a partir de hoje.
+// ct2: diária paga até a colisão de junho/2026, com o último pagamento atrasado.
+// ct3: mensal paga de nov/2025 a abr/2026.
+function historicoPagamentos(): Pagamento[] {
+  const lista: Pagamento[] = [];
+  const hoje = hojeISO();
+  const ontem = somarPeriodos(hoje, "diaria", -1);
+  const diariasCt1 = vencimentosEntre("2025-08-15", ontem, "diaria", 1000);
+  diariasCt1.forEach((data, i) => {
+    const diasAtras = diariasCt1.length - i;
+    const atrasado = diasAtras === 3 || diasAtras === 41;
+    lista.push({
+      id: `pg-ct1-${data}`,
+      contratoId: "ct1",
+      valor: 110,
+      data,
+      vencimento: data,
+      pagoEm: atrasado ? undefined : data,
+      forma: "Pix",
+      status: atrasado ? "atrasado" : "pago",
+    });
+  });
+  for (const data of vencimentosEntre("2026-04-01", "2026-06-25", "diaria", 200)) {
+    const atrasado = data === "2026-06-25";
+    lista.push({
+      id: `pg-ct2-${data}`,
+      contratoId: "ct2",
+      valor: 95,
+      data,
+      vencimento: data,
+      pagoEm: atrasado ? undefined : data,
+      forma: "Pix",
+      status: atrasado ? "atrasado" : "pago",
+    });
+  }
+  for (const data of vencimentosEntre("2025-11-01", "2026-04-01", "mensal")) {
+    lista.push({
+      id: `pg-ct3-${data}`,
+      contratoId: "ct3",
+      valor: 2600,
+      data,
+      vencimento: data,
+      pagoEm: data,
+      forma: "Transferência",
+      status: "pago",
+    });
+  }
+  return lista.reverse();
+}
+
+export const pagamentosMock: Pagamento[] = historicoPagamentos();
 
 export const notificacoesMock: Notificacao[] = [
   {
@@ -612,24 +667,6 @@ export const marketplaceMock: AnuncioMarketplace[] = [
     foto: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=600&h=400&fit=crop",
     regras: "Motorista com 4.8+ e 6 meses de plataforma.",
   },
-];
-
-// Financeiro por veículo (mock)
-export const financeiroPorVeiculo: { carroId: string; receita: number; custos: number }[] = [
-  { carroId: "c1", receita: 3300, custos: 730 },
-  { carroId: "c2", receita: 2600, custos: 780 },
-  { carroId: "c3", receita: 0, custos: 890 },
-  { carroId: "c4", receita: 800, custos: 1800 },
-  { carroId: "c5", receita: 1400, custos: 165 },
-];
-
-export const custosMensais = [
-  { mes: "Jan", valor: 1200 },
-  { mes: "Fev", valor: 900 },
-  { mes: "Mar", valor: 1600 },
-  { mes: "Abr", valor: 800 },
-  { mes: "Mai", valor: 1100 },
-  { mes: "Jun", valor: 2200 },
 ];
 
 export const lembretesDefault: ConfigLembretes = {

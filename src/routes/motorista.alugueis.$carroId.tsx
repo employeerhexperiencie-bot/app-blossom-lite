@@ -27,6 +27,7 @@ import { carros } from "@/lib/mock-data";
 import { fmtBRL, MOTORISTA_LOGADO_ID, type Contrato } from "@/lib/mock-proprietario";
 import { useCarro, useProprietario } from "@/lib/store-proprietario";
 import { useCandidatoMotorista } from "@/lib/motorista-perfil";
+import { caucaoPorNivel } from "@/lib/cobrancas";
 
 export const Route = createFileRoute("/motorista/alugueis/$carroId")({
   loader: ({ params }) => {
@@ -56,6 +57,7 @@ function CarroDetalhe() {
   // Lê o carro pela store do proprietário, para refletir status e km atualizados por ele.
   const c = useCarro(base.id) ?? base;
   const candidato = useCandidatoMotorista();
+  const minhaCaucao = caucaoPorNivel(c.caucao, candidato.nivel);
   const enviarProposta = useProprietario((s) => s.enviarProposta);
   const aceitarContrato = useProprietario((s) => s.motoristaAceitarContrato);
   const recusarContrato = useProprietario((s) => s.motoristaRecusarContrato);
@@ -118,7 +120,10 @@ function CarroDetalhe() {
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
           <Spec label="Diária" value={`R$ ${c.diaria}`} highlight />
           <Spec label="Mensal" value={`R$ ${c.mensal}`} />
-          <Spec label="Caução" value={`R$ ${c.caucao}`} />
+          <Spec
+            label={minhaCaucao.desconto > 0 ? `Sua caução · ${candidato.nivel}` : "Caução"}
+            value={`R$ ${minhaCaucao.valor}`}
+          />
         </div>
 
         <div className="mt-4 space-y-2 rounded-2xl border border-border bg-card p-4 text-sm">

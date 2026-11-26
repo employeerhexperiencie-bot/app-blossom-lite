@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
@@ -9,7 +10,6 @@ import {
   manutencaoMock,
   lembretesDefault,
   motoristasCandidatos,
-  financeiroPorVeiculo as financeiroBase,
   type Contrato,
   type Pagamento,
   type Notificacao,
@@ -24,9 +24,11 @@ import {
   type ChecklistItem,
   type MotoristaCandidato,
   hojeISO,
+  fmtBRL,
 } from "./mock-proprietario";
 import type { Carro } from "./mock-data";
 import { carros as carrosBase } from "./mock-data";
+import { emAberto, financeiroDoCarro, vencimentosEntre } from "./cobrancas";
 
 type State = {
   contratos: Contrato[];
@@ -45,6 +47,7 @@ type State = {
   checklists: Checklist[];
 
   registrarPagamento: (id: string) => void;
+  sincronizarCobrancas: () => void;
   registrarPagamentoDetalhado: (
     contratoId: string,
     dados: { valor: number; data: string; forma: Pagamento["forma"] },
@@ -134,9 +137,31 @@ export const useProprietario = create<State>()(
 
       registrarPagamento: (id) =>
         set({
-          pagamentos: get().pagamentos.map((p) => (p.id === id ? { ...p, status: "pago" } : p)),
+          pagamentos: get().pagamentos.map((p) =>
+            p.id === id ? { ...p, status: "pago", pagoEm: hojeISO() } : p,
+          ),
         }),
       registrarPagamentoDetalhado: (contratoId, dados) => {
+        // Quita primeiro a cobrança em aberto mais antiga do contrato; sem cobrança aberta, registra um pagamento avulso.
+        const aberta = get()
+          .pagamentos.filter((p) => p.contratoId === contratoId && emAberto(p))
+          .sort((x, y) => ((x.vencimento ?? x.data) < (y.vencimento ?? y.data) ? -1 : 1))[0];
+        if (aberta) {
+          set({
+            pagamentos: get().pagamentos.map((p) =>
+              p.id === aberta.id
+                ? {
+                    ...p,
+                    status: "pago",
+                    pagoEm: dados.data,
+                    forma: dados.forma,
+                    valor: dados.valor,
+                  }
+                : p,
+            ),
+          });
+          return;
+        }
         const id = `pg${Date.now()}`;
         set({
           pagamentos: [
@@ -145,12 +170,67 @@ export const useProprietario = create<State>()(
               contratoId,
               valor: dados.valor,
               data: dados.data,
+              pagoEm: dados.data,
               forma: dados.forma,
               status: "pago",
             },
             ...get().pagamentos,
           ],
         });
+      },
+      sincronizarCobrancas: () => {
+        const hoje = hojeISO();
+        const pagamentos = get().pagamentos;
+        const novos: Pagamento[] = [];
+        const viraramAtraso = new Map<string, number>();
+        const existentes = new Set(
+          pagamentos.filter((p) => p.vencimento).map((p) => `${p.contratoId}|${p.vencimento}`),
+        );
+
+        // 1. Cria as cobranças que venceram até hoje nos contratos ativos com cobrança automática.
+        for (const c of get().contratos) {
+          if (c.status !== "ativo" || !c.cobrancaDesde) continue;
+          for (const venc of vencimentosEntre(c.cobrancaDesde, hoje, c.periodicidade)) {
+            if (existentes.has(`${c.id}|${venc}`)) continue;
+            const atrasado = venc < hoje;
+            novos.push({
+              id: `pg-${c.id}-${venc}`,
+              contratoId: c.id,
+              valor: c.valor,
+              data: venc,
+              vencimento: venc,
+              forma: "Pix",
+              status: atrasado ? "atrasado" : "pendente",
+            });
+            if (atrasado) viraramAtraso.set(c.id, (viraramAtraso.get(c.id) ?? 0) + 1);
+          }
+        }
+
+        // 2. Cobranças pendentes que passaram do vencimento viram atrasadas.
+        const atualizados = pagamentos.map((p) => {
+          if (p.status === "pendente" && (p.vencimento ?? p.data) < hoje) {
+            viraramAtraso.set(p.contratoId, (viraramAtraso.get(p.contratoId) ?? 0) + 1);
+            return { ...p, status: "atrasado" as const };
+          }
+          return p;
+        });
+
+        if (novos.length === 0 && viraramAtraso.size === 0) return;
+        set({ pagamentos: [...novos.reverse(), ...atualizados] });
+
+        for (const [contratoId, qtd] of viraramAtraso) {
+          const c = get().contratos.find((x) => x.id === contratoId);
+          if (!c) continue;
+          get().addNotificacao({
+            tipo: "pagamento",
+            titulo: qtd > 1 ? `${qtd} pagamentos atrasados` : "Pagamento atrasado",
+            descricao: `${c.motoristaNome} — ${fmtBRL(c.valor * qtd)}`,
+            data: "Agora",
+            urgencia: "alta",
+            carroId: c.carroId,
+            contratoId,
+          });
+        }
       },
       encerrarContrato: (id) => {
         const contrato = get().contratos.find((c) => c.id === id);
@@ -427,7 +507,7 @@ export const useProprietario = create<State>()(
         const hoje = hojeISO();
         set({
           contratos: get().contratos.map((c) =>
-            c.id === id ? { ...c, status: "ativo", inicio: hoje } : c,
+            c.id === id ? { ...c, status: "ativo", inicio: hoje, cobrancaDesde: hoje } : c,
           ),
           carrosOverrides: {
             ...get().carrosOverrides,
@@ -453,6 +533,8 @@ export const useProprietario = create<State>()(
           carroId: contrato.carroId,
           contratoId: id,
         });
+        // A primeira cobrança vence no dia do aceite.
+        get().sincronizarCobrancas();
       },
       motoristaRecusarContrato: (id) => {
         const contrato = get().contratos.find((c) => c.id === id);
@@ -537,7 +619,26 @@ export const useProprietario = create<State>()(
         });
       },
     }),
-    { name: "proprietario-state" },
+    {
+      name: "proprietario-state",
+      version: 2,
+      // v2: pagamentos ganharam vencimento e histórico gerado. Mantém o que a pessoa registrou e troca os exemplos antigos.
+      migrate: (persisted, versao) => {
+        const estado = persisted as Partial<State>;
+        if (versao < 2) {
+          const exemplosAntigos = new Set(["pg1", "pg2", "pg3", "pg4", "pg5", "pg6"]);
+          const registrados = (estado.pagamentos ?? []).filter((p) => !exemplosAntigos.has(p.id));
+          return {
+            ...estado,
+            pagamentos: [...registrados, ...pagamentosMock],
+            contratos: (estado.contratos ?? contratosMock).map((c) =>
+              c.id === "ct1" && !c.cobrancaDesde ? { ...c, cobrancaDesde: hojeISO() } : c,
+            ),
+          } as State;
+        }
+        return estado as State;
+      },
+    },
   ),
 );
 
@@ -577,23 +678,21 @@ export function usePagamentosDoContrato(contratoId: string): Pagamento[] {
   );
 }
 
-export function useFinanceiroPorVeiculo(): { carroId: string; receita: number; custos: number }[] {
+export function useTodosEventos(): EventoVeiculo[] {
   const extras = useProprietario((s) => s.eventosExtras);
-  return financeiroBase.map((f) => {
-    const custosExtras = extras
-      .filter(
-        (e) =>
-          e.carroId === f.carroId &&
-          (e.tipo === "custo" ||
-            e.tipo === "troca-oleo" ||
-            e.tipo === "troca-pneu" ||
-            e.tipo === "revisao" ||
-            e.tipo === "multa" ||
-            e.tipo === "acidente"),
-      )
-      .reduce((a, e) => a + (e.valor ?? 0), 0);
-    return { ...f, custos: f.custos + custosExtras };
-  });
+  return useMemo(() => [...extras, ...eventosMock], [extras]);
+}
+
+/** Receita (pagamentos recebidos) e custos (eventos com valor) de cada carro, desde o início. */
+export function useFinanceiroPorVeiculo(): { carroId: string; receita: number; custos: number }[] {
+  const carros = useCarros();
+  const contratos = useProprietario((s) => s.contratos);
+  const pagamentos = useProprietario((s) => s.pagamentos);
+  const eventos = useTodosEventos();
+  return useMemo(
+    () => carros.map((c) => financeiroDoCarro(c.id, contratos, pagamentos, eventos)),
+    [carros, contratos, pagamentos, eventos],
+  );
 }
 
 export function useCarros(): Carro[] {

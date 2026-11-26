@@ -19,10 +19,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ChecklistForm, ChecklistResumo } from "@/components/proprietario/ChecklistForm";
 import { combustivelLabel, compararChecklists } from "@/lib/checklist";
+import { emAberto, proximoVencimento } from "@/lib/cobrancas";
 import {
   fmtBRL,
   fmtData,
   lembretesDefault,
+  hojeISO,
+  periodicidadeLabel,
   statusContratoLabel,
   type Checklist,
   type Contrato,
@@ -94,7 +97,7 @@ function Detalhe() {
           </div>
           <div className="mt-3 flex gap-4 text-xs">
             <span>Valor {fmtBRL(contrato.valor)}</span>
-            <span className="capitalize">{contrato.periodicidade}</span>
+            <span className="capitalize">{periodicidadeLabel[contrato.periodicidade]}</span>
             <span>Caução {fmtBRL(contrato.caucao)}</span>
           </div>
         </div>
@@ -218,7 +221,7 @@ function Detalhe() {
 
         {aba === "pagamentos" && (
           <PagamentosPanel
-            contratoId={id}
+            contrato={contrato}
             pagamentos={pagamentos}
             onRegistrar={registrarPagamento}
             onRegistrarDetalhado={registrarPagamentoDetalhado}
@@ -240,12 +243,12 @@ function Detalhe() {
 }
 
 function PagamentosPanel({
-  contratoId,
+  contrato,
   pagamentos,
   onRegistrar,
   onRegistrarDetalhado,
 }: {
-  contratoId: string;
+  contrato: Contrato;
   pagamentos: Pagamento[];
   onRegistrar: (id: string) => void;
   onRegistrarDetalhado: (
@@ -254,12 +257,41 @@ function PagamentosPanel({
   ) => void;
 }) {
   const [aberto, setAberto] = useState(false);
-  const [valor, setValor] = useState(120);
-  const [data, setData] = useState(new Date().toISOString().slice(0, 10));
+  const [valor, setValor] = useState(contrato.valor);
+  const [data, setData] = useState(hojeISO());
   const [forma, setForma] = useState<Pagamento["forma"]>("Pix");
+  const [limite, setLimite] = useState(20);
+
+  const ordenados = [...pagamentos].sort((a, b) =>
+    (a.vencimento ?? a.data) < (b.vencimento ?? b.data) ? 1 : -1,
+  );
+  const abertos = pagamentos.filter(emAberto);
+  const atrasados = abertos.filter((p) => p.status === "atrasado");
+  const totalAberto = abertos.reduce((a, p) => a + p.valor, 0);
+  const recebido = pagamentos.filter((p) => p.status === "pago").reduce((a, p) => a + p.valor, 0);
+  const proximo =
+    contrato.status === "ativo" && contrato.cobrancaDesde
+      ? proximoVencimento(contrato.cobrancaDesde, contrato.periodicidade, hojeISO())
+      : undefined;
 
   return (
     <div className="mt-4">
+      <div className="mb-3 grid grid-cols-3 gap-2">
+        <Info k="Recebido" v={fmtBRL(recebido)} />
+        <Info k="Em aberto" v={fmtBRL(totalAberto)} />
+        <Info k="Atrasados" v={String(atrasados.length)} />
+      </div>
+      {proximo && (
+        <p className="mb-3 text-xs text-muted-foreground">
+          Cobrança automática ligada. Próximo vencimento em {fmtData(proximo)}.
+        </p>
+      )}
+      {!contrato.cobrancaDesde && contrato.status === "ativo" && (
+        <p className="mb-3 text-xs text-muted-foreground">
+          Contrato registrado à mão: os pagamentos são lançados manualmente.
+        </p>
+      )}
+
       {!aberto ? (
         <Button
           size="sm"
@@ -267,10 +299,15 @@ function PagamentosPanel({
           className="mb-3 w-full rounded-xl"
           onClick={() => setAberto(true)}
         >
-          <Plus className="mr-2 h-4 w-4" /> Registrar pagamento
+          <Plus className="mr-2 h-4 w-4" /> Registrar pagamento recebido
         </Button>
       ) : (
-        <div className="mb-3 space-y-3 rounded-2xl border border-primary/40 bg-primary/5 p-3">
+        <div className="mb-3 rounded-2xl border border-primary/40 bg-primary/5 p-3">
+          <p className="mb-2 text-xs text-muted-foreground">
+            {abertos.length > 0
+              ? "Quita a cobrança em aberto mais antiga deste contrato."
+              : "Não há cobrança em aberto: será lançado como pagamento avulso."}
+          </p>
           <div className="grid grid-cols-3 gap-2">
             <div>
               <Label className="text-xs">Valor</Label>
@@ -295,7 +332,7 @@ function PagamentosPanel({
               <select
                 value={forma}
                 onChange={(e) => setForma(e.target.value as Pagamento["forma"])}
-                className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm"
+                className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-2 text-sm"
               >
                 <option>Pix</option>
                 <option>Dinheiro</option>
@@ -304,7 +341,7 @@ function PagamentosPanel({
               </select>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="mt-3 flex gap-2">
             <Button
               variant="outline"
               className="flex-1 rounded-xl"
@@ -315,7 +352,7 @@ function PagamentosPanel({
             <Button
               className="flex-1 rounded-xl gradient-primary text-primary-foreground"
               onClick={() => {
-                onRegistrarDetalhado(contratoId, { valor, data, forma });
+                onRegistrarDetalhado(contrato.id, { valor, data, forma });
                 toast.success("Pagamento registrado");
                 setAberto(false);
               }}
@@ -327,15 +364,17 @@ function PagamentosPanel({
       )}
 
       <div className="flex flex-col gap-2">
-        {pagamentos.map((p) => (
+        {ordenados.slice(0, limite).map((p) => (
           <div
             key={p.id}
-            className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card"
+            className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card"
           >
             <div className="min-w-0">
               <div className="font-semibold">{fmtBRL(p.valor)}</div>
-              <div className="text-xs text-muted-foreground">
-                {fmtData(p.data)} · {p.forma}
+              <div className="truncate text-xs text-muted-foreground">
+                {p.status === "pago"
+                  ? `Pago em ${fmtData(p.pagoEm ?? p.data)} · ${p.forma}`
+                  : `Vence em ${fmtData(p.vencimento ?? p.data)}`}
               </div>
             </div>
             <span
@@ -349,21 +388,34 @@ function PagamentosPanel({
             >
               {p.status}
             </span>
-            {p.status !== "pago" && (
+            {p.status !== "pago" ? (
               <Button
                 size="icon"
                 variant="outline"
                 className="h-8 w-8 rounded-full"
+                aria-label="Marcar como pago"
                 onClick={() => {
                   onRegistrar(p.id);
-                  toast.success("Pagamento marcado");
+                  toast.success("Pagamento marcado como recebido");
                 }}
               >
                 <Check className="h-4 w-4 text-success" />
               </Button>
+            ) : (
+              <span className="w-8" />
             )}
           </div>
         ))}
+        {ordenados.length > limite && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl"
+            onClick={() => setLimite(limite + 20)}
+          >
+            Mostrar mais ({ordenados.length - limite} restantes)
+          </Button>
+        )}
         {pagamentos.length === 0 && (
           <p className="text-sm text-muted-foreground">Sem pagamentos registrados.</p>
         )}

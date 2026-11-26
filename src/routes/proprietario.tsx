@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Car, FileText, CalendarClock, User, LayoutDashboard, Bell } from "lucide-react";
 import { AppShell, type Tab } from "@/components/AppShell";
 import { useProprietario } from "@/lib/store-proprietario";
@@ -15,6 +16,11 @@ const tabs: Tab[] = [
 
 function Layout() {
   const naoLidas = useProprietario((s) => s.notificacoes.length - s.notificacoesLidas.length);
+  const sincronizarCobrancas = useProprietario((s) => s.sincronizarCobrancas);
+  // Ao abrir o app, gera as cobranças que venceram desde a última visita e marca os atrasos.
+  useEffect(() => {
+    sincronizarCobrancas();
+  }, [sincronizarCobrancas]);
   return (
     <AppShell
       title="Sua frota"

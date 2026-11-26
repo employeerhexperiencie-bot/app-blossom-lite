@@ -30,13 +30,14 @@ describe("usePagamentosDoContrato", () => {
 
   it("atualiza quando um pagamento do contrato é registrado", () => {
     const { result } = renderHook(() => usePagamentosDoContrato("ct1"));
-    const antes = result.current.length;
+    const abertosAntes = result.current.filter((p) => p.status !== "pago").length;
     act(() => {
       useProprietario
         .getState()
         .registrarPagamentoDetalhado("ct1", { valor: 110, data: "2026-11-26", forma: "Pix" });
     });
-    expect(result.current.length).toBe(antes + 1);
+    // O pagamento quita uma cobrança em aberto do contrato, e a lista da tela reflete isso.
+    expect(result.current.filter((p) => p.status !== "pago").length).toBe(abertosAntes - 1);
   });
 });
 

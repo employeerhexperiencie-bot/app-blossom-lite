@@ -15,6 +15,7 @@ import {
   type Contrato,
 } from "@/lib/mock-proprietario";
 import { useProprietario, useCarro } from "@/lib/store-proprietario";
+import { caucaoPorNivel } from "@/lib/cobrancas";
 
 export const Route = createFileRoute("/proprietario/solicitacoes/$id")({
   loader: ({ params }) => ({ id: params.id }),
@@ -34,7 +35,9 @@ function SolicitacaoDetalhe() {
   const [periodicidade, setPeriodicidade] = useState<Contrato["periodicidade"]>(
     sol?.periodicidade ?? "diaria",
   );
-  const [caucao, setCaucao] = useState(carro?.caucao ?? 1500);
+  // Caução sugerida já com o benefício do nível do motorista no Clube (Bigode e Veinho pagam menos).
+  const sugestaoCaucao = caucaoPorNivel(carro?.caucao ?? 1500, sol?.candidato?.nivel);
+  const [caucao, setCaucao] = useState(sugestaoCaucao.valor);
   const [observacoes, setObservacoes] = useState("");
 
   if (!sol) throw notFound();
@@ -180,6 +183,12 @@ function SolicitacaoDetalhe() {
                   value={caucao}
                   onChange={(e) => setCaucao(+e.target.value)}
                 />
+                {sugestaoCaucao.desconto > 0 && (
+                  <p className="mt-1 text-[11px] text-primary">
+                    Nível {sol.candidato?.nivel}: {Math.round(sugestaoCaucao.desconto * 100)}% a
+                    menos
+                  </p>
+                )}
               </div>
             </div>
             <div className="mt-3">
