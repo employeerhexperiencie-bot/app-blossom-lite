@@ -32,6 +32,11 @@ export type Carro = {
   status: "disponivel" | "alugado" | "manutencao";
   foto: string;
   motoristaAtual?: string;
+  cor?: string;
+  combustivel?: string;
+  chassi?: string;
+  renavam?: string;
+  observacoes?: string;
 };
 
 export type Solicitacao = {

@@ -94,6 +94,17 @@ export type Pagamento = {
   data: string;
   forma: "Pix" | "Dinheiro" | "Cartão" | "Transferência";
   status: "pago" | "pendente" | "atrasado";
+  /** Identificador da cobrança Pix (txid), quando gerada pelo app */
+  txid?: string;
+  /** Data em que a cobrança foi enviada ao motorista */
+  cobradoEm?: string;
+};
+
+/** Dados que o proprietário usa para receber via Pix */
+export type DadosRecebimento = {
+  nome: string;
+  cidade: string;
+  chavePix: string;
 };
 
 export type ChecklistItem = {
@@ -345,7 +356,9 @@ export function eventoIcone(tipo: EventoTipo): string {
 
 export function fmtData(iso: string): string {
   try {
-    const d = new Date(iso);
+    // "AAAA-MM-DD" sem horário é lido como meia-noite UTC, o que no Brasil (UTC-3)
+    // mostra o dia anterior. Ancorar ao meio-dia local evita isso.
+    const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T12:00:00` : iso);
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
   } catch {
     return iso;

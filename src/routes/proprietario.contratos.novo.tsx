@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { carros, motoristas } from "@/lib/mock-data";
-import { useProprietario } from "@/lib/store-proprietario";
+import { motoristas } from "@/lib/mock-data";
+import { useCarros, useProprietario } from "@/lib/store-proprietario";
 
 export const Route = createFileRoute("/proprietario/contratos/novo")({
   head: () => ({ meta: [{ title: "Novo contrato — TCHI LÉVA" }] }),
@@ -18,18 +18,23 @@ export const Route = createFileRoute("/proprietario/contratos/novo")({
 function NovoContrato() {
   const navigate = useNavigate();
   const criar = useProprietario((s) => s.criarContrato);
+  const carros = useCarros();
+  // Só carros livres podem receber contrato novo (evita alugar o mesmo carro duas vezes)
+  const carrosDisp = carros.filter((c) => c.status === "disponivel");
   const [motoristaId, setMotoristaId] = useState(motoristas[0].id);
-  const [carroId, setCarroId] = useState(carros.find((c) => c.status === "disponivel")?.id ?? carros[0].id);
+  const [carroId, setCarroId] = useState(carrosDisp[0]?.id ?? "");
   const [valor, setValor] = useState(120);
   const [periodicidade, setPeriodicidade] = useState<"diaria" | "semanal" | "mensal">("diaria");
   const [caucao, setCaucao] = useState(1500);
   const [inicio, setInicio] = useState(new Date().toISOString().slice(0, 10));
   const [observacoes, setObservacoes] = useState("");
 
-  const carrosDisp = carros.filter((c) => c.status !== "manutencao");
-
   function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!carroId) {
+      toast.error("Nenhum carro disponível para contrato");
+      return;
+    }
     const m = motoristas.find((x) => x.id === motoristaId)!;
     const id = criar({
       carroId, motoristaId, motoristaNome: m.nome,
@@ -59,6 +64,9 @@ function NovoContrato() {
           <select value={carroId} onChange={(e) => setCarroId(e.target.value)} className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm">
             {carrosDisp.map((c) => <option key={c.id} value={c.id}>{c.marca} {c.modelo} · {c.placa}</option>)}
           </select>
+          {carrosDisp.length === 0 && (
+            <p className="text-xs text-muted-foreground">Todos os carros estão alugados ou em manutenção.</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
