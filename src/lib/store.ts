@@ -38,7 +38,8 @@ type ConectState = {
   finalizarCorrida: (id: string) => void;
   cancelarCorrida: () => void;
 
-  ficarOnline: () => void;
+  // Só fica online com o check-in do dia aprovado; devolve false quando falta o check-in.
+  ficarOnline: () => boolean;
   ficarOffline: () => void;
   encerrarDia: () => void;
   reabrirDia: () => void;
@@ -99,11 +100,19 @@ export const useConect = create<ConectState>()(
       aceitarCorrida: (id) => set({ corridaAtivaId: id, statusOperacao: "em_corrida" }),
       finalizarCorrida: (id) => {
         const feitas = get().corridasFeitasHoje;
-        set({ corridaAtivaId: null, corridasFeitasHoje: [...feitas, id], statusOperacao: "online" });
+        set({
+          corridaAtivaId: null,
+          corridasFeitasHoje: [...feitas, id],
+          statusOperacao: "online",
+        });
       },
       cancelarCorrida: () => set({ corridaAtivaId: null, statusOperacao: "online" }),
 
-      ficarOnline: () => set({ statusOperacao: "online", onlineDesde: Date.now() }),
+      ficarOnline: () => {
+        if (!checkinValido(get().checkin)) return false;
+        set({ statusOperacao: "online", onlineDesde: Date.now() });
+        return true;
+      },
       ficarOffline: () => {
         const desde = get().onlineDesde;
         const extra = desde ? Math.round((Date.now() - desde) / 60000) : 0;
@@ -116,19 +125,15 @@ export const useConect = create<ConectState>()(
       encerrarDia: () => set({ statusOperacao: "fim_do_dia", onlineDesde: null }),
       reabrirDia: () => set({ statusOperacao: "offline" }),
 
-
       enviarOrcamento: (servico) => {
         const enviados = get().orcamentosEnviados;
         set({
-          orcamentosEnviados: [
-            { id: `or${Date.now()}`, servico, data: "Agora" },
-            ...enviados,
-          ],
+          orcamentosEnviados: [{ id: `or${Date.now()}`, servico, data: "Agora" }, ...enviados],
         });
       },
     }),
-    { name: "conect-state" }
-  )
+    { name: "conect-state" },
+  ),
 );
 
 export function checkinValido(c: CheckinStatus | null): boolean {

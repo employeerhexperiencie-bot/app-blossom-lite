@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { corridasDisponiveis } from "@/lib/mock-data";
 import { useConect, checkinValido } from "@/lib/store";
 
-export const Route = createFileRoute("/motorista/corridas")({
+export const Route = createFileRoute("/motorista/corridas/")({
   head: () => ({ meta: [{ title: "Corridas — Motorista | TCHI LÉVA" }] }),
   component: Corridas,
 });
@@ -29,7 +29,10 @@ function Corridas() {
           <p className="mt-1 text-sm text-muted-foreground">
             Você precisa concluir o check-in do dia para receber corridas.
           </p>
-          <Button asChild className="mt-4 rounded-xl gradient-primary text-primary-foreground shadow-glow">
+          <Button
+            asChild
+            className="mt-4 rounded-xl gradient-primary text-primary-foreground shadow-glow"
+          >
             <Link to="/motorista/checkin">Fazer check-in</Link>
           </Button>
         </div>
@@ -44,7 +47,9 @@ function Corridas() {
           <h2 className="font-display text-lg font-bold">Corrida em andamento</h2>
           <p className="mt-1 text-sm text-muted-foreground">Você tem uma corrida ativa.</p>
           <Button
-            onClick={() => navigate({ to: "/motorista/corridas/$id", params: { id: corridaAtivaId } })}
+            onClick={() =>
+              navigate({ to: "/motorista/corridas/$id", params: { id: corridaAtivaId } })
+            }
             className="mt-4 rounded-xl gradient-primary text-primary-foreground shadow-glow"
           >
             Voltar para corrida
@@ -92,14 +97,18 @@ function Corridas() {
                 <div className="flex items-start gap-2">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-success" />
                   <div className="min-w-0 text-sm">
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Origem</div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Origem
+                    </div>
                     <div className="truncate">{c.origem}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                   <div className="min-w-0 text-sm">
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Destino</div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Destino
+                    </div>
                     <div className="truncate">{c.destino}</div>
                   </div>
                 </div>

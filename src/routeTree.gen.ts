@@ -39,10 +39,8 @@ import { Route as MotoristaPerfilRouteImport } from './routes/motorista.perfil'
 import { Route as MotoristaOrcamentosRouteImport } from './routes/motorista.orcamentos'
 import { Route as MotoristaOperacaoRouteImport } from './routes/motorista.operacao'
 import { Route as MotoristaJornadaRouteImport } from './routes/motorista.jornada'
-import { Route as MotoristaCorridasRouteImport } from './routes/motorista.corridas'
 import { Route as MotoristaClubeRouteImport } from './routes/motorista.clube'
 import { Route as MotoristaCheckinRouteImport } from './routes/motorista.checkin'
-import { Route as MotoristaBeneficiosRouteImport } from './routes/motorista.beneficios'
 import { Route as LojaPlanoRouteImport } from './routes/loja.plano'
 import { Route as LojaOportunidadesRouteImport } from './routes/loja.oportunidades'
 import { Route as LojaNegocioRouteImport } from './routes/loja.negocio'
@@ -53,6 +51,8 @@ import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as ProprietarioFrotaIndexRouteImport } from './routes/proprietario.frota.index'
 import { Route as ProprietarioContratosIndexRouteImport } from './routes/proprietario.contratos.index'
 import { Route as OficinaServicosIndexRouteImport } from './routes/oficina.servicos.index'
+import { Route as MotoristaCorridasIndexRouteImport } from './routes/motorista.corridas.index'
+import { Route as MotoristaBeneficiosIndexRouteImport } from './routes/motorista.beneficios.index'
 import { Route as MotoristaAlugueisIndexRouteImport } from './routes/motorista.alugueis.index'
 import { Route as LojaPedidosIndexRouteImport } from './routes/loja.pedidos.index'
 import { Route as LojaCatalogoIndexRouteImport } from './routes/loja.catalogo.index'
@@ -222,11 +222,6 @@ const MotoristaJornadaRoute = MotoristaJornadaRouteImport.update({
   path: '/jornada',
   getParentRoute: () => MotoristaRoute,
 } as any)
-const MotoristaCorridasRoute = MotoristaCorridasRouteImport.update({
-  id: '/corridas',
-  path: '/corridas',
-  getParentRoute: () => MotoristaRoute,
-} as any)
 const MotoristaClubeRoute = MotoristaClubeRouteImport.update({
   id: '/clube',
   path: '/clube',
@@ -235,11 +230,6 @@ const MotoristaClubeRoute = MotoristaClubeRouteImport.update({
 const MotoristaCheckinRoute = MotoristaCheckinRouteImport.update({
   id: '/checkin',
   path: '/checkin',
-  getParentRoute: () => MotoristaRoute,
-} as any)
-const MotoristaBeneficiosRoute = MotoristaBeneficiosRouteImport.update({
-  id: '/beneficios',
-  path: '/beneficios',
   getParentRoute: () => MotoristaRoute,
 } as any)
 const LojaPlanoRoute = LojaPlanoRouteImport.update({
@@ -293,6 +283,17 @@ const OficinaServicosIndexRoute = OficinaServicosIndexRouteImport.update({
   path: '/servicos/',
   getParentRoute: () => OficinaRoute,
 } as any)
+const MotoristaCorridasIndexRoute = MotoristaCorridasIndexRouteImport.update({
+  id: '/corridas/',
+  path: '/corridas/',
+  getParentRoute: () => MotoristaRoute,
+} as any)
+const MotoristaBeneficiosIndexRoute =
+  MotoristaBeneficiosIndexRouteImport.update({
+    id: '/beneficios/',
+    path: '/beneficios/',
+    getParentRoute: () => MotoristaRoute,
+  } as any)
 const MotoristaAlugueisIndexRoute = MotoristaAlugueisIndexRouteImport.update({
   id: '/alugueis/',
   path: '/alugueis/',
@@ -354,15 +355,15 @@ const OficinaServicosOsIdRoute = OficinaServicosOsIdRouteImport.update({
   getParentRoute: () => OficinaRoute,
 } as any)
 const MotoristaCorridasIdRoute = MotoristaCorridasIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => MotoristaCorridasRoute,
+  id: '/corridas/$id',
+  path: '/corridas/$id',
+  getParentRoute: () => MotoristaRoute,
 } as any)
 const MotoristaBeneficiosParceiroIdRoute =
   MotoristaBeneficiosParceiroIdRouteImport.update({
-    id: '/$parceiroId',
-    path: '/$parceiroId',
-    getParentRoute: () => MotoristaBeneficiosRoute,
+    id: '/beneficios/$parceiroId',
+    path: '/beneficios/$parceiroId',
+    getParentRoute: () => MotoristaRoute,
   } as any)
 const MotoristaAlugueisCarroIdRoute =
   MotoristaAlugueisCarroIdRouteImport.update({
@@ -403,10 +404,8 @@ export interface FileRoutesByFullPath {
   '/loja/negocio': typeof LojaNegocioRoute
   '/loja/oportunidades': typeof LojaOportunidadesRoute
   '/loja/plano': typeof LojaPlanoRoute
-  '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
   '/motorista/clube': typeof MotoristaClubeRoute
-  '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/operacao': typeof MotoristaOperacaoRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
@@ -445,6 +444,8 @@ export interface FileRoutesByFullPath {
   '/loja/catalogo/': typeof LojaCatalogoIndexRoute
   '/loja/pedidos/': typeof LojaPedidosIndexRoute
   '/motorista/alugueis/': typeof MotoristaAlugueisIndexRoute
+  '/motorista/beneficios/': typeof MotoristaBeneficiosIndexRoute
+  '/motorista/corridas/': typeof MotoristaCorridasIndexRoute
   '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
@@ -460,10 +461,8 @@ export interface FileRoutesByTo {
   '/loja/negocio': typeof LojaNegocioRoute
   '/loja/oportunidades': typeof LojaOportunidadesRoute
   '/loja/plano': typeof LojaPlanoRoute
-  '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
   '/motorista/clube': typeof MotoristaClubeRoute
-  '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/operacao': typeof MotoristaOperacaoRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
@@ -502,6 +501,8 @@ export interface FileRoutesByTo {
   '/loja/catalogo': typeof LojaCatalogoIndexRoute
   '/loja/pedidos': typeof LojaPedidosIndexRoute
   '/motorista/alugueis': typeof MotoristaAlugueisIndexRoute
+  '/motorista/beneficios': typeof MotoristaBeneficiosIndexRoute
+  '/motorista/corridas': typeof MotoristaCorridasIndexRoute
   '/oficina/servicos': typeof OficinaServicosIndexRoute
   '/proprietario/contratos': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota': typeof ProprietarioFrotaIndexRoute
@@ -524,10 +525,8 @@ export interface FileRoutesById {
   '/loja/negocio': typeof LojaNegocioRoute
   '/loja/oportunidades': typeof LojaOportunidadesRoute
   '/loja/plano': typeof LojaPlanoRoute
-  '/motorista/beneficios': typeof MotoristaBeneficiosRouteWithChildren
   '/motorista/checkin': typeof MotoristaCheckinRoute
   '/motorista/clube': typeof MotoristaClubeRoute
-  '/motorista/corridas': typeof MotoristaCorridasRouteWithChildren
   '/motorista/jornada': typeof MotoristaJornadaRoute
   '/motorista/operacao': typeof MotoristaOperacaoRoute
   '/motorista/orcamentos': typeof MotoristaOrcamentosRoute
@@ -566,6 +565,8 @@ export interface FileRoutesById {
   '/loja/catalogo/': typeof LojaCatalogoIndexRoute
   '/loja/pedidos/': typeof LojaPedidosIndexRoute
   '/motorista/alugueis/': typeof MotoristaAlugueisIndexRoute
+  '/motorista/beneficios/': typeof MotoristaBeneficiosIndexRoute
+  '/motorista/corridas/': typeof MotoristaCorridasIndexRoute
   '/oficina/servicos/': typeof OficinaServicosIndexRoute
   '/proprietario/contratos/': typeof ProprietarioContratosIndexRoute
   '/proprietario/frota/': typeof ProprietarioFrotaIndexRoute
@@ -589,10 +590,8 @@ export interface FileRouteTypes {
     | '/loja/negocio'
     | '/loja/oportunidades'
     | '/loja/plano'
-    | '/motorista/beneficios'
     | '/motorista/checkin'
     | '/motorista/clube'
-    | '/motorista/corridas'
     | '/motorista/jornada'
     | '/motorista/operacao'
     | '/motorista/orcamentos'
@@ -631,6 +630,8 @@ export interface FileRouteTypes {
     | '/loja/catalogo/'
     | '/loja/pedidos/'
     | '/motorista/alugueis/'
+    | '/motorista/beneficios/'
+    | '/motorista/corridas/'
     | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
@@ -646,10 +647,8 @@ export interface FileRouteTypes {
     | '/loja/negocio'
     | '/loja/oportunidades'
     | '/loja/plano'
-    | '/motorista/beneficios'
     | '/motorista/checkin'
     | '/motorista/clube'
-    | '/motorista/corridas'
     | '/motorista/jornada'
     | '/motorista/operacao'
     | '/motorista/orcamentos'
@@ -688,6 +687,8 @@ export interface FileRouteTypes {
     | '/loja/catalogo'
     | '/loja/pedidos'
     | '/motorista/alugueis'
+    | '/motorista/beneficios'
+    | '/motorista/corridas'
     | '/oficina/servicos'
     | '/proprietario/contratos'
     | '/proprietario/frota'
@@ -709,10 +710,8 @@ export interface FileRouteTypes {
     | '/loja/negocio'
     | '/loja/oportunidades'
     | '/loja/plano'
-    | '/motorista/beneficios'
     | '/motorista/checkin'
     | '/motorista/clube'
-    | '/motorista/corridas'
     | '/motorista/jornada'
     | '/motorista/operacao'
     | '/motorista/orcamentos'
@@ -751,6 +750,8 @@ export interface FileRouteTypes {
     | '/loja/catalogo/'
     | '/loja/pedidos/'
     | '/motorista/alugueis/'
+    | '/motorista/beneficios/'
+    | '/motorista/corridas/'
     | '/oficina/servicos/'
     | '/proprietario/contratos/'
     | '/proprietario/frota/'
@@ -980,13 +981,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MotoristaJornadaRouteImport
       parentRoute: typeof MotoristaRoute
     }
-    '/motorista/corridas': {
-      id: '/motorista/corridas'
-      path: '/corridas'
-      fullPath: '/motorista/corridas'
-      preLoaderRoute: typeof MotoristaCorridasRouteImport
-      parentRoute: typeof MotoristaRoute
-    }
     '/motorista/clube': {
       id: '/motorista/clube'
       path: '/clube'
@@ -999,13 +993,6 @@ declare module '@tanstack/react-router' {
       path: '/checkin'
       fullPath: '/motorista/checkin'
       preLoaderRoute: typeof MotoristaCheckinRouteImport
-      parentRoute: typeof MotoristaRoute
-    }
-    '/motorista/beneficios': {
-      id: '/motorista/beneficios'
-      path: '/beneficios'
-      fullPath: '/motorista/beneficios'
-      preLoaderRoute: typeof MotoristaBeneficiosRouteImport
       parentRoute: typeof MotoristaRoute
     }
     '/loja/plano': {
@@ -1077,6 +1064,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/oficina/servicos/'
       preLoaderRoute: typeof OficinaServicosIndexRouteImport
       parentRoute: typeof OficinaRoute
+    }
+    '/motorista/corridas/': {
+      id: '/motorista/corridas/'
+      path: '/corridas'
+      fullPath: '/motorista/corridas/'
+      preLoaderRoute: typeof MotoristaCorridasIndexRouteImport
+      parentRoute: typeof MotoristaRoute
+    }
+    '/motorista/beneficios/': {
+      id: '/motorista/beneficios/'
+      path: '/beneficios'
+      fullPath: '/motorista/beneficios/'
+      preLoaderRoute: typeof MotoristaBeneficiosIndexRouteImport
+      parentRoute: typeof MotoristaRoute
     }
     '/motorista/alugueis/': {
       id: '/motorista/alugueis/'
@@ -1157,17 +1158,17 @@ declare module '@tanstack/react-router' {
     }
     '/motorista/corridas/$id': {
       id: '/motorista/corridas/$id'
-      path: '/$id'
+      path: '/corridas/$id'
       fullPath: '/motorista/corridas/$id'
       preLoaderRoute: typeof MotoristaCorridasIdRouteImport
-      parentRoute: typeof MotoristaCorridasRoute
+      parentRoute: typeof MotoristaRoute
     }
     '/motorista/beneficios/$parceiroId': {
       id: '/motorista/beneficios/$parceiroId'
-      path: '/$parceiroId'
+      path: '/beneficios/$parceiroId'
       fullPath: '/motorista/beneficios/$parceiroId'
       preLoaderRoute: typeof MotoristaBeneficiosParceiroIdRouteImport
-      parentRoute: typeof MotoristaBeneficiosRoute
+      parentRoute: typeof MotoristaRoute
     }
     '/motorista/alugueis/$carroId': {
       id: '/motorista/alugueis/$carroId'
@@ -1244,33 +1245,9 @@ const LojaRouteChildren: LojaRouteChildren = {
 
 const LojaRouteWithChildren = LojaRoute._addFileChildren(LojaRouteChildren)
 
-interface MotoristaBeneficiosRouteChildren {
-  MotoristaBeneficiosParceiroIdRoute: typeof MotoristaBeneficiosParceiroIdRoute
-}
-
-const MotoristaBeneficiosRouteChildren: MotoristaBeneficiosRouteChildren = {
-  MotoristaBeneficiosParceiroIdRoute: MotoristaBeneficiosParceiroIdRoute,
-}
-
-const MotoristaBeneficiosRouteWithChildren =
-  MotoristaBeneficiosRoute._addFileChildren(MotoristaBeneficiosRouteChildren)
-
-interface MotoristaCorridasRouteChildren {
-  MotoristaCorridasIdRoute: typeof MotoristaCorridasIdRoute
-}
-
-const MotoristaCorridasRouteChildren: MotoristaCorridasRouteChildren = {
-  MotoristaCorridasIdRoute: MotoristaCorridasIdRoute,
-}
-
-const MotoristaCorridasRouteWithChildren =
-  MotoristaCorridasRoute._addFileChildren(MotoristaCorridasRouteChildren)
-
 interface MotoristaRouteChildren {
-  MotoristaBeneficiosRoute: typeof MotoristaBeneficiosRouteWithChildren
   MotoristaCheckinRoute: typeof MotoristaCheckinRoute
   MotoristaClubeRoute: typeof MotoristaClubeRoute
-  MotoristaCorridasRoute: typeof MotoristaCorridasRouteWithChildren
   MotoristaJornadaRoute: typeof MotoristaJornadaRoute
   MotoristaOperacaoRoute: typeof MotoristaOperacaoRoute
   MotoristaOrcamentosRoute: typeof MotoristaOrcamentosRoute
@@ -1278,14 +1255,16 @@ interface MotoristaRouteChildren {
   MotoristaRodarRoute: typeof MotoristaRodarRoute
   MotoristaIndexRoute: typeof MotoristaIndexRoute
   MotoristaAlugueisCarroIdRoute: typeof MotoristaAlugueisCarroIdRoute
+  MotoristaBeneficiosParceiroIdRoute: typeof MotoristaBeneficiosParceiroIdRoute
+  MotoristaCorridasIdRoute: typeof MotoristaCorridasIdRoute
   MotoristaAlugueisIndexRoute: typeof MotoristaAlugueisIndexRoute
+  MotoristaBeneficiosIndexRoute: typeof MotoristaBeneficiosIndexRoute
+  MotoristaCorridasIndexRoute: typeof MotoristaCorridasIndexRoute
 }
 
 const MotoristaRouteChildren: MotoristaRouteChildren = {
-  MotoristaBeneficiosRoute: MotoristaBeneficiosRouteWithChildren,
   MotoristaCheckinRoute: MotoristaCheckinRoute,
   MotoristaClubeRoute: MotoristaClubeRoute,
-  MotoristaCorridasRoute: MotoristaCorridasRouteWithChildren,
   MotoristaJornadaRoute: MotoristaJornadaRoute,
   MotoristaOperacaoRoute: MotoristaOperacaoRoute,
   MotoristaOrcamentosRoute: MotoristaOrcamentosRoute,
@@ -1293,7 +1272,11 @@ const MotoristaRouteChildren: MotoristaRouteChildren = {
   MotoristaRodarRoute: MotoristaRodarRoute,
   MotoristaIndexRoute: MotoristaIndexRoute,
   MotoristaAlugueisCarroIdRoute: MotoristaAlugueisCarroIdRoute,
+  MotoristaBeneficiosParceiroIdRoute: MotoristaBeneficiosParceiroIdRoute,
+  MotoristaCorridasIdRoute: MotoristaCorridasIdRoute,
   MotoristaAlugueisIndexRoute: MotoristaAlugueisIndexRoute,
+  MotoristaBeneficiosIndexRoute: MotoristaBeneficiosIndexRoute,
+  MotoristaCorridasIndexRoute: MotoristaCorridasIndexRoute,
 }
 
 const MotoristaRouteWithChildren = MotoristaRoute._addFileChildren(
