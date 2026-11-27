@@ -25,7 +25,8 @@ import {
 } from "@/lib/mock-oficina";
 import { toast } from "sonner";
 import { saudeDoCarro } from "@/lib/mock-oficina";
-import { manutencaoMock } from "@/lib/mock-proprietario";
+import { useManutencaoTodos } from "@/lib/store-proprietario";
+import { comissaoOS } from "@/lib/monetizacao";
 
 export const Route = createFileRoute("/oficina/servicos/$osId")({
   head: () => ({
@@ -58,6 +59,7 @@ function Detalhe() {
   const { osId } = Route.useParams();
   const os = useOrdem(osId);
   const store = useOficina();
+  const manutencaoTodos = useManutencaoTodos();
   const [aba, setAba] = useState<(typeof abas)[number]>("resumo");
 
   // dialogs
@@ -234,17 +236,64 @@ function Detalhe() {
                 </Button>
               </>
             )}
-            {os.status === "em_atendimento" && (
-              <Button className="rounded-xl" variant="outline" onClick={() => setAba("finalizar")}>
-                Ir para conclusão
-              </Button>
+            {os.status === "em_atendimento" &&
+              (os.clienteTipo === "proprietario" && os.carroId && !os.orcamentoAprovadoEm ? (
+                <>
+                  <Button
+                    className="rounded-xl gradient-primary text-primary-foreground"
+                    disabled={totalOS(os) <= 0}
+                    onClick={() => {
+                      store.enviarOrcamento(os.id);
+                      toast.success("Orçamento enviado ao dono do carro");
+                    }}
+                  >
+                    Enviar orçamento para aprovação ({fmtBRL(totalOS(os))})
+                  </Button>
+                  <p className="text-center text-[11px] text-muted-foreground">
+                    {totalOS(os) <= 0
+                      ? "Adicione os serviços e as peças na aba Serviços para montar o orçamento."
+                      : "O dono aprova pelo app; depois disso você conclui o serviço."}
+                  </p>
+                </>
+              ) : (
+                <Button
+                  className="rounded-xl"
+                  variant="outline"
+                  onClick={() => setAba("finalizar")}
+                >
+                  Ir para conclusão
+                </Button>
+              ))}
+            {os.status === "aguardando_aprovacao" && (
+              <div className="rounded-xl border border-warning/60 bg-warning/5 p-3 text-xs">
+                <b>Aguardando aprovação</b> de {os.clienteNome}: orçamento de{" "}
+                {fmtBRL(os.valorEstimado ?? totalOS(os))}
+                {os.clienteTipo === "motorista" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-2 w-full rounded-xl"
+                    onClick={() => {
+                      store.aprovarOrcamento(os.id);
+                      toast.success("Aprovação registrada");
+                    }}
+                  >
+                    Cliente aprovou por telefone
+                  </Button>
+                )}
+              </div>
+            )}
+            {os.status === "recusado" && os.orcamentoRecusadoMotivo && (
+              <p className="rounded-xl bg-muted p-3 text-xs text-muted-foreground">
+                Orçamento recusado: {os.orcamentoRecusadoMotivo}
+              </p>
             )}
           </div>
 
           <SaudeVeiculoCard
             saude={saudeDoCarro(
               os.checklist?.km ?? os.km ?? 30000,
-              manutencaoMock.filter((m) => m.carroId === os.carroId),
+              manutencaoTodos.filter((m) => m.carroId === os.carroId),
             )}
           />
         </PageSection>
@@ -456,6 +505,9 @@ function Detalhe() {
                 Total {fmtBRL(os.conclusao.valorTotal)} · garantia {os.conclusao.garantiaMeses}{" "}
                 meses
               </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Taxa TCHI LÉVA: {fmtBRL(comissaoOS(os))} (10% dos serviços, 8% das peças)
+              </div>
               {os.conclusao.observacoes && (
                 <p className="mt-1 text-xs text-muted-foreground">{os.conclusao.observacoes}</p>
               )}
@@ -466,6 +518,9 @@ function Detalhe() {
                 <span className="text-sm font-semibold">Valor total</span>
                 <span className="font-display text-lg font-black">{fmtBRL(total)}</span>
               </div>
+              <p className="text-[11px] text-muted-foreground">
+                Taxa TCHI LÉVA de {fmtBRL(comissaoOS(os))} (10% dos serviços, 8% das peças).
+              </p>
               <div>
                 <Label>Fotos finais</Label>
                 <button

@@ -13,6 +13,7 @@ import {
   fmtBRL,
   periodicidadeLabel,
   type Contrato,
+  type SolicitacaoLocacao,
 } from "@/lib/mock-proprietario";
 import { useProprietario, useCarro } from "@/lib/store-proprietario";
 import { caucaoPorNivel } from "@/lib/cobrancas";
@@ -125,6 +126,8 @@ function SolicitacaoDetalhe() {
           )}
         </div>
       )}
+
+      <CompararCandidatos atual={sol} />
 
       {sol.mensagem && (
         <div className="mt-3 rounded-2xl border border-border bg-card p-3 shadow-card">
@@ -265,6 +268,68 @@ function MiniKpi({
       <Icon className="mx-auto h-3.5 w-3.5 text-primary" />
       <div className="mt-1 text-[9px] uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="font-street text-sm font-black leading-tight">{value}</div>
+    </div>
+  );
+}
+
+/** Outros motoristas que pediram o mesmo carro, lado a lado com o atual. */
+function CompararCandidatos({ atual }: { atual: SolicitacaoLocacao }) {
+  const todas = useProprietario((s) => s.solicitacoes);
+  const doCarro = todas.filter(
+    (x) => x.carroId === atual.carroId && (x.id === atual.id || x.status === "pendente"),
+  );
+  if (doCarro.length < 2) return null;
+  const linhas = doCarro
+    .map((x) => ({
+      sol: x,
+      m: x.candidato ?? motoristasCandidatos.find((c) => c.id === x.motoristaId),
+    }))
+    .sort((a, b) => (b.m?.avaliacao ?? 0) - (a.m?.avaliacao ?? 0));
+
+  return (
+    <div className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-card">
+      <h3 className="font-street text-xs font-black uppercase tracking-wider text-muted-foreground">
+        Comparar candidatos para este carro ({linhas.length})
+      </h3>
+      <div className="mt-2 overflow-x-auto">
+        <table className="w-full text-left text-xs">
+          <thead className="text-[10px] uppercase text-muted-foreground">
+            <tr>
+              <th className="py-1 pr-2 font-semibold">Motorista</th>
+              <th className="py-1 pr-2 font-semibold">Nota</th>
+              <th className="py-1 pr-2 font-semibold">Nível</th>
+              <th className="py-1 pr-2 font-semibold">Corridas</th>
+              <th className="py-1 font-semibold">Proposta</th>
+            </tr>
+          </thead>
+          <tbody>
+            {linhas.map(({ sol, m }) => (
+              <tr
+                key={sol.id}
+                className={`border-t border-border ${sol.id === atual.id ? "bg-primary/5 font-semibold" : ""}`}
+              >
+                <td className="py-1.5 pr-2">
+                  {sol.id === atual.id ? (
+                    (m?.nome ?? "Motorista") + " (este)"
+                  ) : (
+                    <Link
+                      to="/proprietario/solicitacoes/$id"
+                      params={{ id: sol.id }}
+                      className="text-primary underline"
+                    >
+                      {m?.nome ?? "Motorista"}
+                    </Link>
+                  )}
+                </td>
+                <td className="py-1.5 pr-2">{m?.avaliacao.toFixed(1) ?? "—"}</td>
+                <td className="py-1.5 pr-2">{m?.nivel ?? "—"}</td>
+                <td className="py-1.5 pr-2">{m?.corridas ?? "—"}</td>
+                <td className="py-1.5">{sol.valorProposto ? fmtBRL(sol.valorProposto) : "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

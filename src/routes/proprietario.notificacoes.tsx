@@ -1,5 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bell, Check, Banknote, Wrench, FileWarning, AlertTriangle, FileText, Gauge, ChevronRight } from "lucide-react";
+import {
+  Bell,
+  Check,
+  Banknote,
+  Wrench,
+  FileWarning,
+  AlertTriangle,
+  FileText,
+  Gauge,
+  ChevronRight,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -22,16 +32,21 @@ function Notificacoes() {
   const [urgencia, setUrgencia] = useState<string>("todos");
   const [leitura, setLeitura] = useState<string>("todos");
 
-  const filtradas = useMemo(() => notificacoes.filter((n) => {
-    if (tipo !== "todos" && n.tipo !== tipo) return false;
-    if (urgencia !== "todos" && n.urgencia !== urgencia) return false;
-    const lida = lidas.includes(n.id);
-    if (leitura === "lidas" && !lida) return false;
-    if (leitura === "naolidas" && lida) return false;
-    return true;
-  }), [notificacoes, tipo, urgencia, leitura, lidas]);
+  const filtradas = useMemo(
+    () =>
+      notificacoes.filter((n) => {
+        if (tipo !== "todos" && n.tipo !== tipo) return false;
+        if (urgencia !== "todos" && n.urgencia !== urgencia) return false;
+        const lida = lidas.includes(n.id);
+        if (leitura === "lidas" && !lida) return false;
+        if (leitura === "naolidas" && lida) return false;
+        return true;
+      }),
+    [notificacoes, tipo, urgencia, leitura, lidas],
+  );
 
-  const ativos = (tipo !== "todos" ? 1 : 0) + (urgencia !== "todos" ? 1 : 0) + (leitura !== "todos" ? 1 : 0);
+  const ativos =
+    (tipo !== "todos" ? 1 : 0) + (urgencia !== "todos" ? 1 : 0) + (leitura !== "todos" ? 1 : 0);
 
   return (
     <PageSection>
@@ -48,10 +63,17 @@ function Notificacoes() {
       <div className="mb-3">
         <FiltroBar
           ativos={ativos}
-          onLimpar={() => { setTipo("todos"); setUrgencia("todos"); setLeitura("todos"); }}
+          onLimpar={() => {
+            setTipo("todos");
+            setUrgencia("todos");
+            setLeitura("todos");
+          }}
           chips={[
             {
-              key: "tp", label: "Tipo", value: tipo, onChange: setTipo,
+              key: "tp",
+              label: "Tipo",
+              value: tipo,
+              onChange: setTipo,
               options: [
                 { value: "todos", label: "Todos" },
                 { value: "pagamento", label: "Pagamento" },
@@ -64,7 +86,10 @@ function Notificacoes() {
               ],
             },
             {
-              key: "ur", label: "Urgência", value: urgencia, onChange: setUrgencia,
+              key: "ur",
+              label: "Urgência",
+              value: urgencia,
+              onChange: setUrgencia,
               options: [
                 { value: "todos", label: "Todas" },
                 { value: "alta", label: "Alta" },
@@ -73,7 +98,10 @@ function Notificacoes() {
               ],
             },
             {
-              key: "lt", label: "Leitura", value: leitura, onChange: setLeitura,
+              key: "lt",
+              label: "Leitura",
+              value: leitura,
+              onChange: setLeitura,
               options: [
                 { value: "todos", label: "Todas" },
                 { value: "naolidas", label: "Não lidas" },
@@ -93,7 +121,9 @@ function Notificacoes() {
           const hasLink = !!(n.solicitacaoId || n.contratoId || n.carroId);
           const body = (
             <>
-              <span className={`grid h-9 w-9 place-items-center rounded-xl ${toneOf(n.urgencia)}`}>{iconOf(n.tipo)}</span>
+              <span className={`grid h-9 w-9 place-items-center rounded-xl ${toneOf(n.urgencia)}`}>
+                {iconOf(n.tipo)}
+              </span>
               <div className="min-w-0">
                 <div className="truncate font-semibold">{n.titulo}</div>
                 <div className="truncate text-xs text-muted-foreground">{n.descricao}</div>
@@ -107,21 +137,39 @@ function Notificacoes() {
 
           if (n.solicitacaoId) {
             return (
-              <Link key={n.id} to="/proprietario/solicitacoes/$id" params={{ id: n.solicitacaoId }} onClick={() => marcarLida(n.id)} className={className}>
+              <Link
+                key={n.id}
+                to="/proprietario/solicitacoes/$id"
+                params={{ id: n.solicitacaoId }}
+                onClick={() => marcarLida(n.id)}
+                className={className}
+              >
                 {body}
               </Link>
             );
           }
           if (n.contratoId) {
             return (
-              <Link key={n.id} to="/proprietario/contratos/$id" params={{ id: n.contratoId }} onClick={() => marcarLida(n.id)} className={className}>
+              <Link
+                key={n.id}
+                to="/proprietario/contratos/$id"
+                params={{ id: n.contratoId }}
+                onClick={() => marcarLida(n.id)}
+                className={className}
+              >
                 {body}
               </Link>
             );
           }
           if (n.carroId) {
             return (
-              <Link key={n.id} to="/proprietario/frota/$carroId" params={{ carroId: n.carroId }} onClick={() => marcarLida(n.id)} className={className}>
+              <Link
+                key={n.id}
+                to="/proprietario/frota/$carroId"
+                params={{ carroId: n.carroId }}
+                onClick={() => marcarLida(n.id)}
+                className={className}
+              >
                 {body}
               </Link>
             );
@@ -132,7 +180,9 @@ function Notificacoes() {
             </button>
           );
         })}
-        {filtradas.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma notificação nesta seleção.</p>}
+        {filtradas.length === 0 && (
+          <p className="text-sm text-muted-foreground">Nenhuma notificação nesta seleção.</p>
+        )}
       </div>
     </PageSection>
   );

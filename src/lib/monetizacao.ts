@@ -30,11 +30,36 @@ export type FonteReceita = { key: string; label: string; valor: number; descrica
 
 // Receita agregada da plataforma (visão Admin) — mock consolidado do ecossistema
 export const receitaPlataforma: FonteReceita[] = [
-  { key: "com-produtos", label: "Comissão de produtos", valor: 18420, descricao: "8% sobre vendas do marketplace" },
-  { key: "com-servicos", label: "Comissão de serviços", valor: 22980, descricao: "10% sobre serviços realizados" },
-  { key: "assinaturas", label: "Assinaturas Premium", valor: 8994, descricao: "60 parceiros no plano Premium" },
-  { key: "leads", label: "Leads qualificados", valor: 5310, descricao: "1.180 leads entregues a parceiros" },
-  { key: "publicidade", label: "Publicidade contextual", valor: 3240, descricao: "Ofertas baseadas em necessidade" },
+  {
+    key: "com-produtos",
+    label: "Comissão de produtos",
+    valor: 18420,
+    descricao: "8% sobre vendas do marketplace",
+  },
+  {
+    key: "com-servicos",
+    label: "Comissão de serviços",
+    valor: 22980,
+    descricao: "10% sobre serviços realizados",
+  },
+  {
+    key: "assinaturas",
+    label: "Assinaturas Premium",
+    valor: 8994,
+    descricao: "60 parceiros no plano Premium",
+  },
+  {
+    key: "leads",
+    label: "Leads qualificados",
+    valor: 5310,
+    descricao: "1.180 leads entregues a parceiros",
+  },
+  {
+    key: "publicidade",
+    label: "Publicidade contextual",
+    valor: 3240,
+    descricao: "Ofertas baseadas em necessidade",
+  },
 ];
 
 export const gmvMensal = [
@@ -48,4 +73,14 @@ export const gmvMensal = [
 
 export function totalReceitaPlataforma(): number {
   return receitaPlataforma.reduce((a, f) => a + f.valor, 0);
+}
+
+/** Comissão da TCHI LÉVA numa ordem de serviço: 10% dos serviços e 8% das peças. */
+export function comissaoOS(os: {
+  servicos: { valor: number }[];
+  pecas: { valorUnit: number; quantidade: number }[];
+}): number {
+  const s = os.servicos.reduce((a, i) => a + i.valor, 0) * taxas.servico;
+  const p = os.pecas.reduce((a, i) => a + i.valorUnit * i.quantidade, 0) * taxas.produto;
+  return Math.round((s + p) * 100) / 100;
 }

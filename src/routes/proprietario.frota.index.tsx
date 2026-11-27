@@ -5,7 +5,7 @@ import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { FiltroBar } from "@/components/FiltroBar";
 import type { Carro } from "@/lib/mock-data";
-import { documentosMock } from "@/lib/mock-proprietario";
+import { hojeISO, statusDocumento } from "@/lib/mock-proprietario";
 import { useCarros, useProprietario, useFinanceiroPorVeiculo } from "@/lib/store-proprietario";
 
 export const Route = createFileRoute("/proprietario/frota/")({
@@ -23,6 +23,7 @@ function Frota() {
   const carros = useCarros();
   const anuncios = useProprietario((s) => s.anuncios);
   const financeiro = useFinanceiroPorVeiculo();
+  const documentos = useProprietario((s) => s.documentos);
 
   const [status, setStatus] = useState<string>("todos");
   const [publicacao, setPublicacao] = useState<string>("todos");
@@ -31,9 +32,7 @@ function Frota() {
   const [busca, setBusca] = useState("");
 
   const alertaCarro = (id: string) =>
-    documentosMock.some(
-      (d) => d.carroId === id && (d.status === "vencendo" || d.status === "vencido"),
-    );
+    documentos.some((d) => d.carroId === id && statusDocumento(d.vencimento, hojeISO()) !== "ok");
 
   const lista = useMemo(() => {
     let l = carros.slice();

@@ -14,6 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useConect } from "@/lib/store";
 import { useCarros, useProprietario } from "@/lib/store-proprietario";
+import { DocumentosDono } from "@/components/proprietario/Documentos";
+import { PLANO_FROTA, mensalidadePlanoFrota } from "@/lib/regras-proprietario";
+import { fmtBRL, fmtData } from "@/lib/mock-proprietario";
 import type { PerfilDono } from "@/lib/mock-proprietario";
 
 export const Route = createFileRoute("/proprietario/perfil")({
@@ -129,6 +132,15 @@ function Perfil() {
         Salvar perfil
       </Button>
 
+      <section className="mt-5 space-y-3 rounded-2xl border border-border bg-card p-4">
+        <h2 className="font-street text-xs font-black uppercase tracking-wider text-muted-foreground">
+          Meus documentos
+        </h2>
+        <DocumentosDono />
+      </section>
+
+      <PlanoFrota carros={carros.length} />
+
       <div className="mt-5 divide-y divide-border rounded-2xl border border-border bg-card">
         <Atalho to="/proprietario/frota/anuncios" icon={Megaphone} label="Meus anúncios" />
         <Atalho to="/proprietario/contratos/motoristas" icon={Users} label="Motoristas" />
@@ -188,5 +200,64 @@ function Atalho({
       <span className="font-semibold">{label}</span>
       <ChevronRight className="h-4 w-4 text-muted-foreground" />
     </Link>
+  );
+}
+
+/** Plano Frota: grátis até o limite de carros; acima disso, valor por carro por mês. */
+function PlanoFrota({ carros }: { carros: number }) {
+  const plano = useProprietario((s) => s.planoFrota);
+  const assinar = useProprietario((s) => s.assinarPlanoFrota);
+  const cancelar = useProprietario((s) => s.cancelarPlanoFrota);
+  const mensal = mensalidadePlanoFrota(carros);
+  const pagos = Math.max(0, carros - PLANO_FROTA.gratisAte);
+
+  return (
+    <section className="mt-3 space-y-2 rounded-2xl border border-primary/40 bg-primary/5 p-4">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="font-street text-xs font-black uppercase tracking-wider text-primary">
+          Plano Frota
+        </h2>
+        <span className="text-[11px] font-semibold">
+          {plano.ativo ? "Assinante" : mensal > 0 ? "Não assinante" : "Grátis"}
+        </span>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Contratos, cobrança Pix, vistorias com fotos e oficina parceira para a frota inteira. Grátis
+        até {PLANO_FROTA.gratisAte} carros; depois, {fmtBRL(PLANO_FROTA.precoPorCarro)} por carro
+        por mês.
+      </p>
+      <div className="flex items-center justify-between rounded-xl bg-card px-3 py-2 text-sm">
+        <span>
+          {carros} carro{carros === 1 ? "" : "s"}
+          {pagos > 0 ? ` · ${pagos} pago${pagos === 1 ? "" : "s"}` : ""}
+        </span>
+        <b>{mensal > 0 ? `${fmtBRL(mensal)}/mês` : "R$ 0"}</b>
+      </div>
+      {plano.ativo ? (
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <span className="text-muted-foreground">
+            Desde {plano.desde ? fmtData(plano.desde) : "hoje"}
+          </span>
+          <Button size="sm" variant="outline" className="rounded-xl" onClick={cancelar}>
+            Cancelar plano
+          </Button>
+        </div>
+      ) : mensal > 0 ? (
+        <>
+          <Button
+            className="w-full rounded-xl gradient-primary text-primary-foreground"
+            onClick={() => {
+              assinar(carros);
+              toast.success("Plano Frota assinado");
+            }}
+          >
+            Assinar por {fmtBRL(mensal)}/mês
+          </Button>
+          <p className="text-[11px] text-muted-foreground">
+            Protótipo: a cobrança é simulada, nenhum valor é debitado.
+          </p>
+        </>
+      ) : null}
+    </section>
   );
 }

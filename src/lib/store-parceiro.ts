@@ -38,6 +38,14 @@ type State = {
   criarCampanha: (c: Omit<Campanha, "id" | "ativa">) => void;
   alternarCampanha: (id: string) => void;
   assinarPremium: () => void;
+  // Pedido feito por um proprietário a partir do alerta de manutenção do carro.
+  pedirDaFrota: (d: {
+    itemId: string;
+    quantidade: number;
+    clienteNome: string;
+    veiculo: string;
+    observacoes?: string;
+  }) => string | undefined;
   cancelarPremium: () => void;
 };
 
@@ -66,17 +74,24 @@ export const useParceiro = create<State>()(
       entradaEstoque: (itemId, qtd, motivo) =>
         set({
           catalogo: get().catalogo.map((x) =>
-            x.id === itemId ? { ...x, quantidade: (x.quantidade ?? 0) + qtd } : x
+            x.id === itemId ? { ...x, quantidade: (x.quantidade ?? 0) + qtd } : x,
           ),
           movimentos: [
-            { id: `mv${Date.now()}`, itemId, tipo: "entrada", quantidade: qtd, motivo, data: hoje() },
+            {
+              id: `mv${Date.now()}`,
+              itemId,
+              tipo: "entrada",
+              quantidade: qtd,
+              motivo,
+              data: hoje(),
+            },
             ...get().movimentos,
           ],
         }),
       saidaEstoque: (itemId, qtd, motivo) =>
         set({
           catalogo: get().catalogo.map((x) =>
-            x.id === itemId ? { ...x, quantidade: Math.max(0, (x.quantidade ?? 0) - qtd) } : x
+            x.id === itemId ? { ...x, quantidade: Math.max(0, (x.quantidade ?? 0) - qtd) } : x,
           ),
           movimentos: [
             { id: `mv${Date.now()}`, itemId, tipo: "saida", quantidade: qtd, motivo, data: hoje() },
@@ -94,21 +109,57 @@ export const useParceiro = create<State>()(
           }),
         }),
       recusarPedido: (id) =>
-        set({ pedidos: get().pedidos.map((p) => (p.id === id ? { ...p, status: "recusado" } : p)) }),
+        set({
+          pedidos: get().pedidos.map((p) => (p.id === id ? { ...p, status: "recusado" } : p)),
+        }),
 
-      criarCampanha: (c) => set({ campanhas: [{ ...c, id: `cp${Date.now()}`, ativa: true }, ...get().campanhas] }),
+      criarCampanha: (c) =>
+        set({ campanhas: [{ ...c, id: `cp${Date.now()}`, ativa: true }, ...get().campanhas] }),
       alternarCampanha: (id) =>
-        set({ campanhas: get().campanhas.map((c) => (c.id === id ? { ...c, ativa: !c.ativa } : c)) }),
+        set({
+          campanhas: get().campanhas.map((c) => (c.id === id ? { ...c, ativa: !c.ativa } : c)),
+        }),
 
+      pedirDaFrota: ({ itemId, quantidade, clienteNome, veiculo, observacoes }) => {
+        const item = get().catalogo.find((i) => i.id === itemId && i.ativo);
+        if (!item) return;
+        const id = `pf${Date.now()}`;
+        const maior = Math.max(
+          1000,
+          ...get().pedidos.map((p) => Number(p.codigo.replace(/\D/g, "")) || 0),
+        );
+        const agora = new Date();
+        const pedido: Pedido = {
+          id,
+          codigo: `#${maior + 1}`,
+          tipo: item.tipo === "servico" ? "agendamento" : "compra",
+          status: "novo",
+          clienteNome,
+          clientePerfil: "proprietario",
+          veiculo,
+          data: hoje(),
+          hora: `${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`,
+          origem: "oportunidade",
+          itens: [{ nome: item.nome, quantidade, valorUnit: item.preco, tipo: item.tipo }],
+          observacoes,
+        };
+        set({
+          pedidos: [pedido, ...get().pedidos],
+          catalogo: get().catalogo.map((i) => (i.id === itemId ? { ...i, leads: i.leads + 1 } : i)),
+        });
+        return id;
+      },
       assinarPremium: () => set({ negocio: { ...get().negocio, plano: "premium" } }),
       cancelarPremium: () => set({ negocio: { ...get().negocio, plano: "gratuito" } }),
     }),
-    { name: "parceiro-state" }
-  )
+    { name: "parceiro-state" },
+  ),
 );
 
+// Data local (AAAA-MM-DD): toISOString() usa UTC e, à noite no Brasil, já devolve o dia seguinte.
 function hoje() {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 // -------- Selectors --------
@@ -125,8 +176,10 @@ export function useEstoqueBaixo(): ItemCatalogo[] {
   // useShallow: o filtro cria um array novo a cada leitura; sem ele o Zustand 5 entra em laço
   return useParceiro(
     useShallow((s) =>
-      s.catalogo.filter((i) => i.tipo === "produto" && (i.quantidade ?? 0) <= (i.estoqueMinimo ?? 0))
-    )
+      s.catalogo.filter(
+        (i) => i.tipo === "produto" && (i.quantidade ?? 0) <= (i.estoqueMinimo ?? 0),
+      ),
+    ),
   );
 }
 
@@ -141,7 +194,7 @@ export function useResumoNegocio() {
   const novos = pedidos.filter((p) => p.status === "novo");
   const abertos = pedidos.filter((p) => !["entregue", "recusado"].includes(p.status));
   const acabando = catalogo.filter(
-    (i) => i.tipo === "produto" && (i.quantidade ?? 0) <= (i.estoqueMinimo ?? 0)
+    (i) => i.tipo === "produto" && (i.quantidade ?? 0) <= (i.estoqueMinimo ?? 0),
   );
   const clientesNovos = new Set(doDia.map((p) => p.clienteNome)).size;
 
