@@ -129,6 +129,17 @@ export type Pagamento = {
   status: "pago" | "pendente" | "atrasado";
   vencimento?: string; // data em que a cobrança vence
   pagoEm?: string; // data em que foi paga
+  /** Identificador da cobrança Pix (txid), quando gerada pelo app */
+  txid?: string;
+  /** Data em que a cobrança foi enviada ao motorista */
+  cobradoEm?: string;
+};
+
+/** Dados que o proprietário usa para receber via Pix */
+export type DadosRecebimento = {
+  nome: string;
+  cidade: string;
+  chavePix: string;
 };
 
 export type ChecklistItem = {

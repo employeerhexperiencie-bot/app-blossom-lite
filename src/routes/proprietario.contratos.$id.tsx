@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   QrCode,
@@ -10,6 +10,8 @@ import {
   Clock,
   Star,
   Megaphone,
+  FileDown,
+  Loader2,
 } from "lucide-react";
 import { useState } from "react";
 import { PageSection } from "@/components/AppShell";
@@ -19,7 +21,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ChecklistForm, ChecklistResumo } from "@/components/proprietario/ChecklistForm";
-import { PixCobranca } from "@/components/proprietario/PixCobranca";
+import { CobrancaPixDialog } from "@/components/proprietario/CobrancaPixDialog";
+import { proximoVencimento as proximoVencimentoManual } from "@/lib/pix";
 import { combustivelLabel, compararChecklists } from "@/lib/checklist";
 import { emAberto, proximoVencimento } from "@/lib/cobrancas";
 import {
@@ -68,6 +71,8 @@ function Detalhe() {
   const lembretesSalvos = useProprietario((s) => s.lembretes[id]);
   const salvarLembretes = useProprietario((s) => s.salvarLembretes);
   const anuncio = useProprietario((s) => (contrato ? s.anuncios[contrato.carroId] : undefined));
+  const perfil = useProprietario((s) => s.perfil);
+  const [gerandoPdf, setGerandoPdf] = useState(false);
   const publicar = useProprietario((s) => s.publicarVeiculo);
   const [aba, setAba] = useState<Aba>("geral");
   const [encerrando, setEncerrando] = useState(false);
@@ -158,6 +163,36 @@ function Detalhe() {
                 {contrato.observacoes}
               </p>
             )}
+
+            <Button
+              variant="outline"
+              className="w-full rounded-xl"
+              disabled={gerandoPdf}
+              onClick={async () => {
+                setGerandoPdf(true);
+                try {
+                  // A biblioteca de PDF só é carregada quando o dono pede o arquivo.
+                  const { baixarContratoPdf } = await import("@/lib/contrato-pdf");
+                  await baixarContratoPdf({
+                    contrato,
+                    carro,
+                    proprietarioNome: perfil.nome || "Proprietário",
+                  });
+                  toast.success("Contrato em PDF baixado");
+                } catch {
+                  toast.error("Não foi possível gerar o PDF");
+                } finally {
+                  setGerandoPdf(false);
+                }
+              }}
+            >
+              {gerandoPdf ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <FileDown className="mr-2 h-4 w-4" />
+              )}
+              Baixar contrato (PDF)
+            </Button>
 
             {contrato.status === "encerrado" && <ResumoEncerramento contrato={contrato} />}
 
@@ -263,7 +298,12 @@ function PagamentosPanel({
   const [data, setData] = useState(hojeISO());
   const [forma, setForma] = useState<Pagamento["forma"]>("Pix");
   const [limite, setLimite] = useState(20);
-  const [cobrando, setCobrando] = useState<Pagamento | null>(null);
+  const [cobrandoId, setCobrandoId] = useState<string | null>(null);
+  const cobrando = pagamentos.find((p) => p.id === cobrandoId) ?? null;
+  const gerarCobranca = useProprietario((s) => s.gerarCobranca);
+  const temChavePix = useProprietario((s) => !!s.perfil.chavePix);
+  const carro = useCarro(contrato.carroId);
+  const navigate = useNavigate();
 
   const ordenados = [...pagamentos].sort((a, b) =>
     (a.vencimento ?? a.data) < (b.vencimento ?? b.data) ? 1 : -1,
@@ -295,6 +335,28 @@ function PagamentosPanel({
         </p>
       )}
 
+      {contrato.status === "ativo" && (
+        <Button
+          size="sm"
+          className="mb-2 w-full rounded-xl gradient-primary text-primary-foreground shadow-glow"
+          onClick={() => {
+            if (!temChavePix) {
+              toast("Cadastre sua chave Pix para gerar cobranças");
+              navigate({ to: "/proprietario/perfil" });
+              return;
+            }
+            // Cobrança avulsa: vence depois da última registrada, além das geradas automaticamente.
+            const ultimo = ordenados[0]?.vencimento ?? ordenados[0]?.data;
+            const novoId = gerarCobranca(contrato.id, {
+              valor: contrato.valor,
+              vencimento: proximoVencimentoManual(ultimo, contrato.periodicidade),
+            });
+            setCobrandoId(novoId);
+          }}
+        >
+          <QrCode className="mr-2 h-4 w-4" /> Gerar cobrança Pix
+        </Button>
+      )}
       {!aberto ? (
         <Button
           size="sm"
@@ -378,6 +440,7 @@ function PagamentosPanel({
                 {p.status === "pago"
                   ? `Pago em ${fmtData(p.pagoEm ?? p.data)} · ${p.forma}`
                   : `Vence em ${fmtData(p.vencimento ?? p.data)}`}
+                {p.cobradoEm && " · cobrança enviada"}
               </div>
             </div>
             <span
@@ -397,7 +460,7 @@ function PagamentosPanel({
                 variant="outline"
                 className="h-8 w-8 rounded-full"
                 aria-label="Cobrar com Pix"
-                onClick={() => setCobrando(p)}
+                onClick={() => setCobrandoId(p.id)}
               >
                 <QrCode className="h-4 w-4 text-primary" />
               </Button>
@@ -436,16 +499,12 @@ function PagamentosPanel({
           <p className="text-sm text-muted-foreground">Sem pagamentos registrados.</p>
         )}
       </div>
-      {cobrando && (
-        <PixCobranca
-          aberto
-          onFechar={() => setCobrando(null)}
-          valor={cobrando.valor}
-          identificador={cobrando.id}
-          descricao={`Aluguel de ${contrato.motoristaNome}`}
-          vencimento={cobrando.vencimento ?? cobrando.data}
-        />
-      )}
+      <CobrancaPixDialog
+        pagamento={cobrando}
+        motoristaNome={contrato.motoristaNome}
+        veiculo={carro ? `${carro.marca} ${carro.modelo}` : "veículo"}
+        onClose={() => setCobrandoId(null)}
+      />
     </div>
   );
 }

@@ -18,10 +18,10 @@ export const Route = createFileRoute("/proprietario/contratos/novo")({
 function NovoContrato() {
   const navigate = useNavigate();
   const criar = useProprietario((s) => s.criarContrato);
-  const [motoristaId, setMotoristaId] = useState(motoristas[0].id);
-  // Lista a frota do próprio dono (inclui carros recém-cadastrados); só carros livres podem receber contrato.
   const carros = useCarros();
+  // Só carros livres podem receber contrato novo (evita alugar o mesmo carro duas vezes)
   const carrosDisp = carros.filter((c) => c.status === "disponivel");
+  const [motoristaId, setMotoristaId] = useState(motoristas[0].id);
   const [carroId, setCarroId] = useState(carrosDisp[0]?.id ?? "");
   const [valor, setValor] = useState(120);
   const [periodicidade, setPeriodicidade] = useState<"diaria" | "semanal" | "mensal">("diaria");
@@ -89,6 +89,11 @@ function NovoContrato() {
               </option>
             ))}
           </select>
+          {carrosDisp.length === 0 && (
+            <p className="text-xs text-muted-foreground">
+              Todos os carros estão alugados ou em manutenção.
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">

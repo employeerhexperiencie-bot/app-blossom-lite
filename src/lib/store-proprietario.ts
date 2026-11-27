@@ -48,6 +48,9 @@ type State = {
   lembretesVeiculo: Lembrete[];
   checklists: Checklist[];
   perfil: PerfilDono;
+  // Cobrança avulsa gerada à mão pelo dono ("Gerar cobrança Pix"), além das automáticas.
+  gerarCobranca: (contratoId: string, dados: { valor: number; vencimento: string }) => string;
+  marcarCobrancaEnviada: (pagamentoId: string) => void;
 
   registrarPagamento: (id: string) => void;
   sincronizarCobrancas: () => void;
@@ -139,6 +142,36 @@ export const useProprietario = create<State>()(
       lembretesVeiculo: [],
       checklists: [],
       perfil: perfilDonoVazio,
+
+      gerarCobranca: (contratoId, { valor, vencimento }) => {
+        const id = `pg${Date.now()}`;
+        // txid do Pix: só letras e números, até 25 caracteres
+        const txid = `TL${contratoId}${Date.now().toString(36)}`
+          .replace(/[^A-Za-z0-9]/g, "")
+          .slice(0, 25);
+        set({
+          pagamentos: [
+            {
+              id,
+              contratoId,
+              valor,
+              data: vencimento,
+              vencimento,
+              forma: "Pix",
+              status: "pendente",
+              txid,
+            },
+            ...get().pagamentos,
+          ],
+        });
+        return id;
+      },
+      marcarCobrancaEnviada: (pagamentoId) =>
+        set({
+          pagamentos: get().pagamentos.map((p) =>
+            p.id === pagamentoId ? { ...p, cobradoEm: hojeISO() } : p,
+          ),
+        }),
 
       registrarPagamento: (id) =>
         set({
@@ -483,6 +516,10 @@ export const useProprietario = create<State>()(
             s.id === id ? { ...s, status: "aceita" } : s,
           ),
         });
+        // A notificação da proposta já foi tratada.
+        get()
+          .notificacoes.filter((n) => n.solicitacaoId === id)
+          .forEach((n) => get().marcarLida(n.id));
         // O contrato nasce aguardando o aceite do motorista; o carro só fica alugado depois do aceite.
         const contratoId = `ct${Date.now()}`;
         const contrato: Contrato = {
@@ -501,12 +538,17 @@ export const useProprietario = create<State>()(
         set({ contratos: [contrato, ...get().contratos] });
         return contratoId;
       },
-      recusarSolicitacao: (id) =>
+      recusarSolicitacao: (id) => {
         set({
           solicitacoes: get().solicitacoes.map((s) =>
             s.id === id ? { ...s, status: "recusada" } : s,
           ),
-        }),
+        });
+        // A notificação da proposta já foi tratada.
+        get()
+          .notificacoes.filter((n) => n.solicitacaoId === id)
+          .forEach((n) => get().marcarLida(n.id));
+      },
       motoristaAceitarContrato: (id) => {
         const contrato = get().contratos.find((c) => c.id === id);
         if (!contrato || contrato.status !== "aguardando_aceite") return;
@@ -524,6 +566,8 @@ export const useProprietario = create<State>()(
             },
           },
         });
+        // O carro foi alugado: o anúncio sai do ar.
+        get().despublicarVeiculo(contrato.carroId);
         get().addEvento({
           carroId: contrato.carroId,
           tipo: "locacao",
@@ -627,19 +671,35 @@ export const useProprietario = create<State>()(
     }),
     {
       name: "proprietario-state",
-      version: 2,
+      version: 3,
       // v2: pagamentos ganharam vencimento e histórico gerado. Mantém o que a pessoa registrou e troca os exemplos antigos.
       migrate: (persisted, versao) => {
         const estado = persisted as Partial<State>;
         if (versao < 2) {
           const exemplosAntigos = new Set(["pg1", "pg2", "pg3", "pg4", "pg5", "pg6"]);
           const registrados = (estado.pagamentos ?? []).filter((p) => !exemplosAntigos.has(p.id));
-          return {
-            ...estado,
+          // Sem "return": as migrações seguintes também precisam rodar.
+          Object.assign(estado, {
             pagamentos: [...registrados, ...pagamentosMock],
             contratos: (estado.contratos ?? contratosMock).map((c) =>
               c.id === "ct1" && !c.cobrancaDesde ? { ...c, cobrancaDesde: hojeISO() } : c,
             ),
+          });
+        }
+        // v3: a chave Pix que estava em "recebimento" (tela antiga do Perfil) passa para o perfil do dono.
+        const antigo = (
+          persisted as { recebimento?: { nome: string; cidade: string; chavePix: string } | null }
+        ).recebimento;
+        if (versao < 3 && antigo?.chavePix && !estado.perfil?.chavePix) {
+          return {
+            ...estado,
+            perfil: {
+              ...perfilDonoVazio,
+              ...estado.perfil,
+              nome: estado.perfil?.nome || antigo.nome,
+              cidade: antigo.cidade || perfilDonoVazio.cidade,
+              chavePix: antigo.chavePix,
+            },
           } as State;
         }
         return estado as State;
@@ -704,8 +764,8 @@ export function useFinanceiroPorVeiculo(): { carroId: string; receita: number; c
 export function useCarros(): Carro[] {
   const overrides = useProprietario((s) => s.carrosOverrides);
   const novos = useProprietario((s) => s.carrosNovos);
-  const base = carrosBase.map((c) => ({ ...c, ...(overrides[c.id] ?? {}) }));
-  return [...novos, ...base];
+  const aplicar = (c: Carro): Carro => ({ ...c, ...(overrides[c.id] ?? {}) });
+  return [...novos.map(aplicar), ...carrosBase.map(aplicar)];
 }
 
 export function useCarro(id: string | undefined): Carro | undefined {
@@ -713,7 +773,7 @@ export function useCarro(id: string | undefined): Carro | undefined {
   const novos = useProprietario((s) => s.carrosNovos);
   if (!id) return undefined;
   const novo = novos.find((n) => n.id === id);
-  if (novo) return novo;
+  if (novo) return { ...novo, ...(overrides[id] ?? {}) };
   const base = carrosBase.find((c) => c.id === id);
   if (!base) return undefined;
   return { ...base, ...(overrides[id] ?? {}) };

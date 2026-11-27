@@ -7,6 +7,24 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useProprietario } from "@/lib/store-proprietario";
+import { isCarPlate, isRenavam } from "validation-br";
+
+// Chassi (VIN): 17 caracteres, sem as letras I, O e Q
+const CHASSI_RE = /^[A-HJ-NPR-Z0-9]{17}$/;
+
+type Erros = Partial<Record<"marca" | "modelo" | "placa" | "chassi" | "renavam" | "ano", string>>;
+
+function validarBasico(f: { marca: string; modelo: string; placa: string; chassi: string; renavam: string; ano: number }): Erros {
+  const e: Erros = {};
+  if (!f.marca.trim()) e.marca = "Informe a marca";
+  if (!f.modelo.trim()) e.modelo = "Informe o modelo";
+  if (!isCarPlate(f.placa)) e.placa = "Placa inválida (ex.: ABC1D23 ou ABC-1234)";
+  if (f.chassi && !CHASSI_RE.test(f.chassi)) e.chassi = "Chassi deve ter 17 caracteres, sem I, O ou Q";
+  if (f.renavam && !isRenavam(f.renavam)) e.renavam = "RENAVAM inválido (11 dígitos)";
+  const anoMax = new Date().getFullYear() + 1;
+  if (!f.ano || f.ano < 1990 || f.ano > anoMax) e.ano = `Ano entre 1990 e ${anoMax}`;
+  return e;
+}
 
 export const Route = createFileRoute("/proprietario/frota/novo")({
   head: () => ({ meta: [{ title: "Cadastrar carro — TCHI LÉVA" }] }),
@@ -28,15 +46,32 @@ function Novo() {
   });
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const [mostrarErros, setMostrarErros] = useState(false);
+  const erros = validarBasico(form);
+  const temErro = Object.keys(erros).length > 0;
+  const erro = (k: keyof Erros) => (mostrarErros ? erros[k] : undefined);
+
+  function avancar() {
+    if (passo === 1 && temErro) {
+      setMostrarErros(true);
+      toast.error("Corrija os dados do veículo para continuar");
+      return;
+    }
+    setPasso((p) => (p + 1) as Passo);
+  }
 
   function submit() {
-    if (!form.marca || !form.modelo || !form.placa) {
-      toast.error("Preencha marca, modelo e placa");
+    if (temErro) {
+      setMostrarErros(true);
+      toast.error("Corrija os dados do veículo");
       setPasso(1);
       return;
     }
     const id = criarVeiculo({
-      marca: form.marca, modelo: form.modelo, ano: form.ano, placa: form.placa,
+      marca: form.marca.trim(), modelo: form.modelo.trim(), ano: form.ano, placa: form.placa,
+      cor: form.cor || undefined, combustivel: form.combustivel || undefined,
+      chassi: form.chassi || undefined, renavam: form.renavam || undefined,
+      observacoes: form.observacoes || undefined,
       diaria: form.diaria, mensal: form.mensal, caucao: form.caucao,
       km: form.km, cidade: form.cidade, seguro: form.seguro,
       proprietario: "Você",
@@ -61,14 +96,14 @@ function Novo() {
         {passo === 1 && (
           <Bloco titulo="Dados básicos">
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Marca" value={form.marca} onChange={(v) => set("marca", v)} placeholder="Chevrolet" />
-              <Field label="Modelo" value={form.modelo} onChange={(v) => set("modelo", v)} placeholder="Onix" />
-              <Field label="Ano" type="number" value={String(form.ano)} onChange={(v) => set("ano", +v)} />
+              <Field label="Marca" value={form.marca} onChange={(v) => set("marca", v)} placeholder="Chevrolet" erro={erro("marca")} />
+              <Field label="Modelo" value={form.modelo} onChange={(v) => set("modelo", v)} placeholder="Onix" erro={erro("modelo")} />
+              <Field label="Ano" type="number" value={String(form.ano)} onChange={(v) => set("ano", +v)} erro={erro("ano")} />
               <Field label="Cor" value={form.cor} onChange={(v) => set("cor", v)} placeholder="Preto" />
-              <Field label="Placa" value={form.placa} onChange={(v) => set("placa", v.toUpperCase())} placeholder="ABC-1D23" />
+              <Field label="Placa" value={form.placa} onChange={(v) => set("placa", v.toUpperCase())} placeholder="ABC1D23" erro={erro("placa")} />
               <Field label="Combustível" value={form.combustivel} onChange={(v) => set("combustivel", v)} />
-              <Field label="Chassi" value={form.chassi} onChange={(v) => set("chassi", v)} placeholder="9BW..." />
-              <Field label="Renavam" value={form.renavam} onChange={(v) => set("renavam", v)} />
+              <Field label="Chassi" value={form.chassi} onChange={(v) => set("chassi", v.toUpperCase().replace(/\s/g, ""))} placeholder="17 caracteres" erro={erro("chassi")} />
+              <Field label="Renavam" value={form.renavam} onChange={(v) => set("renavam", v.replace(/\D/g, ""))} placeholder="11 dígitos" inputMode="numeric" erro={erro("renavam")} />
               <Field label="KM atual" type="number" value={String(form.km)} onChange={(v) => set("km", +v)} />
               <Field label="Cidade" value={form.cidade} onChange={(v) => set("cidade", v)} />
               <Field label="Diária (R$)" type="number" value={String(form.diaria)} onChange={(v) => set("diaria", +v)} />
@@ -109,6 +144,9 @@ function Novo() {
             <div className="space-y-2 text-sm">
               <Row k="Veículo" v={`${form.marca || "—"} ${form.modelo || ""}`} />
               <Row k="Ano / Placa" v={`${form.ano} · ${form.placa || "—"}`} />
+              <Row k="Cor / Combustível" v={`${form.cor || "—"} · ${form.combustivel || "—"}`} />
+              <Row k="Chassi" v={form.chassi || "—"} />
+              <Row k="RENAVAM" v={form.renavam || "—"} />
               <Row k="Cidade" v={form.cidade} />
               <Row k="KM" v={form.km.toLocaleString("pt-BR")} />
               <Row k="Diária / Mensal" v={`R$ ${form.diaria} · R$ ${form.mensal}`} />
@@ -133,7 +171,7 @@ function Novo() {
           </Button>
         )}
         {passo < 4 && (
-          <Button className="flex-1 rounded-xl gradient-primary text-primary-foreground shadow-glow" onClick={() => setPasso((p) => (p + 1) as Passo)}>
+          <Button className="flex-1 rounded-xl gradient-primary text-primary-foreground shadow-glow" onClick={avancar}>
             Continuar
           </Button>
         )}
@@ -184,11 +222,12 @@ function Bloco({ titulo, children }: { titulo: string; children: React.ReactNode
   );
 }
 
-function Field({ label, value, onChange, ...rest }: { label: string; value: string; onChange: (v: string) => void } & Omit<React.ComponentProps<typeof Input>, "value" | "onChange">) {
+function Field({ label, value, onChange, erro, ...rest }: { label: string; value: string; onChange: (v: string) => void; erro?: string } & Omit<React.ComponentProps<typeof Input>, "value" | "onChange">) {
   return (
     <div className="space-y-1.5">
       <Label className="text-xs">{label}</Label>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} {...rest} />
+      <Input value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!erro} className={erro ? "border-destructive" : undefined} {...rest} />
+      {erro && <p className="text-[11px] text-destructive">{erro}</p>}
     </div>
   );
 }
