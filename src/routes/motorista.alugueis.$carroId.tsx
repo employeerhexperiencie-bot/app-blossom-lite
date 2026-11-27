@@ -35,6 +35,7 @@ import { useCarro, useProprietario, usePagamentosDoContrato } from "@/lib/store-
 import { PixCobranca } from "@/components/proprietario/PixCobranca";
 import { useCandidatoMotorista } from "@/lib/motorista-perfil";
 import { caucaoPorNivel } from "@/lib/cobrancas";
+import { atendeRequisitos, descreverRequisitos } from "@/lib/requisitos";
 
 export const Route = createFileRoute("/motorista/alugueis/$carroId")({
   loader: ({ params }) => {
@@ -64,7 +65,10 @@ function CarroDetalhe() {
   // Lê o carro pela store do proprietário, para refletir status e km atualizados por ele.
   const c = useCarro(base.id) ?? base;
   const candidato = useCandidatoMotorista();
-  const minhaCaucao = caucaoPorNivel(c.caucao, candidato.nivel);
+  const anuncio = useProprietario((s) => s.anuncios[c.id]);
+  // Condições do anúncio do dono; sem anúncio, os valores de referência do carro.
+  const minhaCaucao = caucaoPorNivel(anuncio?.caucao ?? c.caucao, candidato.nivel);
+  const elegibilidade = anuncio ? atendeRequisitos(anuncio, candidato) : { ok: true, motivos: [] };
   const enviarProposta = useProprietario((s) => s.enviarProposta);
   const aceitarContrato = useProprietario((s) => s.motoristaAceitarContrato);
   const recusarContrato = useProprietario((s) => s.motoristaRecusarContrato);
@@ -88,8 +92,10 @@ function CarroDetalhe() {
   const abertos = pagamentosContrato
     .filter((p) => p.status !== "pago")
     .sort((a, b) => ((a.vencimento ?? a.data) < (b.vencimento ?? b.data) ? -1 : 1));
-  const [valor, setValor] = useState(String(c.diaria));
-  const [periodicidade, setPeriodicidade] = useState<Contrato["periodicidade"]>("diaria");
+  const [valor, setValor] = useState(String(anuncio?.valor ?? c.diaria));
+  const [periodicidade, setPeriodicidade] = useState<Contrato["periodicidade"]>(
+    anuncio?.periodicidade ?? "diaria",
+  );
   const [duracao, setDuracao] = useState("");
   const [mensagem, setMensagem] = useState("");
 
@@ -130,8 +136,21 @@ function CarroDetalhe() {
         </h1>
 
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-          <Spec label="Diária" value={`R$ ${c.diaria}`} highlight />
-          <Spec label="Mensal" value={`R$ ${c.mensal}`} />
+          {anuncio ? (
+            <>
+              <Spec
+                label={anuncio.periodicidade === "diaria" ? "Diária" : "Mensal"}
+                value={fmtBRL(anuncio.valor)}
+                highlight
+              />
+              <Spec label="Requisitos" value={descreverRequisitos(anuncio)} />
+            </>
+          ) : (
+            <>
+              <Spec label="Diária" value={`R$ ${c.diaria}`} highlight />
+              <Spec label="Mensal" value={`R$ ${c.mensal}`} />
+            </>
+          )}
           <Spec
             label={minhaCaucao.desconto > 0 ? `Sua caução · ${candidato.nivel}` : "Caução"}
             value={`R$ ${minhaCaucao.valor}`}
@@ -239,6 +258,25 @@ function CarroDetalhe() {
             >
               Alterar proposta
             </Button>
+          </div>
+        ) : c.status !== "disponivel" || !anuncio?.publicado ? (
+          <div className="mt-6 rounded-2xl border border-border bg-muted/40 p-4 text-center text-sm text-muted-foreground">
+            Este carro não está disponível no momento.
+          </div>
+        ) : !elegibilidade.ok ? (
+          <div className="mt-6 rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
+            <div className="font-semibold">Você ainda não atende aos requisitos deste anúncio</div>
+            <ul className="mt-1 list-disc pl-5 text-xs text-muted-foreground">
+              {elegibilidade.motivos.map((m) => (
+                <li key={m}>{m}</li>
+              ))}
+            </ul>
+            <Link
+              to="/motorista/clube"
+              className="mt-2 inline-block text-xs font-semibold text-primary underline"
+            >
+              Ver como subir de nível
+            </Link>
           </div>
         ) : c.status !== "disponivel" ? (
           <div className="mt-6 rounded-2xl border border-border bg-muted/40 p-4 text-center text-sm text-muted-foreground">

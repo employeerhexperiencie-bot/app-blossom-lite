@@ -40,6 +40,8 @@ import {
   useChecklistsDoCarro,
 } from "@/lib/store-proprietario";
 import { FiltroBar } from "@/components/FiltroBar";
+import { descreverRequisitos, nomesNiveis } from "@/lib/requisitos";
+import { EnviarOficina } from "@/components/proprietario/EnviarOficina";
 
 export const Route = createFileRoute("/proprietario/frota/$carroId")({
   loader: ({ params }) => ({ carroId: params.carroId }),
@@ -158,7 +160,9 @@ function Passaporte() {
               <Info k="Marca / Modelo" v={`${c.marca} ${c.modelo}`} />
               <Info k="Ano" v={String(c.ano)} />
               <Info k="Placa" v={c.placa} />
-              {(c.cor || c.combustivel) && <Info k="Cor / Combustível" v={`${c.cor ?? "—"} · ${c.combustivel ?? "—"}`} />}
+              {(c.cor || c.combustivel) && (
+                <Info k="Cor / Combustível" v={`${c.cor ?? "—"} · ${c.combustivel ?? "—"}`} />
+              )}
               {c.renavam && <Info k="RENAVAM" v={c.renavam} />}
               {c.chassi && <Info k="Chassi" v={c.chassi} />}
               {c.observacoes && <Info k="Observações" v={c.observacoes} />}
@@ -891,11 +895,20 @@ function AnuncioBloco({
   const publicar = useProprietario((s) => s.publicarVeiculo);
   const despublicar = useProprietario((s) => s.despublicarVeiculo);
   const [aberto, setAberto] = useState(false);
-  const [periodicidade, setPeriodicidade] = useState<"diaria" | "mensal">("diaria");
-  const [valor, setValor] = useState(sugerido.diaria);
-  const [caucao, setCaucao] = useState(sugerido.caucao);
-  const [requisitos, setRequisitos] = useState("CNH B há mais de 2 anos, sem multas graves.");
-  const [obs, setObs] = useState("");
+  // Um anúncio pausado volta preenchido com as condições anteriores.
+  const [periodicidade, setPeriodicidade] = useState<"diaria" | "mensal">(
+    anuncio?.periodicidade ?? "diaria",
+  );
+  const [valor, setValor] = useState(anuncio?.valor ?? sugerido.diaria);
+  const [caucao, setCaucao] = useState(anuncio?.caucao ?? sugerido.caucao);
+  const [requisitos, setRequisitos] = useState(
+    anuncio?.requisitos ?? "CNH B há mais de 2 anos, sem multas graves.",
+  );
+  const [obs, setObs] = useState(anuncio?.observacoes ?? "");
+  const [nivelMinimo, setNivelMinimo] = useState(anuncio?.nivelMinimo ?? "");
+  const [notaMinima, setNotaMinima] = useState(
+    anuncio?.notaMinima ? String(anuncio.notaMinima) : "",
+  );
 
   if (anuncio?.publicado) {
     return (
@@ -906,6 +919,9 @@ function AnuncioBloco({
         </div>
         <div className="mt-1 text-xs text-muted-foreground">
           {fmtBRL(anuncio.valor)} · {anuncio.periodicidade} · caução {fmtBRL(anuncio.caucao)}
+        </div>
+        <div className="mt-1 text-xs text-muted-foreground">
+          Requisitos: {descreverRequisitos(anuncio)}
         </div>
         <div className="mt-3 flex gap-2">
           <Button
@@ -978,6 +994,39 @@ function AnuncioBloco({
               />
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-xs">Nível mínimo no Clube</Label>
+              <select
+                value={nivelMinimo}
+                onChange={(e) => setNivelMinimo(e.target.value)}
+                className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm"
+              >
+                <option value="">Qualquer nível</option>
+                {nomesNiveis.slice(1).map((n) => (
+                  <option key={n} value={n}>
+                    {n} ou acima
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs">Nota mínima</Label>
+              <select
+                value={notaMinima}
+                onChange={(e) => setNotaMinima(e.target.value)}
+                className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm"
+              >
+                <option value="">Qualquer nota</option>
+                <option value="4.5">4,5 ou mais</option>
+                <option value="4.7">4,7 ou mais</option>
+                <option value="4.9">4,9 ou mais</option>
+              </select>
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Motoristas Bigode e Veinho já pagam caução menor pelo benefício do Clube.
+          </p>
           <div>
             <Label className="text-xs">Requisitos</Label>
             <Textarea
@@ -1015,6 +1064,8 @@ function AnuncioBloco({
                   caucao,
                   requisitos,
                   observacoes: obs,
+                  nivelMinimo: nivelMinimo || undefined,
+                  notaMinima: notaMinima ? Number(notaMinima) : undefined,
                 });
                 toast.success("Veículo publicado no marketplace 🚀");
                 setAberto(false);
@@ -1095,6 +1146,7 @@ function KmBloco({ carroId, kmAtual }: { carroId: string; kmAtual: number }) {
 }
 
 function ItemManutencaoCard({ m, kmAtual }: { m: ItemManutencao; kmAtual: number }) {
+  const carro = useCarro(m.carroId);
   const restante = m.proximoKm ? m.proximoKm - kmAtual : null;
   const alerta = restante !== null && restante < 1000;
   return (
@@ -1119,14 +1171,7 @@ function ItemManutencaoCard({ m, kmAtual }: { m: ItemManutencao; kmAtual: number
           </span>
         )}
       </div>
-      <Button
-        size="sm"
-        variant="outline"
-        className="mt-2 w-full rounded-xl"
-        onClick={() => toast("Integração com oficinas em breve")}
-      >
-        <Wrench className="mr-2 h-4 w-4" /> Enviar para oficina parceira
-      </Button>
+      {carro && <EnviarOficina carro={carro} item={m} />}
     </div>
   );
 }

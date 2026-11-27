@@ -1,10 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, CalendarClock, FileWarning, Wrench, FileText, Bell } from "lucide-react";
+import {
+  ArrowLeft,
+  Banknote,
+  CalendarClock,
+  FileWarning,
+  Wrench,
+  FileText,
+  Bell,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { FiltroBar } from "@/components/FiltroBar";
-import { documentosMock, manutencaoMock, fmtData } from "@/lib/mock-proprietario";
-import { useProprietario, useCarros } from "@/lib/store-proprietario";
+import { documentosMock, fmtBRL, fmtData, hojeISO } from "@/lib/mock-proprietario";
+import { useProprietario, useCarros, useManutencaoTodos } from "@/lib/store-proprietario";
+import { emAberto, proximoVencimento } from "@/lib/cobrancas";
 
 export const Route = createFileRoute("/proprietario/agenda")({
   head: () => ({ meta: [{ title: "Agenda — TCHI LÉVA" }] }),
@@ -16,12 +25,17 @@ type Item = {
   titulo: string;
   sub: string;
   data: string;
-  tipo: "doc" | "manut" | "contrato" | "lembrete";
+  tipo: "doc" | "manut" | "contrato" | "lembrete" | "aluguel";
   carroId?: string;
+  contratoId?: string;
+  acao: string; // rótulo do botão que leva a resolver o item
 };
 
 function Agenda() {
   const contratos = useProprietario((s) => s.contratos);
+  const pagamentos = useProprietario((s) => s.pagamentos);
+  const manutencao = useManutencaoTodos();
+  const hoje = hojeISO();
   const lembretes = useProprietario((s) => s.lembretesVeiculo);
   const carros = useCarros();
 
@@ -39,9 +53,10 @@ function Agenda() {
         data: d.vencimento,
         tipo: "doc",
         carroId: d.carroId,
+        acao: "Renovar",
       };
     }),
-    ...manutencaoMock
+    ...manutencao
       .filter((m) => m.proximaData)
       .map<Item>((m) => {
         const carro = carros.find((c) => c.id === m.carroId);
@@ -52,6 +67,7 @@ function Agenda() {
           data: m.proximaData!,
           tipo: "manut",
           carroId: m.carroId,
+          acao: "Enviar à oficina",
         };
       }),
     ...contratos
@@ -63,6 +79,34 @@ function Agenda() {
         data: c.fim!,
         tipo: "contrato",
         carroId: c.carroId,
+        contratoId: c.id,
+        acao: "Ver contrato",
+      })),
+    // Aluguel: cobranças em aberto e o próximo vencimento dos contratos com cobrança automática.
+    ...pagamentos.filter(emAberto).map<Item>((p) => {
+      const c = contratos.find((x) => x.id === p.contratoId);
+      return {
+        id: `pg-${p.id}`,
+        titulo: `Aluguel — ${c?.motoristaNome ?? "Motorista"}`,
+        sub: `${fmtBRL(p.valor)} ${p.status === "atrasado" ? "em atraso" : "a receber"}`,
+        data: p.vencimento ?? p.data,
+        tipo: "aluguel",
+        carroId: c?.carroId,
+        contratoId: p.contratoId,
+        acao: "Cobrar",
+      };
+    }),
+    ...contratos
+      .filter((c) => c.status === "ativo" && c.cobrancaDesde)
+      .map<Item>((c) => ({
+        id: `prox-${c.id}`,
+        titulo: `Próximo aluguel — ${c.motoristaNome}`,
+        sub: fmtBRL(c.valor),
+        data: proximoVencimento(c.cobrancaDesde!, c.periodicidade, hoje),
+        tipo: "aluguel",
+        carroId: c.carroId,
+        contratoId: c.id,
+        acao: "Ver contrato",
       })),
     ...lembretes
       .filter((l) => !l.feito)
@@ -75,11 +119,11 @@ function Agenda() {
           data: l.dataAlvo,
           tipo: "lembrete",
           carroId: l.carroId,
+          acao: "Ver carro",
         };
       }),
   ].sort((a, b) => (a.data < b.data ? -1 : 1));
 
-  const hoje = new Date().toISOString().slice(0, 10);
   const em7 = addDays(hoje, 7);
   const em30 = addDays(hoje, 30);
 
@@ -112,6 +156,8 @@ function Agenda() {
       <Wrench className="h-4 w-4" />
     ) : t === "lembrete" ? (
       <Bell className="h-4 w-4" />
+    ) : t === "aluguel" ? (
+      <Banknote className="h-4 w-4" />
     ) : (
       <FileText className="h-4 w-4" />
     );
@@ -151,6 +197,7 @@ function Agenda() {
                 { value: "doc", label: "Documento" },
                 { value: "manut", label: "Manutenção" },
                 { value: "contrato", label: "Contrato" },
+                { value: "aluguel", label: "Aluguel" },
                 { value: "lembrete", label: "Lembrete" },
               ],
             },
@@ -196,15 +243,28 @@ function Agenda() {
                   {i.sub} · {fmtData(i.data)}
                 </div>
               </div>
-              <span
-                className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold ${c.cls}`}
-              >
-                {c.label}
-              </span>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${c.cls}`}>
+                  {c.label}
+                </span>
+                <span className="text-[11px] font-semibold text-primary">{i.acao} →</span>
+              </div>
             </>
           );
           const className =
             "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card";
+          if (i.contratoId) {
+            return (
+              <Link
+                key={i.id}
+                to="/proprietario/contratos/$id"
+                params={{ id: i.contratoId }}
+                className={className}
+              >
+                {body}
+              </Link>
+            );
+          }
           if (i.carroId) {
             return (
               <Link

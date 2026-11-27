@@ -23,6 +23,17 @@ type State = {
   campanhas: CampanhaOficina[];
   perfil: PerfilOficina;
 
+  // Pedido vindo do proprietário pelo Passaporte do carro.
+  solicitarServico: (dados: {
+    clienteNome: string;
+    clienteTelefone: string;
+    carroId: string;
+    veiculo: string;
+    placa: string;
+    categoria: OrdemServico["categoria"];
+    descricao: string;
+    km: number;
+  }) => string;
   aceitarSolicitacao: (id: string) => void;
   recusarSolicitacao: (id: string) => void;
   agendar: (id: string, data: string, hora: string) => void;
@@ -43,7 +54,9 @@ function patch(list: OrdemServico[], id: string, fn: (os: OrdemServico) => Ordem
   return list.map((o) => (o.id === id ? fn(o) : o));
 }
 
-const itemManutencaoPorCategoria: Partial<Record<OrdemServico["categoria"], ItemManutencao["item"]>> = {
+const itemManutencaoPorCategoria: Partial<
+  Record<OrdemServico["categoria"], ItemManutencao["item"]>
+> = {
   oleo: "Óleo",
   pneus: "Pneus",
   mecanica: "Freios",
@@ -56,12 +69,40 @@ export const useOficina = create<State>()(
       campanhas: campanhasMock,
       perfil: perfilOficinaDefault,
 
+      solicitarServico: (dados) => {
+        const id = `os${Date.now()}`;
+        const maior = Math.max(
+          1000,
+          ...get().ordens.map((o) => Number(o.codigo.replace(/\D/g, "")) || 0),
+        );
+        const nova: OrdemServico = {
+          id,
+          codigo: `OS-${maior + 1}`,
+          clienteTipo: "proprietario",
+          status: "solicitado",
+          origem: "solicitacao",
+          criadoEm: new Date().toISOString().slice(0, 10),
+          servicos: [],
+          pecas: [],
+          atualizacoes: [],
+          ...dados,
+        };
+        set({ ordens: [nova, ...get().ordens] });
+        return id;
+      },
       aceitarSolicitacao: (id) =>
         set({ ordens: patch(get().ordens, id, (o) => ({ ...o, status: "aceito" as StatusOS })) }),
       recusarSolicitacao: (id) =>
         set({ ordens: patch(get().ordens, id, (o) => ({ ...o, status: "recusado" as StatusOS })) }),
       agendar: (id, data, hora) =>
-        set({ ordens: patch(get().ordens, id, (o) => ({ ...o, status: "agendado", dataAgendada: data, hora })) }),
+        set({
+          ordens: patch(get().ordens, id, (o) => ({
+            ...o,
+            status: "agendado",
+            dataAgendada: data,
+            hora,
+          })),
+        }),
       iniciarAtendimento: (id) =>
         set({ ordens: patch(get().ordens, id, (o) => ({ ...o, status: "em_atendimento" })) }),
       salvarChecklist: (id, c) =>
@@ -74,13 +115,26 @@ export const useOficina = create<State>()(
           })),
         }),
       removerServico: (id, servicoId) =>
-        set({ ordens: patch(get().ordens, id, (o) => ({ ...o, servicos: o.servicos.filter((s) => s.id !== servicoId) })) }),
+        set({
+          ordens: patch(get().ordens, id, (o) => ({
+            ...o,
+            servicos: o.servicos.filter((s) => s.id !== servicoId),
+          })),
+        }),
       addPeca: (id, p) =>
         set({
-          ordens: patch(get().ordens, id, (o) => ({ ...o, pecas: [...o.pecas, { ...p, id: `pc${Date.now()}` }] })),
+          ordens: patch(get().ordens, id, (o) => ({
+            ...o,
+            pecas: [...o.pecas, { ...p, id: `pc${Date.now()}` }],
+          })),
         }),
       removerPeca: (id, pecaId) =>
-        set({ ordens: patch(get().ordens, id, (o) => ({ ...o, pecas: o.pecas.filter((p) => p.id !== pecaId) })) }),
+        set({
+          ordens: patch(get().ordens, id, (o) => ({
+            ...o,
+            pecas: o.pecas.filter((p) => p.id !== pecaId),
+          })),
+        }),
       enviarAtualizacao: (id, a) =>
         set({
           ordens: patch(get().ordens, id, (o) => ({
@@ -142,11 +196,13 @@ export const useOficina = create<State>()(
       criarCampanha: (c) =>
         set({ campanhas: [{ ...c, id: `cp${Date.now()}`, ativa: true }, ...get().campanhas] }),
       alternarCampanha: (id) =>
-        set({ campanhas: get().campanhas.map((c) => (c.id === id ? { ...c, ativa: !c.ativa } : c)) }),
+        set({
+          campanhas: get().campanhas.map((c) => (c.id === id ? { ...c, ativa: !c.ativa } : c)),
+        }),
       salvarPerfil: (p) => set({ perfil: { ...get().perfil, ...p } }),
     }),
-    { name: "oficina-state" }
-  )
+    { name: "oficina-state" },
+  ),
 );
 
 // -------- Selectors --------
@@ -158,7 +214,9 @@ export function useOrdem(id: string | undefined): OrdemServico | undefined {
 export function useResumoHoje() {
   const ordens = useOficina((s) => s.ordens);
   const hoje = new Date().toISOString().slice(0, 10);
-  const doDia = ordens.filter((o) => o.dataAgendada === hoje && o.status !== "recusado" && o.status !== "cancelado");
+  const doDia = ordens.filter(
+    (o) => o.dataAgendada === hoje && o.status !== "recusado" && o.status !== "cancelado",
+  );
   const agendados = doDia.filter((o) => o.status === "agendado" || o.status === "aceito");
   const emAndamento = ordens.filter((o) => o.status === "em_atendimento");
   const aguardando = ordens.filter((o) => o.status === "aguardando_aprovacao");

@@ -6,6 +6,8 @@ import { PageSection } from "@/components/AppShell";
 import { Input } from "@/components/ui/input";
 import { fmtBRL, MOTORISTA_LOGADO_ID } from "@/lib/mock-proprietario";
 import { useCarros, useProprietario } from "@/lib/store-proprietario";
+import { useCandidatoMotorista } from "@/lib/motorista-perfil";
+import { atendeRequisitos, descreverRequisitos } from "@/lib/requisitos";
 
 export const Route = createFileRoute("/motorista/alugueis/")({
   head: () => ({ meta: [{ title: "Aluguéis — TCHI LÉVA" }] }),
@@ -23,9 +25,13 @@ function Alugueis() {
       ),
     ),
   );
+  const anuncios = useProprietario((s) => s.anuncios);
+  const candidato = useCandidatoMotorista();
+  // Só aparecem carros livres com anúncio publicado pelo dono.
   const list = carros.filter(
     (c) =>
       c.status === "disponivel" &&
+      anuncios[c.id]?.publicado &&
       (!q || `${c.marca} ${c.modelo} ${c.cidade}`.toLowerCase().includes(q.toLowerCase())),
   );
 
@@ -105,12 +111,26 @@ function Alugueis() {
                   <div className="text-xs text-muted-foreground">
                     {c.ano} · {c.cidade} · {c.km.toLocaleString("pt-BR")} km
                   </div>
+                  <div
+                    className={`mt-1 text-[11px] font-semibold ${
+                      atendeRequisitos(anuncios[c.id]!, candidato).ok
+                        ? "text-success"
+                        : "text-destructive"
+                    }`}
+                  >
+                    {descreverRequisitos(anuncios[c.id]!)}
+                    {atendeRequisitos(anuncios[c.id]!, candidato).ok
+                      ? " · você atende"
+                      : " · você ainda não atende"}
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Diária
+                    {anuncios[c.id]!.periodicidade === "diaria" ? "Diária" : "Mensal"}
                   </div>
-                  <div className="font-display text-lg font-bold text-primary">R$ {c.diaria}</div>
+                  <div className="font-display text-lg font-bold text-primary">
+                    {fmtBRL(anuncios[c.id]!.valor)}
+                  </div>
                 </div>
               </div>
             </Link>

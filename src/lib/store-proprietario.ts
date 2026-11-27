@@ -26,6 +26,7 @@ import {
   hojeISO,
   fmtBRL,
   perfilDonoVazio,
+  anunciosMock,
   type PerfilDono,
 } from "./mock-proprietario";
 import type { Carro } from "./mock-data";
@@ -136,7 +137,7 @@ export const useProprietario = create<State>()(
       manutencaoOverrides: {},
       carrosOverrides: {},
       carrosNovos: [],
-      anuncios: {},
+      anuncios: anunciosMock,
       lembretes: {},
       solicitacoes: [],
       lembretesVeiculo: [],
@@ -671,7 +672,7 @@ export const useProprietario = create<State>()(
     }),
     {
       name: "proprietario-state",
-      version: 3,
+      version: 4,
       // v2: pagamentos ganharam vencimento e histórico gerado. Mantém o que a pessoa registrou e troca os exemplos antigos.
       migrate: (persisted, versao) => {
         const estado = persisted as Partial<State>;
@@ -691,8 +692,7 @@ export const useProprietario = create<State>()(
           persisted as { recebimento?: { nome: string; cidade: string; chavePix: string } | null }
         ).recebimento;
         if (versao < 3 && antigo?.chavePix && !estado.perfil?.chavePix) {
-          return {
-            ...estado,
+          Object.assign(estado, {
             perfil: {
               ...perfilDonoVazio,
               ...estado.perfil,
@@ -700,7 +700,11 @@ export const useProprietario = create<State>()(
               cidade: antigo.cidade || perfilDonoVazio.cidade,
               chavePix: antigo.chavePix,
             },
-          } as State;
+          });
+        }
+        // v4: o app do motorista passa a listar só carros anunciados; sem anúncios salvos, entram os de exemplo.
+        if (versao < 4 && Object.keys(estado.anuncios ?? {}).length === 0) {
+          Object.assign(estado, { anuncios: anunciosMock });
         }
         return estado as State;
       },

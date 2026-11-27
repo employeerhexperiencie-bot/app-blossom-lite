@@ -180,6 +180,32 @@ export type AnuncioLocacao = {
   requisitos: string;
   observacoes?: string;
   publicadoEm?: string;
+  // Requisitos ligados ao Clube TCHI LÉVA
+  nivelMinimo?: string; // nome do nível (ex.: "Calça Branca")
+  notaMinima?: number;
+};
+
+// Anúncios de exemplo: o HB20 aberto a todos e o Cronos só para motoristas Calça Branca com nota 4,7+.
+// O Corolla fica sem anúncio, para a Início mostrar um carro parado.
+export const anunciosMock: Record<string, AnuncioLocacao> = {
+  c2: {
+    publicado: true,
+    periodicidade: "diaria",
+    valor: 120,
+    caucao: 1500,
+    requisitos: "CNH B há mais de 2 anos.",
+    publicadoEm: "2026-11-10",
+  },
+  c5: {
+    publicado: true,
+    periodicidade: "diaria",
+    valor: 130,
+    caucao: 1500,
+    requisitos: "CNH B há mais de 2 anos, sem multas graves.",
+    publicadoEm: "2026-11-18",
+    nivelMinimo: "Calça Branca",
+    notaMinima: 4.7,
+  },
 };
 
 export type MotoristaCandidato = {
