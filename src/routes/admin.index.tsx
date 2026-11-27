@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { TrendingUp, Users, Car, Wrench, Store, ArrowUpRight } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { corridasDisponiveis, parceiros, lojas, motoristas, carros } from "@/lib/mock-data";
+import { fmtBRL } from "@/lib/mock-proprietario";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "KPIs — Admin | TCHI LÉVA" }] }),
@@ -22,7 +23,7 @@ function AdminKPIs() {
           <Kpi icon={Car} label="Corridas hoje" value="1.284" delta="+12%" />
           <Kpi icon={TrendingUp} label="Faturamento" value="R$ 42,8k" delta="+8%" />
           <Kpi icon={Users} label="Ativos" value="8.412" delta="+3%" />
-          <Kpi icon={ArrowUpRight} label="Ticket médio" value={`R$ ${ticket.toFixed(2)}`} delta="—" />
+          <Kpi icon={ArrowUpRight} label="Ticket médio" value={`${fmtBRL(ticket)}`} delta="—" />
         </div>
       </PageSection>
 
@@ -43,7 +44,17 @@ function AdminKPIs() {
   );
 }
 
-function Kpi({ icon: Icon, label, value, delta }: { icon: typeof TrendingUp; label: string; value: string; delta: string }) {
+function Kpi({
+  icon: Icon,
+  label,
+  value,
+  delta,
+}: {
+  icon: typeof TrendingUp;
+  label: string;
+  value: string;
+  delta: string;
+}) {
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
       <div className="flex items-center justify-between">
@@ -58,11 +69,21 @@ function Kpi({ icon: Icon, label, value, delta }: { icon: typeof TrendingUp; lab
   );
 }
 
-function MiniCount({ icon: Icon, label, value }: { icon: typeof TrendingUp; label: string; value: string | number }) {
+function MiniCount({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof TrendingUp;
+  label: string;
+  value: string | number;
+}) {
   return (
     <div className="rounded-xl border border-border bg-card p-3 shadow-card">
       <Icon className="h-4 w-4 text-muted-foreground" />
-      <div className="mt-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </div>
       <div className="font-display text-lg font-bold">{value}</div>
     </div>
   );

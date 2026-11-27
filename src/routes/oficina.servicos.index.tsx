@@ -5,7 +5,13 @@ import { PageSection } from "@/components/AppShell";
 import { FiltroBar } from "@/components/FiltroBar";
 import { Button } from "@/components/ui/button";
 import { useOficina } from "@/lib/store-oficina";
-import { categoriasServico, fmtBRL, iconeCategoria, statusOSInfo, totalOS } from "@/lib/mock-oficina";
+import {
+  categoriasServico,
+  fmtBRL,
+  iconeCategoria,
+  statusOSInfo,
+  totalOS,
+} from "@/lib/mock-oficina";
 import { toast } from "sonner";
 
 type Busca = { status?: string };
@@ -17,7 +23,10 @@ export const Route = createFileRoute("/oficina/servicos/")({
   head: () => ({
     meta: [
       { title: "Serviços — Centro de Serviços TCHI LÉVA" },
-      { name: "description", content: "Fila de ordens de serviço e solicitações do marketplace TCHI LÉVA." },
+      {
+        name: "description",
+        content: "Fila de ordens de serviço e solicitações do marketplace TCHI LÉVA.",
+      },
       { property: "og:title", content: "Serviços — Centro de Serviços TCHI LÉVA" },
       { property: "og:description", content: "Gerencie ordens de serviço do início à conclusão." },
       { property: "og:type", content: "website" },
@@ -33,7 +42,16 @@ function Servicos() {
   const aceitar = useOficina((s) => s.aceitarSolicitacao);
   const recusar = useOficina((s) => s.recusarSolicitacao);
 
-  const [aba, setAba] = useState<"fila" | "marketplace">("fila");
+  // "Novas solicitações" na Início abre aqui com status=solicitado. Se todas forem do marketplace,
+  // a aba do marketplace já abre selecionada (antes caía numa lista vazia).
+  const [aba, setAba] = useState<"fila" | "marketplace">(() => {
+    if (statusInicial !== "solicitado") return "fila";
+    const diretas = ordens.some((o) => o.status === "solicitado" && o.origem !== "marketplace");
+    const doMarketplace = ordens.some(
+      (o) => o.status === "solicitado" && o.origem === "marketplace",
+    );
+    return !diretas && doMarketplace ? "marketplace" : "fila";
+  });
   const [status, setStatus] = useState(statusInicial ?? "todos");
   const [categoria, setCategoria] = useState("todas");
   const [busca, setBusca] = useState("");
@@ -46,7 +64,13 @@ function Servicos() {
     .filter((o) => categoria === "todas" || o.categoria === categoria)
     .filter((o) => {
       const q = busca.trim().toLowerCase();
-      return !q || o.veiculo.toLowerCase().includes(q) || o.placa.toLowerCase().includes(q) || o.clienteNome.toLowerCase().includes(q) || o.codigo.toLowerCase().includes(q);
+      return (
+        !q ||
+        o.veiculo.toLowerCase().includes(q) ||
+        o.placa.toLowerCase().includes(q) ||
+        o.clienteNome.toLowerCase().includes(q) ||
+        o.codigo.toLowerCase().includes(q)
+      );
     });
 
   const ativos = (status !== "todos" ? 1 : 0) + (categoria !== "todas" ? 1 : 0) + (busca ? 1 : 0);
@@ -77,7 +101,11 @@ function Servicos() {
               onBusca={setBusca}
               buscaPlaceholder="OS, placa, veículo ou cliente"
               ativos={ativos}
-              onLimpar={() => { setStatus("todos"); setCategoria("todas"); setBusca(""); }}
+              onLimpar={() => {
+                setStatus("todos");
+                setCategoria("todas");
+                setBusca("");
+              }}
               chips={[
                 {
                   key: "status",
@@ -123,12 +151,18 @@ function Servicos() {
                     className="rounded-2xl border border-border bg-card p-4 shadow-card"
                   >
                     <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3">
-                      <div className="grid h-10 w-10 place-items-center rounded-xl bg-muted text-lg">{iconeCategoria(o.categoria)}</div>
+                      <div className="grid h-10 w-10 place-items-center rounded-xl bg-muted text-lg">
+                        {iconeCategoria(o.categoria)}
+                      </div>
                       <div className="min-w-0">
                         <div className="truncate font-semibold">{o.veiculo}</div>
-                        <div className="truncate text-xs text-muted-foreground">{o.codigo} · {o.placa} · {o.clienteNome}</div>
+                        <div className="truncate text-xs text-muted-foreground">
+                          {o.codigo} · {o.placa} · {o.clienteNome}
+                        </div>
                       </div>
-                      <span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold ${statusOSInfo[o.status].cls}`}>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold ${statusOSInfo[o.status].cls}`}
+                      >
                         {statusOSInfo[o.status].label}
                       </span>
                     </div>
@@ -153,26 +187,51 @@ function Servicos() {
           ) : (
             <div className="flex flex-col gap-3">
               {marketplace.map((o) => (
-                <div key={o.id} className="rounded-2xl border border-border bg-card p-4 shadow-card">
+                <div
+                  key={o.id}
+                  className="rounded-2xl border border-border bg-card p-4 shadow-card"
+                >
                   <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
-                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-lg">{iconeCategoria(o.categoria)}</div>
+                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-lg">
+                      {iconeCategoria(o.categoria)}
+                    </div>
                     <div className="min-w-0">
                       <div className="truncate font-semibold">{o.veiculo}</div>
-                      <div className="truncate text-xs text-muted-foreground">{o.clienteNome} · {o.placa}</div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {o.clienteNome} · {o.placa}
+                      </div>
                     </div>
                   </div>
                   <p className="mt-2 rounded-xl bg-muted/60 p-2.5 text-sm">"{o.descricao}"</p>
                   <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {o.distanciaKm} km</span>
-                    <span>Estimado {fmtBRL(o.valorEstimado ?? 0)}</span>
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" /> {(o.distanciaKm ?? 0).toLocaleString("pt-BR")}{" "}
+                      km
+                    </span>
+                    <span>
+                      {o.valorEstimado
+                        ? `Estimado ${fmtBRL(o.valorEstimado)}`
+                        : "Orçamento a definir"}
+                    </span>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
-                    <Button variant="outline" className="rounded-xl" onClick={() => { recusar(o.id); toast("Solicitação recusada."); }}>
+                    <Button
+                      variant="outline"
+                      className="rounded-xl"
+                      onClick={() => {
+                        recusar(o.id);
+                        toast("Solicitação recusada.");
+                      }}
+                    >
                       Recusar
                     </Button>
                     <Button
                       className="rounded-xl gradient-primary text-primary-foreground"
-                      onClick={() => { aceitar(o.id); toast.success("Solicitação aceita! Agende o horário."); setAba("fila"); }}
+                      onClick={() => {
+                        aceitar(o.id);
+                        toast.success("Solicitação aceita! Agende o horário.");
+                        setAba("fila");
+                      }}
                     >
                       Aceitar
                     </Button>

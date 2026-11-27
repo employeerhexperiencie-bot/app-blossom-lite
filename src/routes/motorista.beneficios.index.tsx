@@ -76,7 +76,7 @@ function Beneficios() {
                   <div className="min-w-0">
                     <div className="truncate font-semibold">{p.nome}</div>
                     <div className="truncate text-xs text-muted-foreground">
-                      {p.categoria} · {p.distanciaKm} km · {p.horario}
+                      {p.categoria} · {p.distanciaKm.toLocaleString("pt-BR")} km · {p.horario}
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1 text-xs font-semibold">

@@ -33,6 +33,10 @@ type State = {
     categoria: OrdemServico["categoria"];
     descricao: string;
     km: number;
+    // Pedidos de motoristas chegam pelo marketplace; os do proprietário, como solicitação direta.
+    clienteTipo?: OrdemServico["clienteTipo"];
+    origem?: OrdemServico["origem"];
+    distanciaKm?: number;
   }) => string;
   aceitarSolicitacao: (id: string) => void;
   recusarSolicitacao: (id: string) => void;

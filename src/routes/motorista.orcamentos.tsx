@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { orcamentosMock } from "@/lib/mock-data";
 import { useConect } from "@/lib/store";
+import { useOficina } from "@/lib/store-oficina";
+import { statusOSInfo, type OrdemServico } from "@/lib/mock-oficina";
+import { fmtBRL } from "@/lib/mock-proprietario";
 
 export const Route = createFileRoute("/motorista/orcamentos")({
   head: () => ({ meta: [{ title: "Orçamentos — Motorista | TCHI LÉVA" }] }),
@@ -21,10 +24,28 @@ function Orcamentos() {
   const [descricao, setDescricao] = useState("");
   const [sent, setSent] = useState(false);
 
+  const solicitarServico = useOficina((s) => s.solicitarServico);
+  const ordens = useOficina((s) => s.ordens);
+  const nome = useConect((s) => s.nomeUsuario);
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!servico.trim()) return;
-    enviar(servico.trim());
+    // O pedido vira uma solicitação no marketplace do Centro de Serviços.
+    const osId = solicitarServico({
+      clienteNome: nome || "Motorista TCHI LÉVA",
+      clienteTelefone: "",
+      carroId: "c1",
+      veiculo: "Chevrolet Onix 2022",
+      placa: "ABC-1D23",
+      categoria: categoriaDoServico(`${servico} ${descricao}`),
+      descricao: [servico.trim(), descricao.trim()].filter(Boolean).join(" — "),
+      km: 38000,
+      clienteTipo: "motorista",
+      origem: "marketplace",
+      distanciaKm: 1.5,
+    });
+    enviar(servico.trim(), osId);
     setServico("");
     setDescricao("");
     setSent(true);
@@ -41,7 +62,9 @@ function Orcamentos() {
             </div>
             <div>
               <h1 className="font-display text-lg font-bold">Pedir orçamento</h1>
-              <p className="text-xs text-muted-foreground">Oficinas parceiras respondem em minutos.</p>
+              <p className="text-xs text-muted-foreground">
+                Oficinas parceiras respondem em minutos.
+              </p>
             </div>
           </div>
 
@@ -67,7 +90,10 @@ function Orcamentos() {
                 rows={3}
               />
             </div>
-            <Button type="submit" className="w-full rounded-xl gradient-primary text-primary-foreground">
+            <Button
+              type="submit"
+              className="w-full rounded-xl gradient-primary text-primary-foreground"
+            >
               <Send className="mr-1.5 h-4 w-4" /> Enviar para oficinas
             </Button>
             {sent && (
@@ -86,10 +112,15 @@ function Orcamentos() {
           </h2>
           <div className="flex flex-col gap-2">
             {enviados.slice(0, 5).map((o) => (
-              <div key={o.id} className="flex items-center justify-between rounded-xl border border-border bg-card p-3 text-sm shadow-card">
+              <div
+                key={o.id}
+                className="flex items-center justify-between rounded-xl border border-border bg-card p-3 text-sm shadow-card"
+              >
                 <div>
                   <div className="font-semibold">{o.servico}</div>
-                  <div className="text-xs text-muted-foreground">{o.data} · aguardando respostas</div>
+                  <div className="text-xs text-muted-foreground">
+                    {o.data} · {situacaoPedido(ordens.find((os) => os.id === o.osId))}
+                  </div>
                 </div>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -108,17 +139,20 @@ function Orcamentos() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-semibold">{o.servico}</div>
-                  <div className="text-xs text-muted-foreground">{o.veiculo} · {o.data}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {o.veiculo} · {o.data}
+                  </div>
                 </div>
                 <StatusBadge status={o.status} />
               </div>
-              {o.descricao && (
-                <p className="mt-2 text-xs text-muted-foreground">{o.descricao}</p>
-              )}
+              {o.descricao && <p className="mt-2 text-xs text-muted-foreground">{o.descricao}</p>}
               {o.respostas.length > 0 && (
                 <div className="mt-3 space-y-2 border-t border-border pt-3">
                   {o.respostas.map((r) => (
-                    <div key={r.oficinaId} className="flex items-center justify-between rounded-xl bg-muted/50 p-2.5">
+                    <div
+                      key={r.oficinaId}
+                      className="flex items-center justify-between rounded-xl bg-muted/50 p-2.5"
+                    >
                       <div className="min-w-0">
                         <div className="truncate text-sm font-semibold">{r.oficinaNome}</div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -130,7 +164,7 @@ function Orcamentos() {
                         </div>
                       </div>
                       <div className="font-display text-base font-extrabold text-primary">
-                        R$ {r.valor.toFixed(2)}
+                        {fmtBRL(r.valor)}
                       </div>
                     </div>
                   ))}
@@ -151,5 +185,31 @@ function StatusBadge({ status }: { status: "aguardando" | "respondido" | "fechad
     fechado: { txt: "Fechado", cls: "bg-muted text-muted-foreground" },
   } as const;
   const v = map[status];
-  return <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${v.cls}`}>{v.txt}</span>;
+  return (
+    <span
+      className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${v.cls}`}
+    >
+      {v.txt}
+    </span>
+  );
+}
+
+// Tipo de serviço a partir do que o motorista escreveu.
+function categoriaDoServico(texto: string): OrdemServico["categoria"] {
+  const t = texto.toLowerCase();
+  if (/óleo|oleo|filtro/.test(t)) return "oleo";
+  if (/pneu|alinhamento|balanceamento|borrach/.test(t)) return "pneus";
+  if (/bateria|elétric|eletric|farol|lâmpada/.test(t)) return "eletrica";
+  if (/ar.condicionado|ar-condicionado|climatiza/.test(t)) return "ar";
+  if (/lava|lavagem|polimento/.test(t)) return "lava-rapido";
+  if (/funilaria|amassado|pintura|batida/.test(t)) return "funilaria";
+  return "mecanica";
+}
+
+function situacaoPedido(os?: OrdemServico): string {
+  if (!os) return "aguardando respostas";
+  if (os.status === "solicitado") return "aguardando a oficina";
+  if (os.status === "recusado" || os.status === "cancelado") return "recusado pela oficina";
+  if (os.status === "aceito") return "a oficina aceitou e vai agendar";
+  return `com a oficina · ${statusOSInfo[os.status].label.toLowerCase()}`;
 }

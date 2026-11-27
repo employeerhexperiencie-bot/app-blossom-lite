@@ -3,7 +3,8 @@ import { Clock, MapPin, ShieldAlert, Star } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { corridasDisponiveis } from "@/lib/mock-data";
-import { useConect, checkinValido } from "@/lib/store";
+import { useConect, checkinValido, corridasParaMotorista } from "@/lib/store";
+import { fmtBRL } from "@/lib/mock-proprietario";
 
 export const Route = createFileRoute("/motorista/corridas/")({
   head: () => ({ meta: [{ title: "Corridas — Motorista | TCHI LÉVA" }] }),
@@ -16,6 +17,7 @@ function Corridas() {
   const corridaAtivaId = useConect((s) => s.corridaAtivaId);
   const aceitar = useConect((s) => s.aceitarCorrida);
   const feitas = useConect((s) => s.corridasFeitasHoje);
+  const pedidos = useConect((s) => s.pedidos);
   const valido = checkinValido(checkin);
 
   if (!valido) {
@@ -59,7 +61,7 @@ function Corridas() {
     );
   }
 
-  const disponiveis = corridasDisponiveis.filter((c) => !feitas.includes(c.id));
+  const disponiveis = corridasParaMotorista(pedidos, corridasDisponiveis, feitas);
 
   return (
     <>
@@ -86,10 +88,10 @@ function Corridas() {
             <div key={c.id} className="rounded-2xl border border-border bg-card p-4 shadow-card">
               <div className="flex items-center justify-between">
                 <div className="text-xs font-medium text-muted-foreground">
-                  {c.distanciaKm} km · {c.tempoMin} min · {c.formaPagamento}
+                  {c.distanciaKm.toLocaleString("pt-BR")} km · {c.tempoMin} min · {c.formaPagamento}
                 </div>
                 <div className="font-display text-xl font-extrabold text-primary">
-                  R$ {c.valor.toFixed(2)}
+                  {fmtBRL(c.valor)}
                 </div>
               </div>
 
