@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Banknote,
+  Camera,
   CalendarClock,
   CheckCircle2,
   ClipboardCheck,
@@ -13,7 +14,10 @@ import {
   Wrench,
 } from "lucide-react";
 import { PageSection } from "@/components/AppShell";
-import { documentosMock, fmtBRL, hojeISO } from "@/lib/mock-proprietario";
+import { fmtBRL, hojeISO } from "@/lib/mock-proprietario";
+import { useOficina } from "@/lib/store-oficina";
+import { totalOS } from "@/lib/mock-oficina";
+import { situacaoVistoria } from "@/lib/vistorias";
 import {
   useCarros,
   useManutencaoTodos,
@@ -37,6 +41,10 @@ function Inicio() {
   const checklists = useProprietario((s) => s.checklists);
   const anuncios = useProprietario((s) => s.anuncios);
   const perfil = useProprietario((s) => s.perfil);
+  const documentos = useProprietario((s) => s.documentos);
+  const documentosDono = useProprietario((s) => s.documentosDono);
+  const vistorias = useProprietario((s) => s.vistorias);
+  const ordens = useOficina((s) => s.ordens);
   const manutencao = useManutencaoTodos();
   const eventos = useTodosEventos();
   const [verTodas, setVerTodas] = useState(false);
@@ -49,9 +57,31 @@ function Inicio() {
     pagamentos,
     solicitacoes,
     checklists,
-    documentos: documentosMock,
+    documentos,
     manutencao,
     anuncios,
+    documentosDono,
+    orcamentos: ordens
+      .filter(
+        (o) => o.status === "aguardando_aprovacao" && o.carroId && o.clienteTipo === "proprietario",
+      )
+      .map((o) => ({ id: o.id, carroId: o.carroId!, codigo: o.codigo, total: totalOS(o) })),
+    vistoriasPendentes: carros
+      .filter((c) => contratos.some((ct) => ct.carroId === c.id && ct.status === "ativo"))
+      .map((c) => {
+        const ultima = vistorias
+          .filter((v) => v.carroId === c.id)
+          .sort((a, b) => b.enviadaEm.localeCompare(a.enviadaEm))[0];
+        return {
+          carroId: c.id,
+          ...situacaoVistoria(
+            ultima ? { km: ultima.km, data: ultima.enviadaEm.slice(0, 10) } : undefined,
+            c.km,
+            hoje,
+          ),
+        };
+      })
+      .filter((v) => v.pendente),
   });
   const ocupacao = ocupacaoDaFrota(carros);
   const [{ receita }] = serieMensal(pagamentos, eventos, [hoje.slice(0, 7)]);
@@ -160,6 +190,8 @@ function Inicio() {
 
 const icone: Record<TipoAcao, typeof Banknote> = {
   atraso: Banknote,
+  orcamento: Wrench,
+  vistoria: Camera,
   proposta: FileText,
   checklist: ClipboardCheck,
   documento: FileWarning,
@@ -197,6 +229,12 @@ function AcaoCard({ acao }: { acao: Acao }) {
   if (d.to === "/proprietario/contratos/$id")
     return (
       <Link to={d.to} params={{ id: d.id }} className={classe}>
+        {conteudo}
+      </Link>
+    );
+  if (d.to === "/proprietario/perfil")
+    return (
+      <Link to={d.to} className={classe}>
         {conteudo}
       </Link>
     );

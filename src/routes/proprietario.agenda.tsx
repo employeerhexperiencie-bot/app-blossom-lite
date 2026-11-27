@@ -11,7 +11,7 @@ import {
 import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { FiltroBar } from "@/components/FiltroBar";
-import { documentosMock, fmtBRL, fmtData, hojeISO } from "@/lib/mock-proprietario";
+import { fmtBRL, fmtData, hojeISO } from "@/lib/mock-proprietario";
 import { useProprietario, useCarros, useManutencaoTodos } from "@/lib/store-proprietario";
 import { emAberto, proximoVencimento } from "@/lib/cobrancas";
 
@@ -37,6 +37,7 @@ function Agenda() {
   const manutencao = useManutencaoTodos();
   const hoje = hojeISO();
   const lembretes = useProprietario((s) => s.lembretesVeiculo);
+  const documentos = useProprietario((s) => s.documentos);
   const carros = useCarros();
 
   const [tipo, setTipo] = useState<string>("todos");
@@ -44,7 +45,7 @@ function Agenda() {
   const [carroId, setCarroId] = useState<string>("todos");
 
   const itens: Item[] = [
-    ...documentosMock.map<Item>((d) => {
+    ...documentos.map<Item>((d) => {
       const carro = carros.find((c) => c.id === d.carroId);
       return {
         id: `doc-${d.id}`,

@@ -28,7 +28,19 @@ import {
   perfilDonoVazio,
   anunciosMock,
   type PerfilDono,
+  type DocumentoVeiculo,
+  type DocumentoDono,
+  documentosMock,
+  statusDocumento,
 } from "./mock-proprietario";
+import {
+  DESTAQUE_ANUNCIO,
+  mensalidadePlanoFrota,
+  somarDias,
+  destaqueAtivo,
+  type LancamentoPlataforma,
+} from "./regras-proprietario";
+import { limitarFotos, validarKm, type Vistoria } from "./vistorias";
 import type { Carro } from "./mock-data";
 import { carros as carrosBase } from "./mock-data";
 import { emAberto, financeiroDoCarro, vencimentosEntre } from "./cobrancas";
@@ -49,6 +61,32 @@ type State = {
   lembretesVeiculo: Lembrete[];
   checklists: Checklist[];
   perfil: PerfilDono;
+  vistorias: Vistoria[];
+  documentos: DocumentoVeiculo[];
+  documentosDono: DocumentoDono[];
+  planoFrota: { ativo: boolean; desde?: string };
+  lancamentosPlataforma: LancamentoPlataforma[];
+
+  registrarVistoria: (
+    dados: Omit<Vistoria, "id" | "enviadaEm" | "contratoId" | "alerta">,
+  ) => { ok: true; id: string; alerta?: string } | { ok: false; erro: string };
+  salvarDocumento: (doc: {
+    id?: string;
+    carroId: string;
+    tipo: DocumentoVeiculo["tipo"];
+    vencimento: string;
+  }) => void;
+  removerDocumento: (id: string) => void;
+  salvarDocumentoDono: (doc: Omit<DocumentoDono, "id"> & { id?: string }) => void;
+  removerDocumentoDono: (id: string) => void;
+  renovarContrato: (
+    id: string,
+    condicoes?: { valor?: number; periodicidade?: Contrato["periodicidade"]; caucao?: number },
+  ) => string | undefined;
+  destacarAnuncio: (carroId: string) => boolean;
+  assinarPlanoFrota: (qtdCarros: number) => void;
+  cancelarPlanoFrota: () => void;
+  registrarLancamento: (l: Omit<LancamentoPlataforma, "id" | "data">) => void;
   // Cobrança avulsa gerada à mão pelo dono ("Gerar cobrança Pix"), além das automáticas.
   gerarCobranca: (contratoId: string, dados: { valor: number; vencimento: string }) => string;
   marcarCobrancaEnviada: (pagamentoId: string) => void;
@@ -143,6 +181,190 @@ export const useProprietario = create<State>()(
       lembretesVeiculo: [],
       checklists: [],
       perfil: perfilDonoVazio,
+      vistorias: [],
+      documentos: documentosMock,
+      documentosDono: [],
+      planoFrota: { ativo: false },
+      lancamentosPlataforma: [],
+
+      registrarVistoria: (dados) => {
+        const hoje = hojeISO();
+        const kmCarro = kmDoCarro(get(), dados.carroId);
+        const ultima = get()
+          .vistorias.filter((v) => v.carroId === dados.carroId)
+          .sort((a, b) => b.enviadaEm.localeCompare(a.enviadaEm))[0];
+        if (dados.km < kmCarro)
+          return {
+            ok: false,
+            erro: `O KM não pode ser menor que o atual do carro (${kmCarro.toLocaleString("pt-BR")} km).`,
+          };
+        // Sem vistoria anterior não há período para medir o ritmo: só vale a regra acima.
+        const res = validarKm(
+          dados.km,
+          ultima ? { km: ultima.km, data: ultima.enviadaEm.slice(0, 10) } : undefined,
+          hoje,
+        );
+        if (!res.ok) return res;
+        const contrato = get().contratos.find(
+          (c) => c.carroId === dados.carroId && c.status === "ativo",
+        );
+        const id = `vs${Date.now()}`;
+        const vistoria: Vistoria = {
+          ...dados,
+          id,
+          enviadaEm: new Date().toISOString(),
+          contratoId: contrato?.id,
+          alerta: res.alerta,
+        };
+        set({ vistorias: limitarFotos([vistoria, ...get().vistorias]) });
+        if (dados.km > kmCarro) get().atualizarKm(dados.carroId, dados.km, "checklist");
+        const pontos = [
+          dados.luzAcesa ? "luz acesa no painel" : "",
+          dados.avarias ? `avarias: ${dados.avarias}` : "",
+          res.alerta ?? "",
+        ].filter(Boolean);
+        get().addEvento({
+          carroId: dados.carroId,
+          tipo: "vistoria",
+          titulo: `Vistoria com ${dados.qtdFotos} foto${dados.qtdFotos === 1 ? "" : "s"} (${dados.enviadaPor === "motorista" ? "motorista" : "proprietário"})`,
+          descricao: pontos.length ? pontos.join(" · ") : undefined,
+          data: hoje,
+          km: dados.km,
+          origemKm: "foto",
+        });
+        if (dados.enviadaPor === "motorista" || pontos.length) {
+          get().addNotificacao({
+            tipo: "km",
+            titulo: pontos.length ? "Vistoria com pontos de atenção" : "Vistoria recebida",
+            descricao: pontos.length
+              ? pontos.join(" · ")
+              : `${dados.km.toLocaleString("pt-BR")} km, ${dados.qtdFotos} fotos.`,
+            data: "Agora",
+            urgencia: pontos.length ? "alta" : "baixa",
+            carroId: dados.carroId,
+            contratoId: contrato?.id,
+          });
+        }
+        return { ok: true, id, alerta: res.alerta };
+      },
+
+      salvarDocumento: ({ id, carroId, tipo, vencimento }) => {
+        const status = statusDocumento(vencimento, hojeISO());
+        if (id && get().documentos.some((d) => d.id === id)) {
+          set({
+            documentos: get().documentos.map((d) =>
+              d.id === id ? { ...d, tipo, vencimento, status } : d,
+            ),
+          });
+          return;
+        }
+        set({
+          documentos: [
+            { id: `dc${Date.now()}`, carroId, tipo, vencimento, status },
+            ...get().documentos,
+          ],
+        });
+      },
+      removerDocumento: (id) => set({ documentos: get().documentos.filter((d) => d.id !== id) }),
+      salvarDocumentoDono: ({ id, ...doc }) => {
+        if (id && get().documentosDono.some((d) => d.id === id)) {
+          set({
+            documentosDono: get().documentosDono.map((d) => (d.id === id ? { ...doc, id } : d)),
+          });
+          return;
+        }
+        set({ documentosDono: [{ ...doc, id: `dd${Date.now()}` }, ...get().documentosDono] });
+      },
+      removerDocumentoDono: (id) =>
+        set({ documentosDono: get().documentosDono.filter((d) => d.id !== id) }),
+
+      renovarContrato: (id, condicoes) => {
+        const antigo = get().contratos.find((c) => c.id === id);
+        if (!antigo || antigo.status !== "encerrado") return;
+        const ocupado = get().contratos.some(
+          (c) =>
+            c.carroId === antigo.carroId &&
+            (c.status === "ativo" || c.status === "aguardando_aceite" || c.status === "suspenso"),
+        );
+        if (ocupado) return;
+        const novoId = `ct${Date.now()}`;
+        const novo: Contrato = {
+          id: novoId,
+          carroId: antigo.carroId,
+          motoristaId: antigo.motoristaId,
+          motoristaNome: antigo.motoristaNome,
+          valor: condicoes?.valor ?? antigo.valor,
+          periodicidade: condicoes?.periodicidade ?? antigo.periodicidade,
+          caucao: condicoes?.caucao ?? antigo.caucao,
+          inicio: hojeISO(),
+          status: "aguardando_aceite",
+          observacoes: antigo.observacoes,
+          renovacaoDe: antigo.id,
+        };
+        set({ contratos: [novo, ...get().contratos] });
+        get().addEvento({
+          carroId: antigo.carroId,
+          tipo: "locacao",
+          titulo: `Renovação enviada para ${antigo.motoristaNome}`,
+          data: hojeISO(),
+        });
+        return novoId;
+      },
+
+      destacarAnuncio: (carroId) => {
+        const anuncio = get().anuncios[carroId];
+        const hoje = hojeISO();
+        if (!anuncio?.publicado) return false;
+        // Um destaque ainda ativo é estendido a partir do fim atual.
+        const base =
+          anuncio.destaqueAte && destaqueAtivo(anuncio.destaqueAte, hoje)
+            ? anuncio.destaqueAte
+            : hoje;
+        set({
+          anuncios: {
+            ...get().anuncios,
+            [carroId]: { ...anuncio, destaqueAte: somarDias(base, DESTAQUE_ANUNCIO.dias) },
+          },
+        });
+        get().registrarLancamento({
+          tipo: "destaque",
+          valor: DESTAQUE_ANUNCIO.preco,
+          descricao: `Destaque do anúncio por ${DESTAQUE_ANUNCIO.dias} dias`,
+          carroId,
+        });
+        get().registrarCustoAvulso({
+          carroId,
+          descricao: `Destaque do anúncio (${DESTAQUE_ANUNCIO.dias} dias)`,
+          categoria: "outro",
+          valor: DESTAQUE_ANUNCIO.preco,
+          data: hoje,
+        });
+        return true;
+      },
+
+      assinarPlanoFrota: (qtdCarros) => {
+        if (get().planoFrota.ativo) return;
+        set({ planoFrota: { ativo: true, desde: hojeISO() } });
+        const valor = mensalidadePlanoFrota(qtdCarros);
+        if (valor > 0)
+          get().registrarLancamento({
+            tipo: "plano_frota",
+            valor,
+            descricao: `Plano Frota: ${qtdCarros} carros (1ª mensalidade)`,
+          });
+      },
+      cancelarPlanoFrota: () => set({ planoFrota: { ativo: false } }),
+      registrarLancamento: (l) =>
+        set({
+          lancamentosPlataforma: [
+            {
+              ...l,
+              id: `lp${Date.now()}${Math.random().toString(36).slice(2, 6)}`,
+              data: hojeISO(),
+            },
+            ...get().lancamentosPlataforma,
+          ],
+        }),
 
       gerarCobranca: (contratoId, { valor, vencimento }) => {
         const id = `pg${Date.now()}`;
@@ -714,7 +936,7 @@ export const useProprietario = create<State>()(
 
 // -------- Selectors / helpers ----------
 
-function kmDoCarro(
+export function kmDoCarro(
   state: { carrosOverrides: Record<string, Partial<Carro>>; carrosNovos: Carro[] },
   carroId: string,
 ): number {

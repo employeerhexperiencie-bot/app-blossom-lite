@@ -74,6 +74,7 @@ function Detalhe() {
   const perfil = useProprietario((s) => s.perfil);
   const [gerandoPdf, setGerandoPdf] = useState(false);
   const publicar = useProprietario((s) => s.publicarVeiculo);
+  const motoristaAceitar = useProprietario((s) => s.motoristaAceitarContrato);
   const [aba, setAba] = useState<Aba>("geral");
   const [encerrando, setEncerrando] = useState(false);
 
@@ -112,10 +113,30 @@ function Detalhe() {
         {contrato.status === "aguardando_aceite" && (
           <div className="mt-3 flex items-start gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-3">
             <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <p className="text-xs">
-              <b>Aguardando o motorista aceitar.</b> O contrato aparece no app dele, em Aluguéis. O
-              carro só fica alugado depois do aceite.
-            </p>
+            <div className="min-w-0 text-xs">
+              <p>
+                <b>Aguardando o motorista aceitar.</b> O contrato aparece no app dele, em Aluguéis.
+                O carro só fica alugado depois do aceite.
+              </p>
+              {contrato.renovacaoDe && (
+                <>
+                  <p className="mt-1 text-muted-foreground">
+                    Renovação do contrato anterior com {contrato.motoristaNome}.
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-2 rounded-xl"
+                    onClick={() => {
+                      motoristaAceitar(contrato.id);
+                      toast.success("Renovação aceita: o contrato está ativo");
+                    }}
+                  >
+                    Motorista aceitou (registrar)
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         )}
         {contrato.status === "recusado" && (
@@ -195,6 +216,8 @@ function Detalhe() {
             </Button>
 
             {contrato.status === "encerrado" && <ResumoEncerramento contrato={contrato} />}
+
+            {contrato.status === "encerrado" && <RenovarBloco contrato={contrato} />}
 
             {contrato.status === "encerrado" && anuncio && !anuncio.publicado && (
               <Button
@@ -838,6 +861,94 @@ function EncerrarPanel({
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+/** Renovar com o mesmo motorista: mesmas condições (editáveis), sem passar pelo anúncio de novo. */
+function RenovarBloco({ contrato }: { contrato: Contrato }) {
+  const navigate = useNavigate();
+  const renovar = useProprietario((s) => s.renovarContrato);
+  const ocupado = useProprietario((s) =>
+    s.contratos.some(
+      (c) =>
+        c.carroId === contrato.carroId &&
+        c.id !== contrato.id &&
+        (c.status === "ativo" || c.status === "aguardando_aceite" || c.status === "suspenso"),
+    ),
+  );
+  const [aberto, setAberto] = useState(false);
+  const [valor, setValor] = useState(contrato.valor);
+  const [caucao, setCaucao] = useState(contrato.caucao);
+  const [periodicidade, setPeriodicidade] = useState(contrato.periodicidade);
+
+  if (ocupado) return null;
+  const nota = contrato.avaliacao?.nota;
+
+  if (!aberto)
+    return (
+      <Button variant="outline" className="w-full rounded-xl" onClick={() => setAberto(true)}>
+        Renovar com {contrato.motoristaNome.split(" ")[0]}
+        {nota ? ` (nota ${nota})` : ""}
+      </Button>
+    );
+
+  return (
+    <div className="space-y-3 rounded-2xl border border-primary/40 bg-primary/5 p-4">
+      <div className="text-sm font-semibold">Renovar com {contrato.motoristaNome}</div>
+      <div className="grid grid-cols-3 gap-2">
+        <div>
+          <Label className="text-xs">Valor (R$)</Label>
+          <Input
+            className="mt-1"
+            type="number"
+            value={valor}
+            onChange={(e) => setValor(+e.target.value)}
+          />
+        </div>
+        <div>
+          <Label className="text-xs">Período</Label>
+          <select
+            value={periodicidade}
+            onChange={(e) => setPeriodicidade(e.target.value as Contrato["periodicidade"])}
+            className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm"
+          >
+            <option value="diaria">Diária</option>
+            <option value="semanal">Semanal</option>
+            <option value="mensal">Mensal</option>
+          </select>
+        </div>
+        <div>
+          <Label className="text-xs">Caução (R$)</Label>
+          <Input
+            className="mt-1"
+            type="number"
+            value={caucao}
+            onChange={(e) => setCaucao(+e.target.value)}
+          />
+        </div>
+      </div>
+      <p className="text-[11px] text-muted-foreground">
+        O motorista recebe o contrato para aceitar. Faça o checklist de entrada de novo na entrega.
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        <Button variant="outline" className="rounded-xl" onClick={() => setAberto(false)}>
+          Cancelar
+        </Button>
+        <Button
+          className="rounded-xl gradient-primary text-primary-foreground"
+          disabled={valor <= 0}
+          onClick={() => {
+            const novo = renovar(contrato.id, { valor, periodicidade, caucao });
+            if (!novo)
+              return toast.error("Não foi possível renovar: o carro já tem outro contrato.");
+            toast.success("Renovação enviada ao motorista");
+            navigate({ to: "/proprietario/contratos/$id", params: { id: novo } });
+          }}
+        >
+          Enviar renovação
+        </Button>
+      </div>
     </div>
   );
 }

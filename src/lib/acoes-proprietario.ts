@@ -5,6 +5,7 @@ import type {
   Checklist,
   Contrato,
   DocumentoVeiculo,
+  DocumentoDono,
   ItemManutencao,
   Pagamento,
   SolicitacaoLocacao,
@@ -20,7 +21,9 @@ export type TipoAcao =
   | "manutencao"
   | "fim_contrato"
   | "aguardando_aceite"
-  | "carro_parado";
+  | "carro_parado"
+  | "orcamento"
+  | "vistoria";
 
 export type Acao = {
   id: string;
@@ -32,15 +35,18 @@ export type Acao = {
   destino:
     | { to: "/proprietario/contratos/$id"; id: string }
     | { to: "/proprietario/solicitacoes/$id"; id: string }
-    | { to: "/proprietario/frota/$carroId"; carroId: string };
+    | { to: "/proprietario/frota/$carroId"; carroId: string }
+    | { to: "/proprietario/perfil" };
 };
 
 const ORDEM: TipoAcao[] = [
   "atraso",
+  "orcamento",
   "proposta",
   "checklist",
   "documento",
   "manutencao",
+  "vistoria",
   "fim_contrato",
   "carro_parado",
   "aguardando_aceite",
@@ -60,6 +66,11 @@ export function acoesDoDia(d: {
   documentos: DocumentoVeiculo[];
   manutencao: ItemManutencao[];
   anuncios: Record<string, AnuncioLocacao>;
+  /** Orçamentos da oficina esperando o dono aprovar. */
+  orcamentos?: { id: string; carroId: string; codigo: string; total: number }[];
+  /** Carros alugados com a vistoria periódica vencida. */
+  vistoriasPendentes?: { carroId: string; motivo: string; atrasadaDias: number }[];
+  documentosDono?: DocumentoDono[];
 }): Acao[] {
   const acoes: Acao[] = [];
   const nomeCarro = (id: string) => {
@@ -198,6 +209,48 @@ export function acoesDoDia(d: {
       descricao: `${c.motoristaNome} · ${nomeCarro(c.carroId)}`,
       botao: "Ver",
       destino: { to: "/proprietario/contratos/$id", id: c.id },
+    });
+  }
+
+  // 9. Orçamentos da oficina parceira esperando aprovação.
+  for (const o of d.orcamentos ?? []) {
+    acoes.push({
+      id: `orc-${o.id}`,
+      tipo: "orcamento",
+      urgencia: "alta",
+      titulo: `Orçamento da oficina: ${brl(o.total)}`,
+      descricao: `${o.codigo} · ${nomeCarro(o.carroId)}`,
+      botao: "Aprovar",
+      destino: { to: "/proprietario/frota/$carroId", carroId: o.carroId },
+    });
+  }
+
+  // 10. Vistoria com fotos atrasada nos carros alugados.
+  for (const v of d.vistoriasPendentes ?? []) {
+    acoes.push({
+      id: `vist-${v.carroId}`,
+      tipo: "vistoria",
+      urgencia: v.atrasadaDias > 3 ? "alta" : "media",
+      titulo: "Vistoria com fotos pendente",
+      descricao: `${nomeCarro(v.carroId)} · ${v.motivo}`,
+      botao: "Ver",
+      destino: { to: "/proprietario/frota/$carroId", carroId: v.carroId },
+    });
+  }
+
+  // 11. Documentos do próprio dono vencendo em até 30 dias.
+  for (const doc of d.documentosDono ?? []) {
+    if (!doc.vencimento) continue;
+    const dias = diasEntre(d.hoje, doc.vencimento);
+    if (dias > 30) continue;
+    acoes.push({
+      id: `docdono-${doc.id}`,
+      tipo: "documento",
+      urgencia: dias < 0 ? "alta" : "media",
+      titulo: dias < 0 ? `Sua ${doc.tipo} venceu` : `Sua ${doc.tipo} vence em ${dias} dias`,
+      descricao: "Documento do proprietário",
+      botao: "Ver",
+      destino: { to: "/proprietario/perfil" },
     });
   }
 

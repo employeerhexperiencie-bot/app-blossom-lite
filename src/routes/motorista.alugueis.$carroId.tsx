@@ -157,6 +157,21 @@ function CarroDetalhe() {
           />
         </div>
 
+        <Link
+          to="/motorista/beneficios"
+          className="mt-4 block rounded-2xl border border-primary/40 bg-primary/5 p-4 text-xs"
+        >
+          <div className="font-street text-sm font-black uppercase text-primary">
+            Vantagens do Clube com este carro
+          </div>
+          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-muted-foreground">
+            <li>Caução menor para os níveis Bigode e Veinho</li>
+            <li>Descontos nas oficinas e lojas parceiras da TCHI LÉVA</li>
+            <li>Vistoria com fotos que garante a devolução da caução</li>
+          </ul>
+          <span className="mt-1 inline-block font-semibold text-primary">Ver benefícios</span>
+        </Link>
+
         <div className="mt-4 space-y-2 rounded-2xl border border-border bg-card p-4 text-sm">
           <Row icon={MapPin}>{c.cidade}</Row>
           <Row icon={Gauge}>{c.km.toLocaleString("pt-BR")} km</Row>

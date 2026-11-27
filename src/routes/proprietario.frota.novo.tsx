@@ -14,12 +14,20 @@ const CHASSI_RE = /^[A-HJ-NPR-Z0-9]{17}$/;
 
 type Erros = Partial<Record<"marca" | "modelo" | "placa" | "chassi" | "renavam" | "ano", string>>;
 
-function validarBasico(f: { marca: string; modelo: string; placa: string; chassi: string; renavam: string; ano: number }): Erros {
+function validarBasico(f: {
+  marca: string;
+  modelo: string;
+  placa: string;
+  chassi: string;
+  renavam: string;
+  ano: number;
+}): Erros {
   const e: Erros = {};
   if (!f.marca.trim()) e.marca = "Informe a marca";
   if (!f.modelo.trim()) e.modelo = "Informe o modelo";
   if (!isCarPlate(f.placa)) e.placa = "Placa inválida (ex.: ABC1D23 ou ABC-1234)";
-  if (f.chassi && !CHASSI_RE.test(f.chassi)) e.chassi = "Chassi deve ter 17 caracteres, sem I, O ou Q";
+  if (f.chassi && !CHASSI_RE.test(f.chassi))
+    e.chassi = "Chassi deve ter 17 caracteres, sem I, O ou Q";
   if (f.renavam && !isRenavam(f.renavam)) e.renavam = "RENAVAM inválido (11 dígitos)";
   const anoMax = new Date().getFullYear() + 1;
   if (!f.ano || f.ano < 1990 || f.ano > anoMax) e.ano = `Ano entre 1990 e ${anoMax}`;
@@ -38,14 +46,27 @@ function Novo() {
   const criarVeiculo = useProprietario((s) => s.criarVeiculo);
   const [passo, setPasso] = useState<Passo>(1);
   const [form, setForm] = useState({
-    marca: "", modelo: "", ano: 2024, placa: "", cor: "", combustivel: "Flex",
-    chassi: "", renavam: "", km: 0, cidade: "São Paulo",
-    diaria: 120, mensal: 2600, caucao: 1500,
-    seguro: true, observacoes: "",
-    fotos: [] as string[], docs: [] as string[],
+    marca: "",
+    modelo: "",
+    ano: 2024,
+    placa: "",
+    cor: "",
+    combustivel: "Flex",
+    chassi: "",
+    renavam: "",
+    km: 0,
+    cidade: "São Paulo",
+    diaria: 120,
+    mensal: 2600,
+    caucao: 1500,
+    seguro: true,
+    observacoes: "",
+    fotos: [] as string[],
+    docs: [] as string[],
   });
 
-  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
   const [mostrarErros, setMostrarErros] = useState(false);
   const erros = validarBasico(form);
   const temErro = Object.keys(erros).length > 0;
@@ -68,12 +89,21 @@ function Novo() {
       return;
     }
     const id = criarVeiculo({
-      marca: form.marca.trim(), modelo: form.modelo.trim(), ano: form.ano, placa: form.placa,
-      cor: form.cor || undefined, combustivel: form.combustivel || undefined,
-      chassi: form.chassi || undefined, renavam: form.renavam || undefined,
+      marca: form.marca.trim(),
+      modelo: form.modelo.trim(),
+      ano: form.ano,
+      placa: form.placa,
+      cor: form.cor || undefined,
+      combustivel: form.combustivel || undefined,
+      chassi: form.chassi || undefined,
+      renavam: form.renavam || undefined,
       observacoes: form.observacoes || undefined,
-      diaria: form.diaria, mensal: form.mensal, caucao: form.caucao,
-      km: form.km, cidade: form.cidade, seguro: form.seguro,
+      diaria: form.diaria,
+      mensal: form.mensal,
+      caucao: form.caucao,
+      km: form.km,
+      cidade: form.cidade,
+      seguro: form.seguro,
       proprietario: "Você",
       status: "disponivel",
       foto: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=400&fit=crop",
@@ -84,7 +114,10 @@ function Novo() {
 
   return (
     <div className="mx-auto min-h-screen max-w-screen-sm bg-background px-5 py-5">
-      <Link to="/proprietario/frota" className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+      <Link
+        to="/proprietario/frota"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> Voltar
       </Link>
       <h1 className="mt-4 font-street text-2xl font-black uppercase">Cadastrar carro</h1>
@@ -96,22 +129,96 @@ function Novo() {
         {passo === 1 && (
           <Bloco titulo="Dados básicos">
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Marca" value={form.marca} onChange={(v) => set("marca", v)} placeholder="Chevrolet" erro={erro("marca")} />
-              <Field label="Modelo" value={form.modelo} onChange={(v) => set("modelo", v)} placeholder="Onix" erro={erro("modelo")} />
-              <Field label="Ano" type="number" value={String(form.ano)} onChange={(v) => set("ano", +v)} erro={erro("ano")} />
-              <Field label="Cor" value={form.cor} onChange={(v) => set("cor", v)} placeholder="Preto" />
-              <Field label="Placa" value={form.placa} onChange={(v) => set("placa", v.toUpperCase())} placeholder="ABC1D23" erro={erro("placa")} />
-              <Field label="Combustível" value={form.combustivel} onChange={(v) => set("combustivel", v)} />
-              <Field label="Chassi" value={form.chassi} onChange={(v) => set("chassi", v.toUpperCase().replace(/\s/g, ""))} placeholder="17 caracteres" erro={erro("chassi")} />
-              <Field label="Renavam" value={form.renavam} onChange={(v) => set("renavam", v.replace(/\D/g, ""))} placeholder="11 dígitos" inputMode="numeric" erro={erro("renavam")} />
-              <Field label="KM atual" type="number" value={String(form.km)} onChange={(v) => set("km", +v)} />
+              <Field
+                label="Marca"
+                value={form.marca}
+                onChange={(v) => set("marca", v)}
+                placeholder="Chevrolet"
+                erro={erro("marca")}
+              />
+              <Field
+                label="Modelo"
+                value={form.modelo}
+                onChange={(v) => set("modelo", v)}
+                placeholder="Onix"
+                erro={erro("modelo")}
+              />
+              <Field
+                label="Ano"
+                type="number"
+                value={String(form.ano)}
+                onChange={(v) => set("ano", +v)}
+                erro={erro("ano")}
+              />
+              <Field
+                label="Cor"
+                value={form.cor}
+                onChange={(v) => set("cor", v)}
+                placeholder="Preto"
+              />
+              <Field
+                label="Placa"
+                value={form.placa}
+                onChange={(v) => set("placa", v.toUpperCase())}
+                placeholder="ABC1D23"
+                erro={erro("placa")}
+              />
+              <Field
+                label="Combustível"
+                value={form.combustivel}
+                onChange={(v) => set("combustivel", v)}
+              />
+              <Field
+                label="Chassi"
+                value={form.chassi}
+                onChange={(v) => set("chassi", v.toUpperCase().replace(/\s/g, ""))}
+                placeholder="17 caracteres"
+                erro={erro("chassi")}
+              />
+              <Field
+                label="Renavam"
+                value={form.renavam}
+                onChange={(v) => set("renavam", v.replace(/\D/g, ""))}
+                placeholder="11 dígitos"
+                inputMode="numeric"
+                erro={erro("renavam")}
+              />
+              <Field
+                label="KM atual"
+                type="number"
+                value={String(form.km)}
+                onChange={(v) => set("km", +v)}
+              />
               <Field label="Cidade" value={form.cidade} onChange={(v) => set("cidade", v)} />
-              <Field label="Diária (R$)" type="number" value={String(form.diaria)} onChange={(v) => set("diaria", +v)} />
-              <Field label="Mensal (R$)" type="number" value={String(form.mensal)} onChange={(v) => set("mensal", +v)} />
-              <Field label="Caução (R$)" type="number" value={String(form.caucao)} onChange={(v) => set("caucao", +v)} />
+              <Field
+                label="Diária (R$)"
+                type="number"
+                value={String(form.diaria)}
+                onChange={(v) => set("diaria", +v)}
+              />
+              <Field
+                label="Mensal (R$)"
+                type="number"
+                value={String(form.mensal)}
+                onChange={(v) => set("mensal", +v)}
+              />
+              <Field
+                label="Caução (R$)"
+                type="number"
+                value={String(form.caucao)}
+                onChange={(v) => set("caucao", +v)}
+              />
               <div className="col-span-2 flex items-center gap-2 pt-1">
-                <input id="seg" type="checkbox" checked={form.seguro} onChange={(e) => set("seguro", e.target.checked)} className="h-4 w-4" />
-                <Label htmlFor="seg" className="text-xs">Veículo com seguro ativo</Label>
+                <input
+                  id="seg"
+                  type="checkbox"
+                  checked={form.seguro}
+                  onChange={(e) => set("seguro", e.target.checked)}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="seg" className="text-xs">
+                  Veículo com seguro ativo
+                </Label>
               </div>
             </div>
           </Bloco>
@@ -119,7 +226,9 @@ function Novo() {
 
         {passo === 2 && (
           <Bloco titulo="Documentação">
-            <p className="mb-3 text-xs text-muted-foreground">Envie os documentos (preview local — sem upload real).</p>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Envie os documentos (preview local — sem upload real).
+            </p>
             <div className="grid grid-cols-2 gap-2">
               {["CRLV", "Seguro", "Licenciamento", "IPVA", "Manual", "Nota fiscal"].map((n) => (
                 <UploadBox key={n} label={n} icon="file" />
@@ -130,11 +239,15 @@ function Novo() {
 
         {passo === 3 && (
           <Bloco titulo="Fotos do veículo">
-            <p className="mb-3 text-xs text-muted-foreground">Fotos ajudam o motorista a decidir mais rápido.</p>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Fotos ajudam o motorista a decidir mais rápido.
+            </p>
             <div className="grid grid-cols-2 gap-2">
-              {["Frente", "Traseira", "Lateral esq.", "Lateral dir.", "Interior", "Painel"].map((n) => (
-                <UploadBox key={n} label={n} icon="camera" />
-              ))}
+              {["Frente", "Traseira", "Lateral esq.", "Lateral dir.", "Interior", "Painel"].map(
+                (n) => (
+                  <UploadBox key={n} label={n} icon="camera" />
+                ),
+              )}
             </div>
           </Bloco>
         )}
@@ -155,10 +268,16 @@ function Novo() {
             </div>
             <div className="mt-3 space-y-1.5">
               <Label>Observações</Label>
-              <Textarea rows={3} value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} placeholder="Ex: revisão em dia, IPVA pago..." />
+              <Textarea
+                rows={3}
+                value={form.observacoes}
+                onChange={(e) => set("observacoes", e.target.value)}
+                placeholder="Ex: revisão em dia, IPVA pago..."
+              />
             </div>
             <div className="mt-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3 text-xs">
-              Ao salvar, criaremos automaticamente o <b>Passaporte Digital</b> do veículo com Linha do tempo, Agenda, Plano de manutenção e status <b>Disponível</b>.
+              Ao salvar, criaremos automaticamente o <b>Passaporte Digital</b> do veículo com Linha
+              do tempo, Agenda, Plano de manutenção e status <b>Disponível</b>.
             </div>
           </Bloco>
         )}
@@ -166,17 +285,27 @@ function Novo() {
 
       <div className="mt-6 flex gap-2">
         {passo > 1 && (
-          <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setPasso((p) => (p - 1) as Passo)}>
+          <Button
+            variant="outline"
+            className="flex-1 rounded-xl"
+            onClick={() => setPasso((p) => (p - 1) as Passo)}
+          >
             Voltar
           </Button>
         )}
         {passo < 4 && (
-          <Button className="flex-1 rounded-xl gradient-primary text-primary-foreground shadow-glow" onClick={avancar}>
+          <Button
+            className="flex-1 rounded-xl gradient-primary text-primary-foreground shadow-glow"
+            onClick={avancar}
+          >
             Continuar
           </Button>
         )}
         {passo === 4 && (
-          <Button className="flex-1 rounded-xl gradient-primary text-primary-foreground shadow-glow" onClick={submit}>
+          <Button
+            className="flex-1 rounded-xl gradient-primary text-primary-foreground shadow-glow"
+            onClick={submit}
+          >
             <Check className="mr-2 h-4 w-4" /> Criar passaporte
           </Button>
         )}
@@ -195,16 +324,26 @@ function Stepper({ passo }: { passo: Passo }) {
         const feito = n < passo;
         return (
           <div key={l} className="flex flex-1 items-center gap-1">
-            <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-bold ${
-              feito ? "bg-success text-success-foreground" :
-              ativo ? "bg-primary text-primary-foreground" :
-              "bg-muted text-muted-foreground"
-            }`}>
+            <div
+              className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-bold ${
+                feito
+                  ? "bg-success text-success-foreground"
+                  : ativo
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+              }`}
+            >
               {feito ? "✓" : n}
             </div>
             <div className="min-w-0 flex-1">
-              <div className={`truncate text-[10px] font-semibold uppercase ${ativo ? "text-foreground" : "text-muted-foreground"}`}>{l}</div>
-              <div className={`h-0.5 w-full rounded ${feito ? "bg-success" : ativo ? "bg-primary" : "bg-muted"}`} />
+              <div
+                className={`truncate text-[10px] font-semibold uppercase ${ativo ? "text-foreground" : "text-muted-foreground"}`}
+              >
+                {l}
+              </div>
+              <div
+                className={`h-0.5 w-full rounded ${feito ? "bg-success" : ativo ? "bg-primary" : "bg-muted"}`}
+              />
             </div>
           </div>
         );
@@ -216,17 +355,34 @@ function Stepper({ passo }: { passo: Passo }) {
 function Bloco({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="mb-2 font-street text-xs font-black uppercase tracking-wider text-muted-foreground">{titulo}</h2>
+      <h2 className="mb-2 font-street text-xs font-black uppercase tracking-wider text-muted-foreground">
+        {titulo}
+      </h2>
       <div className="rounded-2xl border border-border bg-card p-3 shadow-card">{children}</div>
     </section>
   );
 }
 
-function Field({ label, value, onChange, erro, ...rest }: { label: string; value: string; onChange: (v: string) => void; erro?: string } & Omit<React.ComponentProps<typeof Input>, "value" | "onChange">) {
+function Field({
+  label,
+  value,
+  onChange,
+  erro,
+  ...rest
+}: { label: string; value: string; onChange: (v: string) => void; erro?: string } & Omit<
+  React.ComponentProps<typeof Input>,
+  "value" | "onChange"
+>) {
   return (
     <div className="space-y-1.5">
       <Label className="text-xs">{label}</Label>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!erro} className={erro ? "border-destructive" : undefined} {...rest} />
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={!!erro}
+        className={erro ? "border-destructive" : undefined}
+        {...rest}
+      />
       {erro && <p className="text-[11px] text-destructive">{erro}</p>}
     </div>
   );
@@ -247,7 +403,10 @@ function UploadBox({ label, icon }: { label: string; icon: "camera" | "file" }) 
   return (
     <button
       type="button"
-      onClick={() => { setFeito(true); toast(`${label} adicionado (mock)`); }}
+      onClick={() => {
+        setFeito(true);
+        toast(`${label} adicionado (mock)`);
+      }}
       className={`flex aspect-[4/3] flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-muted-foreground hover:border-primary/50 hover:text-primary ${
         feito ? "border-success bg-success/5 text-success" : "border-border bg-background"
       }`}

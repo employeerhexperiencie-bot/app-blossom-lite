@@ -15,6 +15,7 @@ export type EventoTipo =
   | "custo"
   | "observacao"
   | "checklist"
+  | "vistoria"
   | "outro";
 
 export type CustoCategoria =
@@ -96,6 +97,8 @@ export type Contrato = {
   cobrancaDesde?: string;
   acerto?: AcertoCaucao;
   avaliacao?: AvaliacaoMotorista;
+  // Contrato anterior com o mesmo motorista, quando é uma renovação.
+  renovacaoDe?: string;
 };
 
 // aguardando_aceite: o proprietário enviou o contrato e falta o motorista aceitar no app dele.
@@ -183,6 +186,8 @@ export type AnuncioLocacao = {
   // Requisitos ligados ao Clube TCHI LÉVA
   nivelMinimo?: string; // nome do nível (ex.: "Calça Branca")
   notaMinima?: number;
+  // Anúncio em destaque no marketplace até esta data (AAAA-MM-DD), pago pelo dono.
+  destaqueAte?: string;
 };
 
 // Anúncios de exemplo: o HB20 aberto a todos e o Cronos só para motoristas Calça Branca com nota 4,7+.
@@ -243,6 +248,23 @@ export type PerfilDono = {
   cidade: string;
   chavePix: string;
 };
+
+// Documentos do próprio dono (não do carro), com vencimento quando houver.
+export type DocumentoDono = {
+  id: string;
+  tipo: "CNH" | "Comprovante de residência" | "Contrato social" | "Procuração" | "Outro";
+  numero?: string;
+  vencimento?: string; // AAAA-MM-DD
+};
+
+/** Status de um documento pela data de vencimento: vencido, vencendo em até 30 dias ou em dia. */
+export function statusDocumento(vencimento: string, hoje: string): DocStatus {
+  if (vencimento < hoje) return "vencido";
+  const [a, m, d] = hoje.split("-").map(Number);
+  const limite = new Date(a, m - 1, d + 30, 12);
+  const lim = `${limite.getFullYear()}-${String(limite.getMonth() + 1).padStart(2, "0")}-${String(limite.getDate()).padStart(2, "0")}`;
+  return vencimento <= lim ? "vencendo" : "ok";
+}
 
 export const perfilDonoVazio: PerfilDono = {
   nome: "",
@@ -694,6 +716,7 @@ export function eventoIcone(tipo: EventoTipo): string {
     custo: "💸",
     observacao: "📝",
     checklist: "📋",
+    vistoria: "📸",
     outro: "•",
   };
   return map[tipo];

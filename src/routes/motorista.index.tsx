@@ -1,11 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, ShieldCheck, CheckCircle2, Navigation, Wrench, Car, Moon } from "lucide-react";
+import {
+  ArrowUpRight,
+  ShieldCheck,
+  CheckCircle2,
+  Navigation,
+  Wrench,
+  Car,
+  Moon,
+} from "lucide-react";
 import { PageSection } from "@/components/AppShell";
 import { HeaderMotorista } from "@/components/motorista/HeaderMotorista";
 import { CardMeuNivel } from "@/components/motorista/CardMeuNivel";
 import { ResumoDoDia } from "@/components/motorista/ResumoDoDia";
 import { CardOperacao } from "@/components/motorista/CardOperacao";
 import { CardMeuVeiculo } from "@/components/motorista/CardMeuVeiculo";
+import { AvisoVistoria } from "@/components/motorista/AvisoVistoria";
 import { CardOportunidades } from "@/components/motorista/CardOportunidades";
 import { ResumoFimDoDia } from "@/components/motorista/ResumoFimDoDia";
 import { StatusMesStrip } from "@/components/nivel/StatusMesStrip";
@@ -16,9 +25,16 @@ export const Route = createFileRoute("/motorista/")({
   head: () => ({
     meta: [
       { title: "Início — Motorista | TCHI LÉVA" },
-      { name: "description", content: "Seu nível, ganhos do dia, operação, veículo e oportunidades do ecossistema TCHI LÉVA." },
+      {
+        name: "description",
+        content:
+          "Seu nível, ganhos do dia, operação, veículo e oportunidades do ecossistema TCHI LÉVA.",
+      },
       { property: "og:title", content: "Início — Motorista | TCHI LÉVA" },
-      { property: "og:description", content: "Ganhe mais, gaste menos e evolua de nível com a TCHI LÉVA." },
+      {
+        property: "og:description",
+        content: "Ganhe mais, gaste menos e evolua de nível com a TCHI LÉVA.",
+      },
     ],
   }),
   component: Home,
@@ -55,7 +71,9 @@ function Home() {
             </div>
             <div className="min-w-0">
               <div className="font-semibold">Faça o check-in do dia</div>
-              <div className="text-xs text-muted-foreground">Selfie + 3 fotos do carro para liberar corridas.</div>
+              <div className="text-xs text-muted-foreground">
+                Selfie + 3 fotos do carro para liberar corridas.
+              </div>
             </div>
             <ArrowUpRight className="h-4 w-4 text-warning" />
           </Link>
@@ -73,7 +91,9 @@ function Home() {
             </div>
             <div className="min-w-0">
               <div className="font-semibold">Pronto para rodar</div>
-              <div className="text-xs text-muted-foreground">Check-in aprovado. Abra o mapa e comece a receber corridas.</div>
+              <div className="text-xs text-muted-foreground">
+                Check-in aprovado. Abra o mapa e comece a receber corridas.
+              </div>
             </div>
             <Navigation className="h-4 w-4 text-success" />
           </Link>
@@ -93,6 +113,7 @@ function Home() {
       </PageSection>
 
       <PageSection className="pt-0">
+        <AvisoVistoria />
         <CardMeuVeiculo />
       </PageSection>
 
@@ -125,7 +146,10 @@ function Home() {
 
 function QuickLink({ to, icon: Icon, label }: { to: string; icon: typeof Wrench; label: string }) {
   return (
-    <Link to={to} className="group flex items-center justify-between gap-2 rounded-2xl border border-border bg-card p-4 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary/40">
+    <Link
+      to={to}
+      className="group flex items-center justify-between gap-2 rounded-2xl border border-border bg-card p-4 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary/40"
+    >
       <div className="flex items-center gap-2.5">
         <div className="grid h-9 w-9 place-items-center rounded-lg bg-accent text-accent-foreground">
           <Icon className="h-4 w-4" />

@@ -112,6 +112,10 @@ export type OrdemServico = {
   pecas: Peca[];
   atualizacoes: AtualizacaoOS[];
   conclusao?: ConclusaoOS;
+  // Orçamento enviado ao cliente e a resposta dele.
+  orcamentoEnviadoEm?: string;
+  orcamentoAprovadoEm?: string;
+  orcamentoRecusadoMotivo?: string;
 };
 
 export type CatalogoServico = {

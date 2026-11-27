@@ -19,7 +19,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
-  documentosMock,
   fmtBRL,
   fmtData,
   eventoIcone,
@@ -42,6 +41,12 @@ import {
 import { FiltroBar } from "@/components/FiltroBar";
 import { descreverRequisitos, nomesNiveis } from "@/lib/requisitos";
 import { EnviarOficina } from "@/components/proprietario/EnviarOficina";
+import { OrcamentosOficina } from "@/components/proprietario/OrcamentosOficina";
+import { VidaUtilPecas } from "@/components/proprietario/VidaUtilPecas";
+import { VistoriasPainel, useSituacaoVistoria } from "@/components/proprietario/Vistoria";
+import { DocumentosCarro } from "@/components/proprietario/Documentos";
+import { DESTAQUE_ANUNCIO, destaqueAtivo, diasDesde } from "@/lib/regras-proprietario";
+import { hojeISO } from "@/lib/mock-proprietario";
 
 export const Route = createFileRoute("/proprietario/frota/$carroId")({
   loader: ({ params }) => ({ carroId: params.carroId }),
@@ -52,11 +57,19 @@ export const Route = createFileRoute("/proprietario/frota/$carroId")({
   ),
 });
 
-type Aba = "geral" | "timeline" | "documentos" | "manutencao" | "contratos" | "checklist";
+type Aba =
+  | "geral"
+  | "timeline"
+  | "vistorias"
+  | "documentos"
+  | "manutencao"
+  | "contratos"
+  | "checklist";
 
 const abas: { key: Aba; label: string }[] = [
   { key: "geral", label: "Visão geral" },
   { key: "timeline", label: "Histórico" },
+  { key: "vistorias", label: "Vistorias" },
   { key: "documentos", label: "Documentos" },
   { key: "manutencao", label: "Manutenção" },
   { key: "contratos", label: "Contratos" },
@@ -81,7 +94,6 @@ function Passaporte() {
   if (!c) throw notFound();
 
   const eventos = todosEventosDoCarro(c.id, extras);
-  const docs = documentosMock.filter((d) => d.carroId === c.id);
   const manutencao = useManutencaoDoCarro(c.id);
   const contratosVeiculo = contratos.filter((ct) => ct.carroId === c.id);
   const fin = financeiro.find((f) => f.carroId === c.id) ?? { receita: 0, custos: 0 };
@@ -151,11 +163,12 @@ function Passaporte() {
                 contratos={contratosVeiculo.length}
                 custos={fin.custos}
               />
+              <OrcamentosOficina carroId={c.id} />
               <AnuncioBloco
                 carroId={c.id}
                 sugerido={{ diaria: c.diaria, mensal: c.mensal, caucao: c.caucao }}
               />
-              <KmBloco carroId={c.id} kmAtual={c.km} />
+              <KmBloco carroId={c.id} kmAtual={c.km} onVistoria={() => setAba("vistorias")} />
               {meusLembretes.length > 0 && <LembretesBloco lembretes={meusLembretes} />}
               <Info k="Marca / Modelo" v={`${c.marca} ${c.modelo}`} />
               <Info k="Ano" v={String(c.ano)} />
@@ -178,49 +191,25 @@ function Passaporte() {
 
           {aba === "timeline" && <TimelinePanel eventos={eventos} />}
 
-          {aba === "documentos" && (
-            <div className="flex flex-col gap-2">
-              {docs.map((d) => (
-                <div
-                  key={d.id}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card"
-                >
-                  <div className="min-w-0">
-                    <div className="font-semibold">{d.tipo}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Vence em {fmtData(d.vencimento)}
-                    </div>
-                  </div>
-                  <span
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                      d.status === "ok"
-                        ? "bg-success/15 text-success"
-                        : d.status === "vencendo"
-                          ? "bg-warning/20 text-warning-foreground"
-                          : "bg-destructive/15 text-destructive"
-                    }`}
-                  >
-                    {d.status === "ok"
-                      ? "Em dia"
-                      : d.status === "vencendo"
-                        ? "Vencendo"
-                        : "Vencido"}
-                  </span>
-                </div>
-              ))}
-              {docs.length === 0 && (
-                <p className="text-sm text-muted-foreground">Nenhum documento cadastrado.</p>
-              )}
-            </div>
-          )}
+          {aba === "vistorias" && <VistoriasPainel carroId={c.id} kmAtual={c.km} />}
+
+          {aba === "documentos" && <DocumentosCarro carroId={c.id} />}
 
           {aba === "manutencao" && (
-            <ManutencaoPanel
-              carroId={c.id}
-              kmAtual={c.km}
-              itens={manutencao}
-              onNova={() => setAdicionar("manutencao")}
-            />
+            <div className="flex flex-col gap-3">
+              <OrcamentosOficina carroId={c.id} />
+              <VidaUtilPecas
+                carro={c}
+                manutencao={manutencao}
+                onRegistrar={() => setAdicionar("manutencao")}
+              />
+              <ManutencaoPanel
+                carroId={c.id}
+                kmAtual={c.km}
+                itens={manutencao}
+                onNova={() => setAdicionar("manutencao")}
+              />
+            </div>
           )}
 
           {aba === "contratos" && (
@@ -894,6 +883,7 @@ function AnuncioBloco({
   const anuncio = useProprietario((s) => s.anuncios[carroId]);
   const publicar = useProprietario((s) => s.publicarVeiculo);
   const despublicar = useProprietario((s) => s.despublicarVeiculo);
+  const destacar = useProprietario((s) => s.destacarAnuncio);
   const [aberto, setAberto] = useState(false);
   // Um anúncio pausado volta preenchido com as condições anteriores.
   const [periodicidade, setPeriodicidade] = useState<"diaria" | "mensal">(
@@ -923,6 +913,15 @@ function AnuncioBloco({
         <div className="mt-1 text-xs text-muted-foreground">
           Requisitos: {descreverRequisitos(anuncio)}
         </div>
+        {destaqueAtivo(anuncio.destaqueAte, hojeISO()) ? (
+          <div className="mt-2 rounded-xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary">
+            Em destaque até {fmtData(anuncio.destaqueAte!)}: aparece primeiro para os motoristas.
+          </div>
+        ) : (
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Carro parado custa todo dia. O destaque coloca o anúncio no topo do marketplace.
+          </p>
+        )}
         <div className="mt-3 flex gap-2">
           <Button
             size="sm"
@@ -934,6 +933,20 @@ function AnuncioBloco({
             }}
           >
             Pausar anúncio
+          </Button>
+          <Button
+            size="sm"
+            className="flex-1 rounded-xl gradient-primary text-primary-foreground"
+            onClick={() => {
+              if (destacar(carroId))
+                toast.success(
+                  `Anúncio em destaque por ${DESTAQUE_ANUNCIO.dias} dias (${fmtBRL(DESTAQUE_ANUNCIO.preco)} nos custos do carro)`,
+                );
+            }}
+          >
+            {destaqueAtivo(anuncio.destaqueAte, hojeISO())
+              ? `+${DESTAQUE_ANUNCIO.dias} dias de destaque`
+              : `Destacar · ${fmtBRL(DESTAQUE_ANUNCIO.preco)}`}
           </Button>
         </div>
       </div>
@@ -1080,31 +1093,20 @@ function AnuncioBloco({
   );
 }
 
-function KmBloco({ carroId, kmAtual }: { carroId: string; kmAtual: number }) {
-  const atualizarKm = useProprietario((s) => s.atualizarKm);
-  const addNotificacao = useProprietario((s) => s.addNotificacao);
-  const [pediu, setPediu] = useState(false);
-  const [foto, setFoto] = useState(false);
-  const [novoKm, setNovoKm] = useState(kmAtual + 500);
-
-  function pedirFoto() {
-    setPediu(true);
-    toast("Solicitação enviada ao motorista");
-    setTimeout(() => {
-      setFoto(true);
-      addNotificacao({
-        tipo: "km",
-        titulo: "Foto do painel recebida",
-        descricao: `Veículo com KM atualizado disponível para conferência`,
-        data: "Agora",
-        urgencia: "media",
-        carroId,
-      });
-    }, 1500);
-  }
-
+function KmBloco({
+  carroId,
+  kmAtual,
+  onVistoria,
+}: {
+  carroId: string;
+  kmAtual: number;
+  onVistoria: () => void;
+}) {
+  const situacao = useSituacaoVistoria(carroId, kmAtual);
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+    <div
+      className={`rounded-2xl border p-4 shadow-card ${situacao.pendente ? "border-warning/60 bg-warning/5" : "border-border bg-card"}`}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Gauge className="h-4 w-4 text-primary" />
@@ -1112,35 +1114,13 @@ function KmBloco({ carroId, kmAtual }: { carroId: string; kmAtual: number }) {
         </div>
         <div className="text-lg font-black">{kmAtual.toLocaleString("pt-BR")} km</div>
       </div>
-      {!foto && !pediu && (
-        <Button size="sm" variant="outline" className="mt-3 w-full rounded-xl" onClick={pedirFoto}>
-          <Camera className="mr-2 h-4 w-4" /> Solicitar foto do painel
-        </Button>
-      )}
-      {pediu && !foto && (
-        <p className="mt-3 text-xs text-muted-foreground">Aguardando envio do motorista...</p>
-      )}
-      {foto && (
-        <div className="mt-3 space-y-2">
-          <div className="grid aspect-[16/9] place-items-center rounded-xl border border-dashed border-border bg-background text-xs text-muted-foreground">
-            📷 Foto do painel (mock)
-          </div>
-          <div className="grid grid-cols-[1fr_auto] gap-2">
-            <Input type="number" value={novoKm} onChange={(e) => setNovoKm(+e.target.value)} />
-            <Button
-              className="rounded-xl gradient-primary text-primary-foreground"
-              onClick={() => {
-                atualizarKm(carroId, novoKm, "foto");
-                toast.success("Quilometragem atualizada");
-                setPediu(false);
-                setFoto(false);
-              }}
-            >
-              <Check className="mr-1 h-4 w-4" /> Confirmar
-            </Button>
-          </div>
-        </div>
-      )}
+      <p className="mt-1 text-xs text-muted-foreground">
+        {situacao.pendente ? "Vistoria pendente: " : ""}
+        {situacao.motivo}.
+      </p>
+      <Button size="sm" variant="outline" className="mt-3 w-full rounded-xl" onClick={onVistoria}>
+        <Camera className="mr-2 h-4 w-4" /> Vistorias com fotos
+      </Button>
     </div>
   );
 }
@@ -1148,7 +1128,10 @@ function KmBloco({ carroId, kmAtual }: { carroId: string; kmAtual: number }) {
 function ItemManutencaoCard({ m, kmAtual }: { m: ItemManutencao; kmAtual: number }) {
   const carro = useCarro(m.carroId);
   const restante = m.proximoKm ? m.proximoKm - kmAtual : null;
-  const alerta = restante !== null && restante < 1000;
+  // O item também vence pelo tempo (ex.: óleo a cada 6 meses), mesmo rodando pouco.
+  const vencidoTempo =
+    !!m.intervaloMeses && diasDesde(m.ultimaData, hojeISO()) > m.intervaloMeses * 30.4;
+  const alerta = (restante !== null && restante < 1000) || vencidoTempo;
   return (
     <div
       className={`rounded-2xl border p-3 shadow-card ${alerta ? "border-warning/60 bg-warning/5" : "border-border bg-card"}`}
@@ -1168,6 +1151,11 @@ function ItemManutencaoCard({ m, kmAtual }: { m: ItemManutencao; kmAtual: number
           <span className={alerta ? "font-semibold text-warning-foreground" : ""}>
             Próxima: {m.proximoKm.toLocaleString("pt-BR")} km
             {restante !== null && restante > 0 && ` (faltam ${restante.toLocaleString("pt-BR")})`}
+          </span>
+        )}
+        {vencidoTempo && (
+          <span className="col-span-2 font-semibold text-warning-foreground">
+            Vencido pelo tempo: troca a cada {m.intervaloMeses} meses
           </span>
         )}
       </div>

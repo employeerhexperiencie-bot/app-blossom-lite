@@ -4,7 +4,8 @@ import { Search, Shield, FileSignature } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { PageSection } from "@/components/AppShell";
 import { Input } from "@/components/ui/input";
-import { fmtBRL, MOTORISTA_LOGADO_ID } from "@/lib/mock-proprietario";
+import { fmtBRL, hojeISO, MOTORISTA_LOGADO_ID } from "@/lib/mock-proprietario";
+import { destaqueAtivo } from "@/lib/regras-proprietario";
 import { useCarros, useProprietario } from "@/lib/store-proprietario";
 import { useCandidatoMotorista } from "@/lib/motorista-perfil";
 import { atendeRequisitos, descreverRequisitos } from "@/lib/requisitos";
@@ -34,6 +35,10 @@ function Alugueis() {
       anuncios[c.id]?.publicado &&
       (!q || `${c.marca} ${c.modelo} ${c.cidade}`.toLowerCase().includes(q.toLowerCase())),
   );
+  // Anúncios em destaque (pagos pelo dono) aparecem primeiro.
+  const hoje = hojeISO();
+  const emDestaque = (id: string) => destaqueAtivo(anuncios[id]?.destaqueAte, hoje);
+  list.sort((a, b) => Number(emDestaque(b.id)) - Number(emDestaque(a.id)));
 
   return (
     <>
@@ -97,6 +102,11 @@ function Alugueis() {
                   className="h-full w-full object-cover"
                   loading="lazy"
                 />
+                {emDestaque(c.id) && (
+                  <div className="absolute left-3 top-3 rounded-full bg-primary px-2 py-1 text-[10px] font-bold uppercase text-primary-foreground shadow-glow">
+                    Destaque
+                  </div>
+                )}
                 {c.seguro && (
                   <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-card/95 px-2 py-1 text-[11px] font-semibold shadow-soft">
                     <Shield className="h-3 w-3 text-success" /> com seguro

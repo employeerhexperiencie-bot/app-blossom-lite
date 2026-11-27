@@ -15,7 +15,8 @@ import {
   type PerfilOficina,
   type StatusOS,
 } from "./mock-oficina";
-import { useProprietario } from "./store-proprietario";
+import { useProprietario, kmDoCarro } from "./store-proprietario";
+import { hojeISO } from "./mock-proprietario";
 import type { ItemManutencao } from "./mock-proprietario";
 
 type State = {
@@ -49,6 +50,10 @@ type State = {
   removerPeca: (id: string, pecaId: string) => void;
   enviarAtualizacao: (id: string, a: Omit<AtualizacaoOS, "id" | "data">) => void;
   concluirOS: (id: string, c: Omit<ConclusaoOS, "data">) => void;
+  // Orçamento: a oficina envia, o cliente (dono do carro) aprova ou recusa pelo app.
+  enviarOrcamento: (id: string) => void;
+  aprovarOrcamento: (id: string) => void;
+  recusarOrcamento: (id: string, motivo?: string) => void;
   criarCampanha: (c: Omit<CampanhaOficina, "id" | "ativa">) => void;
   alternarCampanha: (id: string) => void;
   salvarPerfil: (p: Partial<PerfilOficina>) => void;
@@ -85,7 +90,7 @@ export const useOficina = create<State>()(
           clienteTipo: "proprietario",
           status: "solicitado",
           origem: "solicitacao",
-          criadoEm: new Date().toISOString().slice(0, 10),
+          criadoEm: hojeISO(),
           servicos: [],
           pecas: [],
           atualizacoes: [],
@@ -143,16 +148,72 @@ export const useOficina = create<State>()(
         set({
           ordens: patch(get().ordens, id, (o) => ({
             ...o,
-            atualizacoes: [
-              { ...a, id: `at${Date.now()}`, data: new Date().toISOString().slice(0, 10) },
-              ...o.atualizacoes,
-            ],
+            atualizacoes: [{ ...a, id: `at${Date.now()}`, data: hojeISO() }, ...o.atualizacoes],
           })),
         }),
 
+      enviarOrcamento: (id) => {
+        const os = get().ordens.find((o) => o.id === id);
+        if (!os) return;
+        const total = totalOS(os);
+        if (total <= 0) return;
+        const data = hojeISO();
+        set({
+          ordens: patch(get().ordens, id, (o) => ({
+            ...o,
+            status: "aguardando_aprovacao",
+            valorEstimado: total,
+            orcamentoEnviadoEm: data,
+            orcamentoAprovadoEm: undefined,
+            orcamentoRecusadoMotivo: undefined,
+          })),
+        });
+        get().enviarAtualizacao(id, {
+          texto: `Orçamento enviado: ${total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`,
+          midia: "nenhum",
+        });
+        if (os.carroId && os.clienteTipo === "proprietario") {
+          useProprietario.getState().addNotificacao({
+            tipo: "manutencao",
+            titulo: `Orçamento da oficina — ${os.veiculo.split(" ").slice(0, 2).join(" ")}`,
+            descricao: `${get().perfil.nome} enviou o orçamento de ${os.codigo}: ${total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}. Aprove ou recuse no passaporte do carro.`,
+            data: "Agora",
+            urgencia: "alta",
+            carroId: os.carroId,
+          });
+        }
+      },
+      aprovarOrcamento: (id) => {
+        const os = get().ordens.find((o) => o.id === id);
+        if (!os || os.status !== "aguardando_aprovacao") return;
+        set({
+          ordens: patch(get().ordens, id, (o) => ({
+            ...o,
+            status: "em_atendimento",
+            orcamentoAprovadoEm: hojeISO(),
+          })),
+        });
+        get().enviarAtualizacao(id, { texto: "Orçamento aprovado pelo cliente.", midia: "nenhum" });
+      },
+      recusarOrcamento: (id, motivo) => {
+        const os = get().ordens.find((o) => o.id === id);
+        if (!os || os.status !== "aguardando_aprovacao") return;
+        set({
+          ordens: patch(get().ordens, id, (o) => ({
+            ...o,
+            status: "recusado",
+            orcamentoRecusadoMotivo: motivo || "Sem motivo informado",
+          })),
+        });
+        get().enviarAtualizacao(id, {
+          texto: `Orçamento recusado pelo cliente${motivo ? `: ${motivo}` : "."}`,
+          midia: "nenhum",
+        });
+      },
+
       concluirOS: (id, c) => {
         const os = get().ordens.find((o) => o.id === id);
-        const data = new Date().toISOString().slice(0, 10);
+        const data = hojeISO();
         set({
           ordens: patch(get().ordens, id, (o) => ({
             ...o,
@@ -167,6 +228,10 @@ export const useOficina = create<State>()(
         const nomesServicos = os.servicos.map((s) => s.nome).join(", ") || os.descricao;
 
         if (os.carroId) {
+          // O KM medido na entrada da oficina atualiza o carro (nunca para trás).
+          const kmEntrada = os.checklist?.km ?? 0;
+          if (kmEntrada > kmDoCarro(prop, os.carroId))
+            prop.atualizarKm(os.carroId, kmEntrada, "checklist");
           const itemMap = itemManutencaoPorCategoria[os.categoria];
           if (itemMap) {
             prop.registrarManutencao({
@@ -217,7 +282,7 @@ export function useOrdem(id: string | undefined): OrdemServico | undefined {
 
 export function useResumoHoje() {
   const ordens = useOficina((s) => s.ordens);
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = hojeISO();
   const doDia = ordens.filter(
     (o) => o.dataAgendada === hoje && o.status !== "recusado" && o.status !== "cancelado",
   );
