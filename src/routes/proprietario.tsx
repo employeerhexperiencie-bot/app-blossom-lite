@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { Car, FileText, CalendarClock, User, LayoutDashboard, Bell } from "lucide-react";
+import { useEffect } from "react";
+import { Car, FileText, User, LayoutDashboard, Bell, Wallet } from "lucide-react";
 import { AppShell, type Tab } from "@/components/AppShell";
 import { useProprietario } from "@/lib/store-proprietario";
 
@@ -9,12 +10,17 @@ const tabs: Tab[] = [
   { to: "/proprietario", label: "Início", icon: LayoutDashboard },
   { to: "/proprietario/frota", label: "Frota", icon: Car },
   { to: "/proprietario/contratos", label: "Contratos", icon: FileText },
-  { to: "/proprietario/agenda", label: "Agenda", icon: CalendarClock },
+  { to: "/proprietario/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/proprietario/perfil", label: "Perfil", icon: User },
 ];
 
 function Layout() {
   const naoLidas = useProprietario((s) => s.notificacoes.length - s.notificacoesLidas.length);
+  const sincronizarCobrancas = useProprietario((s) => s.sincronizarCobrancas);
+  // Ao abrir o app, gera as cobranças que venceram desde a última visita e marca os atrasos.
+  useEffect(() => {
+    sincronizarCobrancas();
+  }, [sincronizarCobrancas]);
   return (
     <AppShell
       title="Sua frota"

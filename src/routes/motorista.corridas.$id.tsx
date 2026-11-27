@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { corridasDisponiveis } from "@/lib/mock-data";
 import { useConect } from "@/lib/store";
 import { getNivelByViagens, progressoMock } from "@/lib/niveis";
+import { fmtBRL } from "@/lib/mock-proprietario";
 
 export const Route = createFileRoute("/motorista/corridas/$id")({
   head: () => ({ meta: [{ title: "Corrida em andamento — TCHI LÉVA" }] }),
@@ -22,7 +23,10 @@ type Fase = "a-caminho" | "em-corrida" | "finalizada";
 function CorridaDetalhe() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const corrida = corridasDisponiveis.find((c) => c.id === id);
+  const pedidos = useConect((s) => s.pedidos);
+  const iniciarViagem = useConect((s) => s.iniciarViagem);
+  // A corrida pode ser um pedido de passageiro do app ou uma das corridas de exemplo.
+  const corrida = pedidos.find((p) => p.id === id) ?? corridasDisponiveis.find((c) => c.id === id);
   const finalizar = useConect((s) => s.finalizarCorrida);
   const cancelar = useConect((s) => s.cancelarCorrida);
   const [fase, setFase] = useState<Fase>("a-caminho");
@@ -31,7 +35,9 @@ function CorridaDetalhe() {
     return (
       <PageSection>
         <p className="text-sm text-muted-foreground">Corrida não encontrada.</p>
-        <Button asChild className="mt-3"><Link to="/motorista/corridas">Voltar</Link></Button>
+        <Button asChild className="mt-3">
+          <Link to="/motorista/corridas">Voltar</Link>
+        </Button>
       </PageSection>
     );
   }
@@ -51,10 +57,10 @@ function CorridaDetalhe() {
           <p className="mt-1 text-sm text-muted-foreground">Pagamento confirmado.</p>
 
           <div className="mt-5 rounded-xl border border-border bg-card p-4 text-left">
-            <Linha label="Valor da corrida" value={`R$ ${corrida.valor.toFixed(2)}`} />
-            <Linha label={`Taxa TCHI LÉVA (${nivel.nome})`} value={`- R$ ${taxa.toFixed(2)}`} />
+            <Linha label="Valor da corrida" value={`${fmtBRL(corrida.valor)}`} />
+            <Linha label={`Taxa TCHI LÉVA (${nivel.nome})`} value={`- ${fmtBRL(taxa)}`} />
             <div className="my-2 border-t border-dashed border-border" />
-            <Linha label="Você recebeu" value={`R$ ${liquido.toFixed(2)}`} bold />
+            <Linha label="Você recebeu" value={`${fmtBRL(liquido)}`} bold />
           </div>
 
           <div className="mt-5 flex gap-2">
@@ -94,8 +100,14 @@ function CorridaDetalhe() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button size="icon" variant="outline" className="rounded-xl"><Phone className="h-4 w-4" /></Button>
-              <Button size="icon" variant="outline" className="rounded-xl border-destructive/40 text-destructive">
+              <Button size="icon" variant="outline" className="rounded-xl">
+                <Phone className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                className="rounded-xl border-destructive/40 text-destructive"
+              >
                 <ShieldAlert className="h-4 w-4" />
               </Button>
             </div>
@@ -107,9 +119,9 @@ function CorridaDetalhe() {
           </div>
 
           <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-            <Mini label="Distância" value={`${corrida.distanciaKm} km`} />
+            <Mini label="Distância" value={`${corrida.distanciaKm.toLocaleString("pt-BR")} km`} />
             <Mini label="Tempo" value={`${corrida.tempoMin} min`} />
-            <Mini label="Valor" value={`R$ ${corrida.valor.toFixed(2)}`} />
+            <Mini label="Valor" value={`${fmtBRL(corrida.valor)}`} />
           </div>
         </div>
       </PageSection>
@@ -117,7 +129,10 @@ function CorridaDetalhe() {
       <PageSection className="pt-0">
         {fase === "a-caminho" ? (
           <Button
-            onClick={() => setFase("em-corrida")}
+            onClick={() => {
+              setFase("em-corrida");
+              iniciarViagem(corrida.id);
+            }}
             size="lg"
             className="w-full rounded-xl gradient-primary text-primary-foreground shadow-glow"
           >
@@ -139,7 +154,10 @@ function CorridaDetalhe() {
           variant="ghost"
           size="sm"
           className="mt-2 w-full text-muted-foreground"
-          onClick={() => { cancelar(); navigate({ to: "/motorista/corridas" }); }}
+          onClick={() => {
+            cancelar();
+            navigate({ to: "/motorista/corridas" });
+          }}
         >
           <X className="mr-1 h-4 w-4" /> Cancelar corrida
         </Button>
@@ -173,7 +191,9 @@ function Linha({ label, value, bold }: { label: string; value: string; bold?: bo
   return (
     <div className="flex items-center justify-between py-1 text-sm">
       <span className="text-muted-foreground">{label}</span>
-      <span className={bold ? "font-display text-base font-extrabold" : "font-semibold"}>{value}</span>
+      <span className={bold ? "font-display text-base font-extrabold" : "font-semibold"}>
+        {value}
+      </span>
     </div>
   );
 }

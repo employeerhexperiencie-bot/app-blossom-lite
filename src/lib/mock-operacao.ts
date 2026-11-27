@@ -1,8 +1,15 @@
 // Operação do motorista — dados mock derivados do ecossistema TCHI LÉVA
 import { carros, ganhosDoDia, lojas, parceiros } from "./mock-data";
-import { contratosMock, pagamentosMock, manutencaoMock, documentosMock, fmtData } from "./mock-proprietario";
-import { saudePadrao } from "./mock-oficina";
+import {
+  contratosMock,
+  pagamentosMock,
+  manutencaoMock,
+  documentosMock,
+  fmtData,
+} from "./mock-proprietario";
+import { saudeDoCarro } from "./mock-oficina";
 import { economiaMes, gastoMesEmTaxas, getNivelByViagens, progressoMock } from "./niveis";
+import { isoRelativo, rotuloDia } from "./datas";
 
 export const MOTORISTA_ID = "m1";
 export const MOTORISTA_NOME = "João Silva";
@@ -36,7 +43,11 @@ export function custosDoDia(): LinhaCusto[] {
   return [
     { label: "Aluguel do veículo", valor: resumoDia.aluguelDoDia, cor: "var(--nivel-bigode)" },
     { label: "Combustível", valor: resumoDia.combustivel, cor: "var(--nivel-juvenil)" },
-    { label: "Taxas TCHI LÉVA", valor: nivel.taxaFixa * resumoDia.corridas, cor: "var(--nivel-peregrino)" },
+    {
+      label: "Taxas TCHI LÉVA",
+      valor: nivel.taxaFixa * resumoDia.corridas,
+      cor: "var(--nivel-peregrino)",
+    },
     { label: "Alimentação", valor: resumoDia.alimentacao, cor: "var(--nivel-calca-branca)" },
   ];
 }
@@ -94,17 +105,24 @@ export function operacaoMes() {
   };
 }
 
-export type HistoricoDia = { data: string; label: string; receita: number; custos: number; corridas: number };
+export type HistoricoDia = {
+  data: string;
+  label: string;
+  receita: number;
+  custos: number;
+  corridas: number;
+};
 
+// Últimos 8 dias até hoje (datas relativas, para o histórico não envelhecer).
 export const historicoFinanceiro: HistoricoDia[] = [
-  { data: "2026-08-02", label: "Hoje", receita: 287.5, custos: 205.4, corridas: 12 },
-  { data: "2026-08-01", label: "Ontem", receita: 342.1, custos: 218.9, corridas: 15 },
-  { data: "2026-07-31", label: "Sex", receita: 398.7, custos: 241.2, corridas: 18 },
-  { data: "2026-07-30", label: "Qui", receita: 264.3, custos: 196.5, corridas: 11 },
-  { data: "2026-07-29", label: "Qua", receita: 311.9, custos: 208.7, corridas: 14 },
-  { data: "2026-07-28", label: "Ter", receita: 205.4, custos: 178.2, corridas: 9 },
-  { data: "2026-07-27", label: "Seg", receita: 356.8, custos: 226.4, corridas: 16 },
-  { data: "2026-07-26", label: "Dom", receita: 421.5, custos: 249.8, corridas: 19 },
+  { data: isoRelativo(-0), label: rotuloDia(0), receita: 287.5, custos: 205.4, corridas: 12 },
+  { data: isoRelativo(-1), label: rotuloDia(1), receita: 342.1, custos: 218.9, corridas: 15 },
+  { data: isoRelativo(-2), label: rotuloDia(2), receita: 398.7, custos: 241.2, corridas: 18 },
+  { data: isoRelativo(-3), label: rotuloDia(3), receita: 264.3, custos: 196.5, corridas: 11 },
+  { data: isoRelativo(-4), label: rotuloDia(4), receita: 311.9, custos: 208.7, corridas: 14 },
+  { data: isoRelativo(-5), label: rotuloDia(5), receita: 205.4, custos: 178.2, corridas: 9 },
+  { data: isoRelativo(-6), label: rotuloDia(6), receita: 356.8, custos: 226.4, corridas: 16 },
+  { data: isoRelativo(-7), label: rotuloDia(7), receita: 421.5, custos: 249.8, corridas: 19 },
 ];
 
 /* ---------- Veículo do motorista (alugado via módulo Proprietário) ---------- */
@@ -112,7 +130,9 @@ export const historicoFinanceiro: HistoricoDia[] = [
 export type VeiculoMotorista = ReturnType<typeof veiculoDoMotorista>;
 
 export function veiculoDoMotorista() {
-  const contrato = contratosMock.find((c) => c.motoristaId === MOTORISTA_ID && c.status === "ativo");
+  const contrato = contratosMock.find(
+    (c) => c.motoristaId === MOTORISTA_ID && c.status === "ativo",
+  );
   const carro = carros.find((c) => c.id === (contrato?.carroId ?? "c1"))!;
   const pagamentos = pagamentosMock.filter((p) => p.contratoId === contrato?.id);
   const proximoPagamento = pagamentos.find((p) => p.status !== "pago") ?? pagamentos[0];
@@ -122,20 +142,24 @@ export function veiculoDoMotorista() {
   const proximaManutencao = manutencoes[0];
   const documentos = documentosMock.filter((d) => d.carroId === carro.id);
   const pendencias = documentos.filter((d) => d.status !== "ok");
-  const saude = saudePadrao(carro.km);
+  const saude = saudeDoCarro(carro.km, manutencoes);
   return {
     alugado: !!contrato,
     carro,
     contrato,
     proximoPagamento,
     proximaManutencao,
-    kmParaManutencao: proximaManutencao?.proximoKm ? Math.max(0, proximaManutencao.proximoKm - carro.km) : null,
+    kmParaManutencao: proximaManutencao?.proximoKm
+      ? Math.max(0, proximaManutencao.proximoKm - carro.km)
+      : null,
     documentos,
     pendencias,
     saude,
     proprietario: carro.proprietario,
     mensagens: 2,
-    proximaDataManutencao: proximaManutencao?.proximaData ? fmtData(proximaManutencao.proximaData) : null,
+    proximaDataManutencao: proximaManutencao?.proximaData
+      ? fmtData(proximaManutencao.proximaData)
+      : null,
   };
 }
 
@@ -198,7 +222,14 @@ export function oportunidadesMotorista(): OportunidadeMotorista[] {
 
 export const areasDemanda = [
   { id: "ad1", nome: "Terminal Grajaú", nivel: "alta" as const, x: 28, y: 34, multiplicador: 1.4 },
-  { id: "ad2", nome: "Parque Residencial", nivel: "media" as const, x: 62, y: 25, multiplicador: 1.2 },
+  {
+    id: "ad2",
+    nome: "Parque Residencial",
+    nivel: "media" as const,
+    x: 62,
+    y: 25,
+    multiplicador: 1.2,
+  },
   { id: "ad3", nome: "Av. Dona Belmira", nivel: "alta" as const, x: 70, y: 62, multiplicador: 1.5 },
   { id: "ad4", nome: "Interlagos", nivel: "media" as const, x: 36, y: 72, multiplicador: 1.15 },
 ];

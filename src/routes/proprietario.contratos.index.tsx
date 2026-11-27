@@ -4,8 +4,14 @@ import { useMemo, useState } from "react";
 import { PageSection } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { FiltroBar } from "@/components/FiltroBar";
-import { fmtBRL, fmtData } from "@/lib/mock-proprietario";
+import {
+  fmtBRL,
+  fmtData,
+  statusContratoClasse,
+  statusContratoLabel,
+} from "@/lib/mock-proprietario";
 import { useProprietario, useCarros } from "@/lib/store-proprietario";
+import { ContratosNav } from "@/components/proprietario/ContratosNav";
 
 export const Route = createFileRoute("/proprietario/contratos/")({
   head: () => ({ meta: [{ title: "Contratos — TCHI LÉVA" }] }),
@@ -14,7 +20,9 @@ export const Route = createFileRoute("/proprietario/contratos/")({
 
 function Contratos() {
   const contratos = useProprietario((s) => s.contratos);
+  const solicitacoes = useProprietario((s) => s.solicitacoes);
   const carros = useCarros();
+  const propostas = solicitacoes.filter((s) => s.status === "pendente");
   const [status, setStatus] = useState<string>("todos");
   const [carroId, setCarroId] = useState<string>("todos");
   const [busca, setBusca] = useState("");
@@ -32,11 +40,44 @@ function Contratos() {
     });
   }, [contratos, status, carroId, busca, faixa]);
 
-  const ativos = (status !== "todos" ? 1 : 0) + (carroId !== "todos" ? 1 : 0) + (faixa !== "todos" ? 1 : 0);
+  const ativos =
+    (status !== "todos" ? 1 : 0) + (carroId !== "todos" ? 1 : 0) + (faixa !== "todos" ? 1 : 0);
 
   return (
     <>
       <PageSection>
+        <ContratosNav atual="contratos" />
+        {propostas.length > 0 && (
+          <div className="mb-4">
+            <h2 className="mb-2 font-street text-xs font-black uppercase tracking-wider text-muted-foreground">
+              Propostas esperando resposta
+            </h2>
+            <div className="flex flex-col gap-2">
+              {propostas.map((s) => {
+                const carro = carros.find((c) => c.id === s.carroId);
+                return (
+                  <Link
+                    key={s.id}
+                    to="/proprietario/solicitacoes/$id"
+                    params={{ id: s.id }}
+                    className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold">
+                        {s.candidato?.nome ?? "Motorista"}
+                      </div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {carro ? `${carro.marca} ${carro.modelo}` : "Carro"}
+                        {s.valorProposto != null ? ` · ${fmtBRL(s.valorProposto)}` : ""}
+                      </div>
+                    </div>
+                    <span className="text-xs font-semibold text-primary">Responder</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <Link to="/proprietario/contratos/novo">
           <Button className="w-full rounded-xl gradient-primary text-primary-foreground shadow-glow">
             <Plus className="mr-2 h-4 w-4" /> Novo contrato
@@ -48,26 +89,41 @@ function Contratos() {
             onBusca={setBusca}
             buscaPlaceholder="Buscar motorista..."
             ativos={ativos}
-            onLimpar={() => { setStatus("todos"); setCarroId("todos"); setBusca(""); setFaixa("todos"); }}
+            onLimpar={() => {
+              setStatus("todos");
+              setCarroId("todos");
+              setBusca("");
+              setFaixa("todos");
+            }}
             chips={[
               {
-                key: "st", label: "Status", value: status, onChange: setStatus,
+                key: "st",
+                label: "Status",
+                value: status,
+                onChange: setStatus,
                 options: [
                   { value: "todos", label: "Todos" },
+                  { value: "aguardando_aceite", label: "Aguardando aceite" },
                   { value: "ativo", label: "Ativo" },
                   { value: "suspenso", label: "Suspenso" },
                   { value: "encerrado", label: "Encerrado" },
                 ],
               },
               {
-                key: "car", label: "Veículo", value: carroId, onChange: setCarroId,
+                key: "car",
+                label: "Veículo",
+                value: carroId,
+                onChange: setCarroId,
                 options: [
                   { value: "todos", label: "Todos" },
                   ...carros.map((c) => ({ value: c.id, label: `${c.marca} ${c.modelo}` })),
                 ],
               },
               {
-                key: "fx", label: "Valor", value: faixa, onChange: setFaixa,
+                key: "fx",
+                label: "Valor",
+                value: faixa,
+                onChange: setFaixa,
                 options: [
                   { value: "todos", label: "Todos" },
                   { value: "ate100", label: "Até R$100" },
@@ -94,16 +150,17 @@ function Contratos() {
                 <div className="min-w-0">
                   <div className="truncate font-semibold">{ct.motoristaNome}</div>
                   <div className="truncate text-xs text-muted-foreground">
-                    {carro ? `${carro.marca} ${carro.modelo}` : "—"} · {fmtBRL(ct.valor)} / {ct.periodicidade}
+                    {carro ? `${carro.marca} ${carro.modelo}` : "—"} · {fmtBRL(ct.valor)} /{" "}
+                    {ct.periodicidade}
                   </div>
-                  <div className="text-[10px] uppercase text-muted-foreground">Desde {fmtData(ct.inicio)}</div>
+                  <div className="text-[10px] uppercase text-muted-foreground">
+                    Desde {fmtData(ct.inicio)}
+                  </div>
                 </div>
-                <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
-                  ct.status === "ativo" ? "bg-success/15 text-success" :
-                  ct.status === "suspenso" ? "bg-warning/20 text-warning-foreground" :
-                  "bg-muted text-muted-foreground"
-                }`}>
-                  {ct.status}
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusContratoClasse[ct.status]}`}
+                >
+                  {statusContratoLabel[ct.status]}
                 </span>
               </Link>
             );

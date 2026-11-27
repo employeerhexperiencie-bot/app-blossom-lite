@@ -12,6 +12,7 @@ export type CategoriaServico =
   | "lava-rapido"
   | "vistoria"
   | "acessorios";
+import { dataBRRelativa } from "./datas";
 
 export const categoriasServico: { key: CategoriaServico; label: string; icone: string }[] = [
   { key: "mecanica", label: "Mecânica", icone: "🔧" },
@@ -49,16 +50,36 @@ export const statusOSInfo: Record<StatusOS, { label: string; cls: string }> = {
   aceito: { label: "Aceito", cls: "bg-accent/20 text-accent-foreground" },
   agendado: { label: "Agendado", cls: "bg-primary/10 text-primary" },
   em_atendimento: { label: "Em atendimento", cls: "bg-warning/20 text-warning-foreground" },
-  aguardando_aprovacao: { label: "Aguardando aprovação", cls: "bg-warning/20 text-warning-foreground" },
+  aguardando_aprovacao: {
+    label: "Aguardando aprovação",
+    cls: "bg-warning/20 text-warning-foreground",
+  },
   concluido: { label: "Concluído", cls: "bg-success/15 text-success" },
   recusado: { label: "Recusado", cls: "bg-muted text-muted-foreground" },
   cancelado: { label: "Cancelado", cls: "bg-muted text-muted-foreground" },
 };
 
 export type ItemServico = { id: string; nome: string; valor: number; tempoMin: number };
-export type Peca = { id: string; produto: string; quantidade: number; valorUnit: number; fornecedor: string };
-export type AtualizacaoOS = { id: string; data: string; texto: string; midia: "nenhum" | "foto" | "video" };
-export type ChecklistEntrada = { km: number; combustivel: string; fotos: number; observacoes: string; feitoEm: string };
+export type Peca = {
+  id: string;
+  produto: string;
+  quantidade: number;
+  valorUnit: number;
+  fornecedor: string;
+};
+export type AtualizacaoOS = {
+  id: string;
+  data: string;
+  texto: string;
+  midia: "nenhum" | "foto" | "video";
+};
+export type ChecklistEntrada = {
+  km: number;
+  combustivel: string;
+  fotos: number;
+  observacoes: string;
+  feitoEm: string;
+};
 export type ConclusaoOS = {
   data: string;
   valorTotal: number;
@@ -93,12 +114,24 @@ export type OrdemServico = {
   conclusao?: ConclusaoOS;
 };
 
-export type CatalogoServico = { id: string; nome: string; categoria: CategoriaServico; preco: number; tempoMin: number };
+export type CatalogoServico = {
+  id: string;
+  nome: string;
+  categoria: CategoriaServico;
+  preco: number;
+  tempoMin: number;
+};
 
 export const catalogoMock: CatalogoServico[] = [
   { id: "cs1", nome: "Troca de óleo + filtro", categoria: "oleo", preco: 180, tempoMin: 40 },
   { id: "cs2", nome: "Revisão completa", categoria: "mecanica", preco: 320, tempoMin: 120 },
-  { id: "cs3", nome: "Troca de pastilhas de freio", categoria: "mecanica", preco: 240, tempoMin: 90 },
+  {
+    id: "cs3",
+    nome: "Troca de pastilhas de freio",
+    categoria: "mecanica",
+    preco: 240,
+    tempoMin: 90,
+  },
   { id: "cs4", nome: "Alinhamento e balanceamento", categoria: "pneus", preco: 130, tempoMin: 60 },
   { id: "cs5", nome: "Conserto de pneu", categoria: "pneus", preco: 40, tempoMin: 25 },
   { id: "cs6", nome: "Troca de bateria", categoria: "eletrica", preco: 420, tempoMin: 30 },
@@ -119,9 +152,33 @@ export type CampanhaOficina = {
 };
 
 export const campanhasMock: CampanhaOficina[] = [
-  { id: "cp1", titulo: "Troca de óleo + filtro", categoria: "oleo", desconto: 25, validade: "31/12/2026", alvo: "Veículos próximos da revisão", ativa: true },
-  { id: "cp2", titulo: "Revisão dos 30 mil", categoria: "mecanica", desconto: 15, validade: "30/09/2026", alvo: "Frota de proprietários", ativa: true },
-  { id: "cp3", titulo: "Lavagem completa", categoria: "lava-rapido", desconto: 30, validade: "20/08/2026", alvo: "Motoristas nível Bigode+", ativa: false },
+  {
+    id: "cp1",
+    titulo: "Troca de óleo + filtro",
+    categoria: "oleo",
+    desconto: 25,
+    validade: "31/12/2026",
+    alvo: "Veículos próximos da revisão",
+    ativa: true,
+  },
+  {
+    id: "cp2",
+    titulo: "Revisão dos 30 mil",
+    categoria: "mecanica",
+    desconto: 15,
+    validade: dataBRRelativa(45),
+    alvo: "Frota de proprietários",
+    ativa: true,
+  },
+  {
+    id: "cp3",
+    titulo: "Lavagem completa",
+    categoria: "lava-rapido",
+    desconto: 30,
+    validade: dataBRRelativa(-10),
+    alvo: "Motoristas nível Bigode+",
+    ativa: false,
+  },
 ];
 
 const hoje = new Date().toISOString().slice(0, 10);
@@ -130,60 +187,189 @@ const amanha = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
 
 export const ordensMock: OrdemServico[] = [
   {
-    id: "os1", codigo: "OS-1041", clienteNome: "Carlos Mendes", clienteTipo: "proprietario", clienteTelefone: "11999990011",
-    carroId: "c2", veiculo: "Hyundai HB20 2023", placa: "DEF-4G56", categoria: "oleo",
-    descricao: "Troca de óleo e filtro — 22.000 km.", status: "agendado", criadoEm: ontem,
-    dataAgendada: hoje, hora: "09:30", origem: "solicitacao", km: 22000, valorEstimado: 180,
-    servicos: [], pecas: [], atualizacoes: [],
-  },
-  {
-    id: "os2", codigo: "OS-1042", clienteNome: "João Silva", clienteTipo: "motorista", clienteTelefone: "11999990012",
-    carroId: "c1", veiculo: "Chevrolet Onix 2022", placa: "ABC-1D23", categoria: "mecanica",
-    descricao: "Barulho na suspensão dianteira.", status: "em_atendimento", criadoEm: ontem,
-    dataAgendada: hoje, hora: "08:30", origem: "solicitacao", km: 38000, valorEstimado: 450,
-    checklist: { km: 38210, combustivel: "1/2", fotos: 4, observacoes: "Risco no para-choque dianteiro.", feitoEm: hoje },
-    servicos: [{ id: "is1", nome: "Revisão completa", valor: 320, tempoMin: 120 }],
-    pecas: [{ id: "pc1", produto: "Bieleta dianteira", quantidade: 2, valorUnit: 85, fornecedor: "Auto Peças Grajaú" }],
-    atualizacoes: [{ id: "at1", data: hoje, texto: "Veículo no elevador, iniciando diagnóstico.", midia: "foto" }],
-  },
-  {
-    id: "os3", codigo: "OS-1043", clienteNome: "Patrícia Souza", clienteTipo: "motorista", clienteTelefone: "11999990013",
-    carroId: "c3", veiculo: "Toyota Corolla 2021", placa: "GHI-7J89", categoria: "pneus",
-    descricao: "Alinhamento e balanceamento.", status: "aguardando_aprovacao", criadoEm: hoje,
-    dataAgendada: hoje, hora: "10:00", origem: "interno", km: 55000, valorEstimado: 130,
-    servicos: [{ id: "is2", nome: "Alinhamento e balanceamento", valor: 130, tempoMin: 60 }],
-    pecas: [], atualizacoes: [],
-  },
-  {
-    id: "os4", codigo: "OS-1044", clienteNome: "Ricardo Alves", clienteTipo: "motorista", clienteTelefone: "11999990014",
-    carroId: "c4", veiculo: "Renault Kwid 2022", placa: "JKL-0M12", categoria: "pneus",
-    descricao: "Pneu furado, preciso urgente.", status: "solicitado", criadoEm: hoje,
-    origem: "marketplace", distanciaKm: 1.8, valorEstimado: 40,
-    servicos: [], pecas: [], atualizacoes: [],
-  },
-  {
-    id: "os5", codigo: "OS-1045", clienteNome: "Marcos Lima", clienteTipo: "motorista", clienteTelefone: "11999990015",
-    carroId: "c5", veiculo: "Fiat Cronos 2023", placa: "NOP-3Q45", categoria: "eletrica",
-    descricao: "Bateria arriando de manhã.", status: "solicitado", criadoEm: hoje,
-    origem: "marketplace", distanciaKm: 3.2, valorEstimado: 420,
-    servicos: [], pecas: [], atualizacoes: [],
-  },
-  {
-    id: "os6", codigo: "OS-1046", clienteNome: "Ana Pereira", clienteTipo: "proprietario", clienteTelefone: "11999990016",
-    carroId: "c5", veiculo: "Fiat Cronos 2023", placa: "NOP-3Q45", categoria: "ar",
-    descricao: "Higienização do ar-condicionado.", status: "agendado", criadoEm: hoje,
-    dataAgendada: amanha, hora: "11:30", origem: "solicitacao", valorEstimado: 190,
-    servicos: [], pecas: [], atualizacoes: [],
-  },
-  {
-    id: "os7", codigo: "OS-1039", clienteNome: "João Silva", clienteTipo: "motorista", clienteTelefone: "11999990012",
-    carroId: "c1", veiculo: "Chevrolet Onix 2022", placa: "ABC-1D23", categoria: "oleo",
-    descricao: "Troca de óleo.", status: "concluido", criadoEm: ontem,
-    dataAgendada: ontem, hora: "14:00", origem: "solicitacao", km: 37500,
-    servicos: [{ id: "is3", nome: "Troca de óleo + filtro", valor: 180, tempoMin: 40 }],
-    pecas: [{ id: "pc2", produto: "Óleo 5W30 (4L)", quantidade: 1, valorUnit: 120, fornecedor: "Distribuidora Sul" }],
+    id: "os1",
+    codigo: "OS-1041",
+    clienteNome: "Carlos Mendes",
+    clienteTipo: "proprietario",
+    clienteTelefone: "11999990011",
+    carroId: "c2",
+    veiculo: "Hyundai HB20 2023",
+    placa: "DEF-4G56",
+    categoria: "oleo",
+    descricao: "Troca de óleo e filtro — 22.000 km.",
+    status: "agendado",
+    criadoEm: ontem,
+    dataAgendada: hoje,
+    hora: "09:30",
+    origem: "solicitacao",
+    km: 22000,
+    valorEstimado: 180,
+    servicos: [],
+    pecas: [],
     atualizacoes: [],
-    conclusao: { data: ontem, valorTotal: 300, garantiaMeses: 3, observacoes: "Próxima troca em 10.000 km.", fotos: 2 },
+  },
+  {
+    id: "os2",
+    codigo: "OS-1042",
+    clienteNome: "João Silva",
+    clienteTipo: "motorista",
+    clienteTelefone: "11999990012",
+    carroId: "c1",
+    veiculo: "Chevrolet Onix 2022",
+    placa: "ABC-1D23",
+    categoria: "mecanica",
+    descricao: "Barulho na suspensão dianteira.",
+    status: "em_atendimento",
+    criadoEm: ontem,
+    dataAgendada: hoje,
+    hora: "08:30",
+    origem: "solicitacao",
+    km: 38000,
+    valorEstimado: 450,
+    checklist: {
+      km: 38210,
+      combustivel: "1/2",
+      fotos: 4,
+      observacoes: "Risco no para-choque dianteiro.",
+      feitoEm: hoje,
+    },
+    servicos: [{ id: "is1", nome: "Revisão completa", valor: 320, tempoMin: 120 }],
+    pecas: [
+      {
+        id: "pc1",
+        produto: "Bieleta dianteira",
+        quantidade: 2,
+        valorUnit: 85,
+        fornecedor: "Auto Peças Grajaú",
+      },
+    ],
+    atualizacoes: [
+      {
+        id: "at1",
+        data: hoje,
+        texto: "Veículo no elevador, iniciando diagnóstico.",
+        midia: "foto",
+      },
+    ],
+  },
+  {
+    id: "os3",
+    codigo: "OS-1043",
+    clienteNome: "Patrícia Souza",
+    clienteTipo: "motorista",
+    clienteTelefone: "11999990013",
+    carroId: "c3",
+    veiculo: "Toyota Corolla 2021",
+    placa: "GHI-7J89",
+    categoria: "pneus",
+    descricao: "Alinhamento e balanceamento.",
+    status: "aguardando_aprovacao",
+    criadoEm: hoje,
+    dataAgendada: hoje,
+    hora: "10:00",
+    origem: "interno",
+    km: 55000,
+    valorEstimado: 130,
+    servicos: [{ id: "is2", nome: "Alinhamento e balanceamento", valor: 130, tempoMin: 60 }],
+    pecas: [],
+    atualizacoes: [],
+  },
+  {
+    id: "os4",
+    codigo: "OS-1044",
+    clienteNome: "Ricardo Alves",
+    clienteTipo: "motorista",
+    clienteTelefone: "11999990014",
+    carroId: "c4",
+    veiculo: "Renault Kwid 2022",
+    placa: "JKL-0M12",
+    categoria: "pneus",
+    descricao: "Pneu furado, preciso urgente.",
+    status: "solicitado",
+    criadoEm: hoje,
+    origem: "marketplace",
+    distanciaKm: 1.8,
+    valorEstimado: 40,
+    servicos: [],
+    pecas: [],
+    atualizacoes: [],
+  },
+  {
+    id: "os5",
+    codigo: "OS-1045",
+    clienteNome: "Marcos Lima",
+    clienteTipo: "motorista",
+    clienteTelefone: "11999990015",
+    carroId: "c5",
+    veiculo: "Fiat Cronos 2023",
+    placa: "NOP-3Q45",
+    categoria: "eletrica",
+    descricao: "Bateria arriando de manhã.",
+    status: "solicitado",
+    criadoEm: hoje,
+    origem: "marketplace",
+    distanciaKm: 3.2,
+    valorEstimado: 420,
+    servicos: [],
+    pecas: [],
+    atualizacoes: [],
+  },
+  {
+    id: "os6",
+    codigo: "OS-1046",
+    clienteNome: "Ana Pereira",
+    clienteTipo: "proprietario",
+    clienteTelefone: "11999990016",
+    carroId: "c5",
+    veiculo: "Fiat Cronos 2023",
+    placa: "NOP-3Q45",
+    categoria: "ar",
+    descricao: "Higienização do ar-condicionado.",
+    status: "agendado",
+    criadoEm: hoje,
+    dataAgendada: amanha,
+    hora: "11:30",
+    origem: "solicitacao",
+    valorEstimado: 190,
+    servicos: [],
+    pecas: [],
+    atualizacoes: [],
+  },
+  {
+    id: "os7",
+    codigo: "OS-1039",
+    clienteNome: "João Silva",
+    clienteTipo: "motorista",
+    clienteTelefone: "11999990012",
+    carroId: "c1",
+    veiculo: "Chevrolet Onix 2022",
+    placa: "ABC-1D23",
+    categoria: "oleo",
+    descricao: "Troca de óleo.",
+    status: "concluido",
+    criadoEm: ontem,
+    dataAgendada: ontem,
+    hora: "14:00",
+    origem: "solicitacao",
+    km: 37500,
+    servicos: [{ id: "is3", nome: "Troca de óleo + filtro", valor: 180, tempoMin: 40 }],
+    pecas: [
+      {
+        id: "pc2",
+        produto: "Óleo 5W30 (4L)",
+        quantidade: 1,
+        valorUnit: 120,
+        fornecedor: "Distribuidora Sul",
+      },
+    ],
+    atualizacoes: [],
+    conclusao: {
+      data: ontem,
+      valorTotal: 300,
+      garantiaMeses: 3,
+      observacoes: "Próxima troca em 10.000 km.",
+      fotos: 2,
+    },
   },
 ];
 
@@ -224,6 +410,39 @@ export function saudePadrao(kmAtual: number): SaudeVeiculo {
     { nome: "Bateria", intervaloKm: 50000, ultimoKm: Math.max(0, kmAtual - 46000) },
     { nome: "Filtros", intervaloKm: 20000, ultimoKm: Math.max(0, kmAtual - 9000) },
   ]);
+}
+
+// Nomes da saúde do veículo para os itens de manutenção registrados no Passaporte.
+const nomeSaudePorItem: Record<string, string> = {
+  Óleo: "Óleo",
+  "Filtro de óleo": "Óleo",
+  Freios: "Freios",
+  Pneus: "Pneus",
+  "Filtro de ar": "Filtros",
+};
+
+/**
+ * Saúde do carro usando o histórico real de manutenção quando existe (o mesmo que o motorista e o dono veem);
+ * itens sem histórico usam a estimativa padrão. Antes a oficina e o motorista mostravam km diferentes.
+ */
+export function saudeDoCarro(
+  kmAtual: number,
+  manutencao: { item: string; intervaloKm?: number; ultimoKm: number }[],
+): SaudeVeiculo {
+  const padrao = saudePadrao(kmAtual);
+  const reais = new Map<string, ItemSaude>();
+  for (const m of manutencao) {
+    const nome = nomeSaudePorItem[m.item];
+    if (!nome || !m.intervaloKm || reais.has(nome)) continue;
+    reais.set(
+      nome,
+      calcularSaude(kmAtual, [{ nome, intervaloKm: m.intervaloKm, ultimoKm: m.ultimoKm }]).itens[0],
+    );
+  }
+  const itens = padrao.itens.map((i) => reais.get(i.nome) ?? i);
+  const pesos = { ok: 100, atencao: 65, critico: 25 } as const;
+  const score = Math.round(itens.reduce((a, i) => a + pesos[i.status], 0) / itens.length);
+  return { score, itens };
 }
 
 export const perfilOficinaDefault = {

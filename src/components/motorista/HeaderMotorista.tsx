@@ -1,14 +1,29 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { Power, ChevronRight } from "lucide-react";
 import { getNivelByViagens, getProximoNivel, progressoNivel, progressoMock } from "@/lib/niveis";
-import { useConect } from "@/lib/store";
+import { checkinValido, useConect } from "@/lib/store";
 
 export function HeaderMotorista() {
   const nome = useConect((s) => s.nomeUsuario) || "Motorista";
   const status = useConect((s) => s.statusOperacao);
   const ficarOnline = useConect((s) => s.ficarOnline);
   const ficarOffline = useConect((s) => s.ficarOffline);
-  const online = status === "online" || status === "em_corrida";
+  const checkin = useConect((s) => s.checkin);
+  const navigate = useNavigate();
+  // Sem check-in válido hoje o motorista não está online, mesmo que um estado antigo diga o contrário.
+  const online = (status === "online" || status === "em_corrida") && checkinValido(checkin);
+
+  function alternar() {
+    if (online) {
+      ficarOffline();
+      return;
+    }
+    if (!ficarOnline()) {
+      toast("Faça o check-in do dia para ficar online");
+      navigate({ to: "/motorista/checkin" });
+    }
+  }
 
   const nivel = getNivelByViagens(progressoMock.viagensTotais);
   const { pct, restante } = progressoNivel(progressoMock.viagensTotais);
@@ -22,7 +37,12 @@ export function HeaderMotorista() {
             className="grid h-14 w-14 place-items-center overflow-hidden rounded-2xl ring-2 ring-white/15"
             style={{ backgroundImage: nivel.gradient }}
           >
-            <img src={nivel.ilustracao} alt={nivel.nome} className="h-full w-full object-cover" loading="lazy" />
+            <img
+              src={nivel.ilustracao}
+              alt={nivel.nome}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
           </div>
           <span
             className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-card ${
@@ -32,17 +52,24 @@ export function HeaderMotorista() {
         </Link>
 
         <div className="min-w-0">
-          <div className="truncate font-street text-lg font-black uppercase leading-none">{nome.split(" ")[0]}</div>
+          <div className="truncate font-street text-lg font-black uppercase leading-none">
+            {nome.split(" ")[0]}
+          </div>
           <div className="mt-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider">
-            <span className="rounded-full px-2 py-0.5 text-white" style={{ backgroundImage: nivel.gradient }}>
+            <span
+              className="rounded-full px-2 py-0.5 text-white"
+              style={{ backgroundImage: nivel.gradient }}
+            >
               {nivel.nome}
             </span>
-            <span className={online ? "text-success" : "text-muted-foreground"}>{online ? "Online" : "Offline"}</span>
+            <span className={online ? "text-success" : "text-muted-foreground"}>
+              {online ? "Online" : "Offline"}
+            </span>
           </div>
         </div>
 
         <button
-          onClick={() => (online ? ficarOffline() : ficarOnline())}
+          onClick={alternar}
           className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
             online
               ? "border border-border bg-muted text-foreground"
@@ -56,7 +83,10 @@ export function HeaderMotorista() {
 
       <Link to="/motorista/clube" className="mt-3 block">
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full" style={{ width: `${Math.round(pct * 100)}%`, backgroundImage: nivel.gradient }} />
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${Math.round(pct * 100)}%`, backgroundImage: nivel.gradient }}
+          />
         </div>
         <div className="mt-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
           <span>{progressoMock.viagensTotais.toLocaleString("pt-BR")} viagens</span>

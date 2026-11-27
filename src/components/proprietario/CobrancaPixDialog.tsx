@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Check, Copy, Loader2, MessageCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +22,15 @@ type Props = {
 };
 
 export function CobrancaPixDialog({ pagamento, motoristaNome, veiculo, onClose }: Props) {
-  const recebimento = useProprietario((s) => s.recebimento);
+  // Os dados de recebimento vêm do Perfil do dono (nome, cidade e chave Pix).
+  const perfil = useProprietario((s) => s.perfil);
+  const recebimento = useMemo(
+    () =>
+      perfil.chavePix
+        ? { nome: perfil.nome, cidade: perfil.cidade, chavePix: perfil.chavePix }
+        : null,
+    [perfil.nome, perfil.cidade, perfil.chavePix],
+  );
   const registrarPagamento = useProprietario((s) => s.registrarPagamento);
   const marcarCobrancaEnviada = useProprietario((s) => s.marcarCobrancaEnviada);
   const [pix, setPix] = useState<CobrancaPix | null>(null);

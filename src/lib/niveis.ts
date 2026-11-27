@@ -3,6 +3,7 @@ import juvenilAsset from "@/assets/nivel-juvenil.png.asset.json";
 import calcaBrancaAsset from "@/assets/nivel-calca-branca.png.asset.json";
 import bigodeAsset from "@/assets/nivel-bigode.png.asset.json";
 import veinhoAsset from "@/assets/nivel-veinho.png.asset.json";
+import { mesesAnteriores } from "./datas";
 
 const peregrinoImg = peregrinoAsset.url;
 const juvenilImg = juvenilAsset.url;
@@ -10,12 +11,7 @@ const calcaBrancaImg = calcaBrancaAsset.url;
 const bigodeImg = bigodeAsset.url;
 const veinhoImg = veinhoAsset.url;
 
-export type NivelKey =
-  | "peregrino"
-  | "juvenil"
-  | "calca-branca"
-  | "bigode"
-  | "veinho";
+export type NivelKey = "peregrino" | "juvenil" | "calca-branca" | "bigode" | "veinho";
 
 export type NivelInfo = {
   key: NivelKey;
@@ -162,14 +158,12 @@ export const progressoMock: ProgressoMotorista = {
   elogiosMes: 12,
   diasRestantesMes: 9,
   viagensPorSemana: [62, 48, 51, 23],
-  historicoMeses: [
-    { mes: "Jan", nivel: "peregrino", status: "mantido" },
-    { mes: "Fev", nivel: "peregrino", status: "mantido" },
-    { mes: "Mar", nivel: "peregrino", status: "mantido" },
-    { mes: "Abr", nivel: "juvenil", status: "promovido" },
-    { mes: "Mai", nivel: "juvenil", status: "mantido" },
-    { mes: "Jun", nivel: "juvenil", status: "mantido" },
-  ],
+  // Últimos 6 meses fechados, com nomes de mês relativos a hoje.
+  historicoMeses: mesesAnteriores(6).map((mes, i) => ({
+    mes,
+    nivel: (i < 3 ? "peregrino" : "juvenil") as NivelKey,
+    status: (i === 3 ? "promovido" : "mantido") as "promovido" | "mantido",
+  })),
 };
 
 export type RegraStatus = "ok" | "atencao" | "risco";
@@ -189,9 +183,17 @@ export function regrasManutencao(p: ProgressoMotorista) {
   const caronas = statusRegra(p.caronasMes, REGRAS.caronasMin, "min");
   const rejeicoes = statusRegra(p.rejeicoesMes, REGRAS.rejeicoesMax, "max");
   const estrelas: RegraStatus =
-    p.mediaEstrelas >= REGRAS.estrelasMin ? "ok" : p.mediaEstrelas >= REGRAS.estrelasMin - 0.2 ? "atencao" : "risco";
+    p.mediaEstrelas >= REGRAS.estrelasMin
+      ? "ok"
+      : p.mediaEstrelas >= REGRAS.estrelasMin - 0.2
+        ? "atencao"
+        : "risco";
   const arr = [caronas, rejeicoes, estrelas];
-  const geral: RegraStatus = arr.includes("risco") ? "risco" : arr.includes("atencao") ? "atencao" : "ok";
+  const geral: RegraStatus = arr.includes("risco")
+    ? "risco"
+    : arr.includes("atencao")
+      ? "atencao"
+      : "ok";
   return { caronas, rejeicoes, estrelas, geral };
 }
 
@@ -211,7 +213,12 @@ export function simularProximoNivel(p: ProgressoMotorista, extra: number) {
   const novoNivel = getNivelByViagens(novoTotal);
   const economiaTotal = economiaMes(p.viagensMes + extra, novoNivel.taxaFixa);
   const faltam = proximo ? Math.max(0, proximo.min - novoTotal) : 0;
-  return { novoNivel, economiaTotal, faltam, atingiuProximo: !!proximo && novoTotal >= proximo.min };
+  return {
+    novoNivel,
+    economiaTotal,
+    faltam,
+    atingiuProximo: !!proximo && novoTotal >= proximo.min,
+  };
 }
 
 export type Missao = {
@@ -231,10 +238,38 @@ export type Conquista = {
 };
 
 export const missoesMock: Missao[] = [
-  { id: "ms1", titulo: "Caronas solidárias", descricao: "Dê 3 caronas grátis este mês", progresso: 2, meta: 3, xp: 80 },
-  { id: "ms2", titulo: "Mantenha as rejeições", descricao: "Fique abaixo de 100 rejeições no mês", progresso: 38, meta: 100, xp: 60 },
-  { id: "ms3", titulo: "Ritmo da semana", descricao: "Complete 40 viagens nesta semana", progresso: 23, meta: 40, xp: 50 },
-  { id: "ms4", titulo: "Elogios", descricao: "Receba 15 elogios além das 5 estrelas", progresso: 12, meta: 15, xp: 70 },
+  {
+    id: "ms1",
+    titulo: "Caronas solidárias",
+    descricao: "Dê 3 caronas grátis este mês",
+    progresso: 2,
+    meta: 3,
+    xp: 80,
+  },
+  {
+    id: "ms2",
+    titulo: "Mantenha as rejeições",
+    descricao: "Fique abaixo de 100 rejeições no mês",
+    progresso: 38,
+    meta: 100,
+    xp: 60,
+  },
+  {
+    id: "ms3",
+    titulo: "Ritmo da semana",
+    descricao: "Complete 40 viagens nesta semana",
+    progresso: 23,
+    meta: 40,
+    xp: 50,
+  },
+  {
+    id: "ms4",
+    titulo: "Elogios",
+    descricao: "Receba 15 elogios além das 5 estrelas",
+    progresso: 12,
+    meta: 15,
+    xp: 70,
+  },
 ];
 
 export const conquistasMock: Conquista[] = [

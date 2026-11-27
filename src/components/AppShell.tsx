@@ -23,8 +23,12 @@ export function AppShell({
       <header className="sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border bg-background/80 px-5 py-3.5 backdrop-blur-xl">
         <BrandMark size={30} />
         <div className="min-w-0">
-          <div className="text-[9px] font-bold uppercase tracking-[0.22em] text-primary/80">Tchi Léva</div>
-          <h1 className="truncate font-street text-[19px] font-black uppercase tracking-wide leading-none">{title}</h1>
+          <div className="text-[9px] font-bold uppercase tracking-[0.22em] text-primary/80">
+            Tchi Léva
+          </div>
+          <h1 className="truncate font-street text-[19px] font-black uppercase tracking-wide leading-none">
+            {title}
+          </h1>
         </div>
         {right}
       </header>
@@ -32,9 +36,16 @@ export function AppShell({
       <main className="flex-1 pb-24">{children}</main>
 
       <nav className="fixed bottom-0 left-1/2 z-40 w-full max-w-screen-sm -translate-x-1/2 border-t border-border bg-card/95 backdrop-blur-xl">
-        <ul className="grid" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
+        <ul
+          className="grid"
+          style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+        >
           {tabs.map((t) => {
-            const active = pathname === t.to || (t.to !== "/" && pathname.startsWith(t.to + "/"));
+            // Ativa a aba cujo caminho é o prefixo mais longo da página atual,
+            // para a aba "Início" (/perfil) não acender junto com as outras.
+            const casa = (to: string) =>
+              pathname === to || (to !== "/" && pathname.startsWith(to + "/"));
+            const active = casa(t.to) && !tabs.some((o) => o.to.length > t.to.length && casa(o.to));
             const Icon = t.icon;
             return (
               <li key={t.to}>
@@ -59,6 +70,12 @@ export function AppShell({
   );
 }
 
-export function PageSection({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function PageSection({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return <section className={`px-5 py-5 ${className}`}>{children}</section>;
 }

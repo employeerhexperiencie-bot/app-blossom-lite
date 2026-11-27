@@ -1,12 +1,36 @@
-// Geração de cobrança Pix "estática" (BR Code do Banco Central).
-// Funciona com qualquer chave Pix e qualquer banco, sem intermediário.
-// Limite: o app não fica sabendo sozinho que o Pix foi pago — o proprietário
-// confirma no extrato e marca como pago. Confirmação automática exige um
-// provedor de pagamento (Fase 2 do roadmap, decisão em aberto).
-
+// Pix "copia e cola" (BR Code do Banco Central) para cobrar o aluguel. Sem intermediário: o app não
+// fica sabendo sozinho que o Pix foi pago, o proprietário confirma no extrato e marca como pago.
+//
+// Há dois geradores, um de cada frente de trabalho, mantidos juntos de propósito:
+// - gerarPixCopiaECola (brazilian-utils): usado na tela do motorista (PixCobranca).
+// - montarCobrancaPix (gerador próprio em pix-brcode.ts + QR com a lib qrcode): usado nas cobranças
+//   do proprietário (CobrancaPixDialog), com envio por WhatsApp.
+import { generatePixPayload, isValidPixPayload } from "@brazilian-utils/brazilian-utils";
 import { isPixKey } from "validation-br";
 import { gerarBrCode } from "./pix-brcode";
 import type { DadosRecebimento } from "./mock-proprietario";
+
+function semAcento(texto: string): string {
+  return texto.normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
+export function gerarPixCopiaECola(dados: {
+  chave: string;
+  nome: string;
+  cidade: string;
+  valor: number;
+  identificador: string;
+}): string | null {
+  // Regras do padrão: nome até 25 caracteres, cidade até 15, identificador só letras e números (até 25).
+  const payload = generatePixPayload({
+    key: dados.chave.trim(),
+    merchantName: semAcento(dados.nome).trim().slice(0, 25) || "TCHI LEVA",
+    merchantCity: semAcento(dados.cidade).trim().slice(0, 15) || "SAO PAULO",
+    amount: Math.round(dados.valor * 100) / 100,
+    txid: dados.identificador.replace(/[^A-Za-z0-9]/g, "").slice(0, 25) || "***",
+  });
+  return payload && isValidPixPayload(payload) ? payload : null;
+}
 
 /** Remove acentos e caracteres fora do padrão aceito no BR Code. */
 function normalizar(texto: string, max: number): string {
